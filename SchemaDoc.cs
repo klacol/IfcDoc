@@ -2464,7 +2464,7 @@ namespace IfcDoc.Schema.DOC
 	public class DocTemplateDefinition : DocObject // now inherits from DocObject
 	{
 		[DataMember(Order = 0)] [XmlAttribute] public string Type { get; set; } // applicable entity base type for which this template may be used, e.g. "IfcElement"
-		[DataMember(Order = 1), Obsolete] internal string _Description { get; set; } // text at top of section, e.g. "Materials are defined on the @Type using IfcRelAssociatesMaterial"
+		[DataMember(Order = 1), Obsolete] public  string _Description { get; set; } // text at top of section, e.g. "Materials are defined on the @Type using IfcRelAssociatesMaterial"
 		[DataMember(Order = 2), Obsolete] private string _ContentListHead { get; set; } // text at top of list, if items are present, e.g. "<ul>"
 		[DataMember(Order = 3), Obsolete] private string _ContentListItem { get; set; } // text for each item within list (repeated), e.g. "<li><b>@1</b>: @2</li>"
 		[DataMember(Order = 4), Obsolete] private string _ContentListTail { get; set; } // text at bottom of list, e.g. "</ul>"
@@ -2952,7 +2952,7 @@ namespace IfcDoc.Schema.DOC
 	// new in IfcDoc 2.7
 	public class DocExchangeDefinition : DocObject
 	{
-		[DataMember(Order = 0), Obsolete] [XmlAttribute] internal string _Description { get; set; } // added in IfcDoc 3.4, obsolete in IfcDoc 4.9 -- description for formatting purposes
+		[DataMember(Order = 0), Obsolete] [XmlAttribute] public  string _Description { get; set; } // added in IfcDoc 3.4, obsolete in IfcDoc 4.9 -- description for formatting purposes
 		[DataMember(Order = 1)] [XmlElement] public byte[] Icon { get; set; } // embedded PNG file of 16x16 icon // added in IfcDoc 4.9
 		[DataMember(Order = 2)] [XmlAttribute] public DocExchangeApplicabilityEnum Applicability { get; set; }            // added in IfcDoc 4.9
 		[DataMember(Order = 3)] [XmlAttribute] public string ExchangeClass { get; set; } // added in IfcDoc 5.3
