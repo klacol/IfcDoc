@@ -43,8 +43,69 @@ namespace Ifc2Json
         /// <param name="o"></param>
         /// <param name="saved"></param>
         /// <param name="queue"></param>
-        public void TraverseEntity(object o, HashSet<object> saved, Queue<object> queue)
+        public Boolean TraverseEntity(object o, HashSet<object> saved, Queue<object> queue)
         {
+            if (o == null)
+                return false;           
+            // mark as saved
+            saved.Add(o);
+            //存储
+            EntityClassify(o);
+            Type t = o.GetType();
+            //不遍历几何信息实体（节省遍历时间）
+            if (t.Name == "IfcShapeRepresentation" || t.Name == "IfcPolyline" || t.Name == "IfcShapeRepresentation" || t.Name == "IfcExtrudedAreaSolid" || t.Name == "IfcIShapeProfileDef" ||
+               t.Name == "IfcProductDefinitionShape" || t.Name == "IfcGeometricRepresentationSubContext" || t.Name == "IfcFacetedBrep" || t.Name == "IfcClosedShell" || t.Name == "IfcFace" ||
+              t.Name == "IfcFaceOuterBound" || t.Name == "IfcPolyLoop" || t.Name == "IfcProductDefinitionShape" || t.Name == "IfcCompositeCurveSegment" || t.Name == "IfcRelSpaceBoundary")
+            //  || t.Name == "IfcRelSpaceBoundary" || t.Name == "" || t.Name == "" || t.Name == ""
+            {
+                return true;
+            }
+
+            this.TraverseEntityAttributes(o, saved, queue);
+            return true;
+        }
+        //遍历实体属性
+        public void TraverseEntityAttributes(object o, HashSet<object> saved, Queue<object> queue)
+        {
+        }
+        //获取空间结构实体集和构件结构实体集
+        public void EntityClassify(object e)
+        {
+            Type t = e.GetType();
+            if (Basetype(t))
+            {
+                elements.Add(e);
+            }
+            else if (t.BaseType.Name == "IfcSpatialStructureElement")
+            {
+                spatialElements.Add(e);  //将空间实体和物理实体存储至Element中
+            }
+        }
+        //判断物体类型是否为ifcElement，墙、门等构件的定义都是此基类
+        public bool Basetype(Type t)
+        {
+            int i = 0;
+            while (t != null)
+            {
+                if (i > 3)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (t.Name == "IfcElement")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        t = t.BaseType; //BaseType(t)
+                        i++;
+                    }
+                }
+
+            }
+            return false;
         }
     }
 }
