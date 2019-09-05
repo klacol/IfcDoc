@@ -510,14 +510,14 @@ namespace Ifc2Json
                     Console.WriteLine("转换为step工作时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
 
 
-                    Serializer formatTarget = null;
-                    formatTarget = new XmlSerializer(typeProject);
-
+                    //Serializer formatTarget = null;
+                    //formatTarget = new XmlSerializer(typeProject);
+                    Product formatTarget = new Product(typeProject);
                     if (formatTarget != null)
                     {
                         using (System.IO.FileStream streamTarget = System.IO.File.OpenWrite(OutputFile))
                         {
-                            formatTarget.WriteObject(streamTarget, project);
+                            formatTarget.TraverseProject(project);
                         }
                     }
 

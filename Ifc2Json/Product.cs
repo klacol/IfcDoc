@@ -1,7 +1,10 @@
 ﻿using BuildingSmart.Serialization.Xml;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,6 +70,64 @@ namespace Ifc2Json
         //遍历实体属性
         public void TraverseEntityAttributes(object o, HashSet<object> saved, Queue<object> queue)
         {
+            Type t = o.GetType();
+            IList<PropertyInfo> fields = this.GetFieldsAll(t);//获取其所有属性
+            //直接属性不获取其具体的值，其不包含实体
+            List<Tuple<PropertyInfo, DataMemberAttribute, object>> elementFields = new List<Tuple<PropertyInfo, DataMemberAttribute, object>>();//反转属性和导出属性
+            //获取其反转属性和导出
+            foreach (PropertyInfo f in fields)
+            {
+                if (f != null) // derived fields are null
+                {
+                    DocXsdFormatEnum? xsdformat = this.GetXsdFormat(f);
+
+                    Type ft = f.PropertyType, valueType = null;
+                    DataMemberAttribute dataMemberAttribute = null;
+                    object value = GetSerializeValue(o, f, out dataMemberAttribute, out valueType);
+                    if (value == null)
+                        continue;
+                    if (!IsDirectField(f, o))
+                    {
+                        elementFields.Add(new Tuple<PropertyInfo, DataMemberAttribute, object>(f, dataMemberAttribute, value));
+                    }
+                }
+            }
+        }
+        public void TraverseAttributes(object o, PropertyInfo f, HashSet<object> saved,  Queue<object> queue)
+        {
+
+        }
+        //判断以属性是否是直接属性
+        public Boolean IsDirectField(PropertyInfo f,object o)
+        {
+            DocXsdFormatEnum? xsdformat = this.GetXsdFormat(f);
+
+            Type ft = f.PropertyType, valueType = null;
+            DataMemberAttribute dataMemberAttribute = null;
+            object value = GetSerializeValue(o, f, out dataMemberAttribute, out valueType);
+            //if (value == null)
+            //    return false;
+            if (dataMemberAttribute != null && (xsdformat == null || xsdformat == DocXsdFormatEnum.Attribute))
+            {
+                // direct field
+                bool isvaluelist = IsValueCollection(ft);
+                bool isvaluelistlist = ft.IsGenericType && // e.g. IfcTriangulatedFaceSet.Normals
+                    typeof(System.Collections.IEnumerable).IsAssignableFrom(ft.GetGenericTypeDefinition()) &&
+                    IsValueCollection(ft.GetGenericArguments()[0]);
+
+                if (isvaluelistlist || isvaluelist || ft.IsValueType || ft == typeof(String))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;//导出属性
+                }
+            }
+            else
+            {
+                return false;//反转属性
+            }
         }
         //获取空间结构实体集和构件结构实体集
         public void EntityClassify(object e)

@@ -11,8 +11,6 @@ namespace Ifc2Json
         [STAThread]
         static int Main(string[] args)
         {
-
-
             if (args.Length < 2)
             {
                 Console.WriteLine("需要给定输入ifc和输出json文件名！");
