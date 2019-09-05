@@ -82,7 +82,7 @@ namespace Ifc2Json
                     DocXsdFormatEnum? xsdformat = this.GetXsdFormat(f);
 
                     Type ft = f.PropertyType, valueType = null;
-                    DataMemberAttribute dataMemberAttribute = null;
+                    DataMemberAttribute dataMemberAttribute = null; 
                     object value = GetSerializeValue(o, f, out dataMemberAttribute, out valueType);
                     if (value == null)
                         continue;
@@ -92,8 +92,102 @@ namespace Ifc2Json
                     }
                 }
             }
+            if (elementFields.Count > 0)
+            {
+                // write direct object references and lists
+                foreach (Tuple<PropertyInfo, DataMemberAttribute, object> tuple in elementFields) // derived attributes are null
+                {
+                    PropertyInfo f = tuple.Item1;
+                    Type ft = f.PropertyType;
+                    bool isvaluelist = IsValueCollection(ft);
+                    bool isvaluelistlist = ft.IsGenericType && // e.g. IfcTriangulatedFaceSet.Normals
+                        typeof(IEnumerable).IsAssignableFrom(ft.GetGenericTypeDefinition()) &&
+                        IsValueCollection(ft.GetGenericArguments()[0]);
+                    DataMemberAttribute dataMemberAttribute = tuple.Item2;
+                    object value = tuple.Item3;
+                    DocXsdFormatEnum? format = GetXsdFormat(f);
+                    if (format == DocXsdFormatEnum.Element)
+                    {
+                        bool showit = true; //...check: always include tag if Attribute (even if zero); hide if Element 
+                        IEnumerable ienumerable = value as IEnumerable;
+                        if (ienumerable == null)
+                        {
+                            if (!ft.IsValueType && !isvaluelist && !isvaluelistlist)
+                            {
+                                TraverseEntity(value, saved, queue);
+                                continue;
+                            }
+                        }
+                        // for collection is must be non-zero (e.g. IfcProject.IsNestedBy)
+                        else // what about IfcProject.RepresentationContexts if empty? include???
+                        {
+                            showit = false;
+                            foreach (object check in ienumerable)
+                            {
+                                showit = true; // has at least one element
+                                break;
+                            }
+                        }
+                        if (showit)
+                        {
+                            TraverseAttributes(o, f, queue);
+                        }
+                    }
+                    else if (dataMemberAttribute != null)
+                    {
+                        // hide fields where inverse attribute used instead
+                        if (!ft.IsValueType && !isvaluelist && !isvaluelistlist)
+                        {
+                            if (value != null)
+                            {
+                                IEnumerable ienumerable = value as IEnumerable;
+                                if (ienumerable == null)
+                                {
+                                    string fieldName = PropertySerializeName(f), fieldTypeName = TypeSerializeName(ft);
+                                    if (string.Compare(fieldName, fieldTypeName) == 0)
+                                    {
+                                        TraverseEntity(value, saved, queue);
+                                        continue;
+                                    }
+                                }
+                                bool showit = true;
+
+                                if (!f.IsDefined(typeof(System.ComponentModel.DataAnnotations.RequiredAttribute), false) && ienumerable != null)
+                                {
+                                    showit = false;
+                                    foreach (object sub in ienumerable)
+                                    {
+                                        showit = true;
+                                        break;
+                                    }
+                                }
+                                if (showit)
+                                {
+                                    TraverseAttributes(o,f, queue);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // inverse
+                        // record it for downstream serialization
+                        if (value is IEnumerable)
+                        {
+                            IEnumerable invlist = (IEnumerable)value;
+                            foreach (object invobj in invlist)
+                            {
+                                if (!saved.Contains(invobj))
+                                {
+                                    queue.Enqueue(invobj);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        public void TraverseAttributes(object o, PropertyInfo f, HashSet<object> saved,  Queue<object> queue)
+        public void TraverseAttributes(object o, PropertyInfo f, Queue<object> queue)
         {
 
         }
