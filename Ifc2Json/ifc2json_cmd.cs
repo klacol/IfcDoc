@@ -517,7 +517,7 @@ namespace Ifc2Json
                     {
                         using (System.IO.FileStream streamTarget = System.IO.File.OpenWrite(OutputFile))
                         {
-                            formatTarget.TraverseProject(project);
+                            formatTarget.WriteJson(streamTarget, project);
                         }
                     }
 
