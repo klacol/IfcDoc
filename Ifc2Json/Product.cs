@@ -39,6 +39,9 @@ namespace Ifc2Json
             DateTime endT = DateTime.Now;
             TimeSpan ts = endT - startT;
             Console.WriteLine("遍历project内部结构所需的时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
+            Console.WriteLine("总共实体（去除几何表达）的个数:" + saved.Count);
+            Console.WriteLine("空间实体的个数:" + spatialElements.Count);
+            Console.WriteLine("构件实体的个数:" + elements.Count);
         }
         /// <summary>
         /// 遍历过程中将物件实体和空间实体存储
@@ -49,14 +52,12 @@ namespace Ifc2Json
         public Boolean TraverseEntity(object o, HashSet<object> saved, Queue<object> queue)
         {
             if (o == null)
-                return false;           
-            // mark as saved
-            saved.Add(o);
+                return false;
             //存储
             EntityClassify(o);
             Type t = o.GetType();
             //不遍历几何信息实体（节省遍历时间）
-            if (t.Name == "IfcShapeRepresentation" || t.Name == "IfcPolyline" || t.Name == "IfcShapeRepresentation" || t.Name == "IfcExtrudedAreaSolid" || t.Name == "IfcIShapeProfileDef" ||
+            if (t.Name == "IfcLocalPlacement" || t.Name == "IfcPolyline" || t.Name == "IfcShapeRepresentation" || t.Name == "IfcExtrudedAreaSolid" || t.Name == "IfcIShapeProfileDef" ||
                t.Name == "IfcProductDefinitionShape" || t.Name == "IfcGeometricRepresentationSubContext" || t.Name == "IfcFacetedBrep" || t.Name == "IfcClosedShell" || t.Name == "IfcFace" ||
               t.Name == "IfcFaceOuterBound" || t.Name == "IfcPolyLoop" || t.Name == "IfcProductDefinitionShape" || t.Name == "IfcCompositeCurveSegment" || t.Name == "IfcRelSpaceBoundary")
             //  || t.Name == "IfcRelSpaceBoundary" || t.Name == "" || t.Name == "" || t.Name == ""
@@ -71,6 +72,12 @@ namespace Ifc2Json
         public void TraverseEntityAttributes(object o, HashSet<object> saved, Queue<object> queue)
         {
             Type t = o.GetType();
+            // mark as saved
+            if (saved.Contains(o))
+            {
+                return;
+            }
+            saved.Add(o);
             IList<PropertyInfo> fields = this.GetFieldsAll(t);//获取其所有属性
             //直接属性不获取其具体的值，其不包含实体
             List<Tuple<PropertyInfo, DataMemberAttribute, object>> elementFields = new List<Tuple<PropertyInfo, DataMemberAttribute, object>>();//反转属性和导出属性
@@ -82,7 +89,7 @@ namespace Ifc2Json
                     DocXsdFormatEnum? xsdformat = this.GetXsdFormat(f);
 
                     Type ft = f.PropertyType, valueType = null;
-                    DataMemberAttribute dataMemberAttribute = null; 
+                    DataMemberAttribute dataMemberAttribute = null;
                     object value = GetSerializeValue(o, f, out dataMemberAttribute, out valueType);
                     if (value == null)
                         continue;
@@ -130,7 +137,7 @@ namespace Ifc2Json
                         }
                         if (showit)
                         {
-                            TraverseAttributes(o, f, queue);
+                            TraverseAttributes(o, f, saved, queue);
                         }
                     }
                     else if (dataMemberAttribute != null)
@@ -163,7 +170,7 @@ namespace Ifc2Json
                                 }
                                 if (showit)
                                 {
-                                    TraverseAttributes(o,f, queue);
+                                    TraverseAttributes(o, f, saved, queue);
                                 }
                             }
                         }
@@ -186,10 +193,103 @@ namespace Ifc2Json
                     }
                 }
             }
+            IEnumerable enumerable = o as IEnumerable;
+            if (enumerable != null)
+            {
+                foreach (object obj in enumerable)
+                    TraverseEntity(obj, saved, queue);
+            }
         }
-        public void TraverseAttributes(object o, PropertyInfo f, Queue<object> queue)
+        public void TraverseAttributes(object o, PropertyInfo f, HashSet<object> saved, Queue<object> queue)
         {
+            object v = f.GetValue(o);
+            if (v == null)
+                return;
+            string memberName = PropertySerializeName(f);
+            Type objectType = o.GetType();
+            string typeName = TypeSerializeName(o.GetType());
+            if (string.Compare(memberName, typeName) == 0)
+            {
+                TraverseEntity(v, saved, queue);
+                return;
+            }
 
+            Type ft = f.PropertyType;
+            PropertyInfo fieldValue = null;
+            if (ft.IsValueType)
+            {
+                if (ft == typeof(DateTime)) // header datetime
+                {
+                    return;
+                }
+                fieldValue = ft.GetProperty("Value"); // if it exists for value type
+            }
+            else if ((ft == typeof(string))|| (ft == typeof(byte[])))
+            {
+                return;
+            }
+            DocXsdFormatEnum? format = GetXsdFormat(f);
+            if (IsEntityCollection(ft))
+            {
+                IEnumerable list = (IEnumerable)v;
+                // for nested lists, flatten; e.g. IfcBSplineSurfaceWithKnots.ControlPointList
+                if (typeof(IEnumerable).IsAssignableFrom(ft.GetGenericArguments()[0]))
+                {
+                    // special case
+                    if (f.Name.Equals("InnerCoordIndices")) //hack
+                    {
+                        return;
+                    }
+                    ArrayList flatlist = new ArrayList();
+                    foreach (IEnumerable innerlist in list)
+                    {
+                        foreach (object e in innerlist)
+                        {
+                            flatlist.Add(e);
+                        }
+                    }
+                    list = flatlist;
+                }
+                foreach (object e in list)
+                {
+                    if (e != null) // could be null if buggy file -- not matching schema
+                    {
+                        if (!e.GetType().IsValueType && !(e is string)) // presumes an entity
+                        {
+                            if (format != null && format == DocXsdFormatEnum.Attribute)
+                            {
+                                // only one item, e.g. StyledByItem\IfcStyledItem
+                                TraverseEntityAttributes(e, saved, queue);
+                                break; // if more items, skip them -- buggy input data; no way to encode
+                            }
+                            else
+                            {
+                                TraverseEntity(e, saved, queue);
+                            }
+                        }
+                    }
+                }
+            } // otherwise if not collection...
+            else if (ft.IsInterface && v is ValueType)//Type 元数据中函数有IsInterface
+            {//eg:IfcValue
+                return; 
+            }
+            else if (fieldValue != null) // must be IfcBinary -- but not DateTime or other raw primitives
+            {
+                v = fieldValue.GetValue(v);
+            }
+            else 
+            {
+                if (format != null && format == DocXsdFormatEnum.Attribute)
+                {
+                    TraverseEntityAttributes(v,saved, queue);
+                }
+                else
+                {
+                    // if rooted, then check if we need to use reference; otherwise embed
+                    TraverseEntity(v, saved, queue);
+                }
+            }
         }
         //判断以属性是否是直接属性
         public Boolean IsDirectField(PropertyInfo f,object o)
@@ -261,6 +361,11 @@ namespace Ifc2Json
 
             }
             return false;
+        }
+        // JSON字符串中回车符的处理
+        protected string strToJson(string str)
+        {
+            return str.Replace("\n", "\\n").Replace("\r", "").Replace("\\", "\\\\");
         }
     }
 }
