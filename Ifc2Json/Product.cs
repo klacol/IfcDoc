@@ -1,7 +1,9 @@
 ﻿using BuildingSmart.Serialization.Xml;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -12,10 +14,177 @@ namespace Ifc2Json
 {
     public class Product : XmlSerializer
     {
+        ArrayList products = new ArrayList();//存储构件与其对应的属性实例
+        protected internal class ProductProperties
+        {
+            public string Guid { get; set; }//构件的id
+            public bool IsBuildingStorey { get; set; }//一标志判断获取的stroey是否是楼层
+            public Dictionary<string, Dictionary<string, string>> properties { get; set; }
+        }
+
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
         public Product(Type typeProject) : base(typeProject)
         {
+        }
+        //根据属性PropertyInfo获取其对应的值只讨论直接属性
+        protected void GetPropertyInfoValue(object e, PropertyInfo f, ref string v)
+        {
+            Type t = e.GetType(), stringType = typeof(String);
+            if (f != null) // derived fields are null
+            {
+                DocXsdFormatEnum? xsdformat = this.GetXsdFormat(f);
+                Type ft = f.PropertyType, valueType = null;
+                DataMemberAttribute dataMemberAttribute = null;
+                object value = GetSerializeValue(e, f, out dataMemberAttribute, out valueType);
+                if (value != null)
+                {
+                    if (dataMemberAttribute != null && (xsdformat == null || xsdformat == DocXsdFormatEnum.Attribute))
+                    {
+                        // direct field
+                        bool isvaluelist = IsValueCollection(ft);
+                        bool isvaluelistlist = ft.IsGenericType && // e.g. IfcTriangulatedFaceSet.Normals
+                            typeof(System.Collections.IEnumerable).IsAssignableFrom(ft.GetGenericTypeDefinition()) &&
+                            IsValueCollection(ft.GetGenericArguments()[0]);
+                        if (isvaluelistlist || isvaluelist || ft.IsValueType || ft == stringType)
+                        {
+                            //string key = f.Name;
+                            if (ft == stringType && string.IsNullOrEmpty(value.ToString()))
+                                return;
+                            if (isvaluelistlist)
+                            {
+                                ft = ft.GetGenericArguments()[0].GetGenericArguments()[0];
+                                PropertyInfo fieldValue = ft.GetProperty("Value");
+                                if (fieldValue != null)
+                                {    
+                                    string va = "";
+                                    System.Collections.IList list = (System.Collections.IList)value;
+                                    for (int i = 0; i < list.Count; i++)
+                                    {
+                                        System.Collections.IList listInner = (System.Collections.IList)list[i];
+                                        for (int j = 0; j < listInner.Count; j++)
+                                        {
+                                            if (i > 0 || j > 0)
+                                            {
+                                                v = v + " ";//加空格
+                                            }
+                                            object elem = listInner[j];
+                                            if (elem != null) // should never be null, but be safe
+                                            {
+                                                elem = fieldValue.GetValue(elem);
+                                                string encodedvalue = System.Security.SecurityElement.Escape(elem.ToString());
+                                                // 对Json字符串中回车符处理;
+                                                va = this.strToJson(encodedvalue);
+                                            }
+                                        }
+                                        v = v + va;
+                                    }
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine("XXX Error serializing ValueListlist" + e.ToString());
+                                }
+                            }
+                            else if (isvaluelist)
+                            {
+                                ft = ft.GetGenericArguments()[0];
+                                PropertyInfo fieldValue = ft.GetProperty("Value");
+
+                                IEnumerable list = (IEnumerable)value;
+                                int i = 0;
+                                string va = "";
+                                foreach (object o in list)
+                                {
+                                    if (e != null) // should never be null, but be safe
+                                    {
+                                        object elem = e;
+                                        if (fieldValue != null)
+                                        {
+                                            elem = fieldValue.GetValue(e);
+                                        }
+                                        if (elem is byte[])
+                                        {
+                                            // IfcPixelTexture.Pixels
+                                            va = SerializeBytes((byte[])elem);                                           
+                                        }
+                                        else
+                                        {
+                                            string encodedvalue = System.Security.SecurityElement.Escape(elem.ToString());
+                                            // 对Json字符串中回车符处理
+                                            va = this.strToJson(encodedvalue);
+                                        }
+                                    }
+                                    if (i == 0)
+                                    {
+                                        v = va;
+                                    }
+                                    v = v+ " "+va;
+                                }
+                            }
+                            else
+                            {
+                                if (ft.IsGenericType && ft.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                {
+                                    // special case for Nullable types
+                                    ft = ft.GetGenericArguments()[0];
+                                }
+                                Type typewrap = null;
+                                while (ft.IsValueType && !ft.IsPrimitive)
+                                {
+                                    PropertyInfo fieldValue = ft.GetProperty("Value");
+                                    if (fieldValue != null)
+                                    {
+                                        value = fieldValue.GetValue(value);
+                                        if (typewrap == null)
+                                        {
+                                            typewrap = ft;
+                                        }
+                                        ft = fieldValue.PropertyType;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                if (ft.IsEnum || ft == typeof(bool))
+                                {
+                                    value = value.ToString().ToLowerInvariant();
+                                }
+
+                                if (value is IList)
+                                {
+                                    // IfcCompoundPlaneAngleMeasure
+                                    IList list = (IList)value;
+                                    string va = "";
+                                    for (int i = 0; i < list.Count; i++)
+                                    {
+                                        object elem = list[i];
+                                      
+                                        if (elem != null) // should never be null, but be safe
+                                        {
+                                            string encodedvalue = System.Security.SecurityElement.Escape(elem.ToString());
+                                            // 对Json字符串中回车符处理
+                                          //  v = this.strToJson(encodedvalue);//eg:(39,54,57,601318)
+                                          if (i == 0)
+                                          {
+                                              va =  this.strToJson(encodedvalue);
+                                          }
+                                          va = va+ " "+ this.strToJson(encodedvalue) ;
+                                        }
+                                    }
+                                    v = va;
+                                }
+                                else if (value != null)
+                                {
+                                    string encodedvalue = System.Security.SecurityElement.Escape(value.ToString());
+                                    v = this.strToJson(encodedvalue);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         //遍历project
         public void TraverseProject(object root)
