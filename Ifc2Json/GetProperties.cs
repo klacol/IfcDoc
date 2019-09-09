@@ -76,6 +76,7 @@ namespace Ifc2Json
                 p.Type = type;
                 entityProperties.Add("基本属性", BasicProperties);
                 GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
+                GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
                 p.properties = entityProperties;
                 if (p.Type == "IfcSpace")
                 {
@@ -110,7 +111,7 @@ namespace Ifc2Json
                 HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
                 GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
                 GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-
+                GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
                 p.properties = entityProperties;
                 products.Add(p);
             }
@@ -164,9 +165,35 @@ namespace Ifc2Json
                 entityProperties.Add(propertySetName, propertiesFields);
             }
         }
-        protected  void WriteHeader(StreamWriter writer,string name)
+        protected void GetTypePropertyEntitiesValue(HashSet<object> RelTypeEntities, Dictionary<string, Dictionary<string, string>> entityProperties)
         {
-            
+            if (RelTypeEntities.Count > 1)
+            {
+                Console.WriteLine("RelTypeEntitiesc相关的实体Type有多个");
+            }
+            foreach (object e in RelTypeEntities)
+            {
+                object typeEntity;
+                Type t; PropertyInfo f;
+             
+                Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
+                t = e.GetType();
+                f = t.GetProperty("RelatingType");
+                typeEntity = f.GetValue(e);//得到相关的Type,例如IfcDoorType
+                //IfcTypeObject  HasPropertySets: OPTIONAL SET[1:?] OF IfcPropertySetDefinition;
+                f = typeEntity.GetType().GetProperty("HasPropertySets");
+                Type ft = f.PropertyType;
+                if (IsEntityCollection(ft))
+                {
+                    IEnumerable list = (IEnumerable)typeEntity;
+                    foreach (object propertySet in list)
+                    {
+                        string propertySetName = "";
+                        GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
+                        entityProperties.Add(propertySetName, propertiesFields);
+                    }
+                }
+            }
         }
     }
 }

@@ -149,6 +149,33 @@ namespace Ifc2Json
                     Console.WriteLine("HasProperties属性处理出错");
                 }
             }
+            else if (setType.Name == "IfcElementQuantity")
+            {
+                PropertyInfo f;
+                f = setType.GetProperty("Name");
+                GetPropertyInfoValue(propertySet, f, ref name);//返回其name值
+                                                               //Quantities: SET[1:?] OF IfcPhysicalQuantity;
+                f = setType.GetProperty("Quantities");
+                object Quantities = f.GetValue(propertySet);
+                //获取其name和value
+                Type ft = f.PropertyType;
+                if (IsEntityCollection(ft))
+                {
+                    IEnumerable list = (IEnumerable)Quantities;
+                    foreach (object invobj in list)
+                    {
+                        string key = "", value = "";
+                        f = invobj.GetType().GetProperty("Name");
+                        GetPropertyInfoValue(invobj, f, ref key);
+
+                        f = invobj.GetType().GetProperty("LengthValue");//可用正则表达式进行匹配
+                        GetPropertyInfoValue(invobj, f, ref value);
+
+                        PropertiesFields.Add(key, value);
+                    }
+
+                }
+            }
             else
             {
                 Console.WriteLine(setType.Name + "这一类型属性集需要处理");
@@ -636,6 +663,10 @@ namespace Ifc2Json
         public bool Basetype(Type t)
         {
             int i = 0;
+            if (t.Name == "IfcOpeningElement")
+            {
+                return false;//开洞元素暂且不考虑
+            }
             while (t != null)
             {
                 if (i > 3)
