@@ -1,4 +1,5 @@
-﻿using BuildingSmart.Serialization.Xml;
+﻿//获取构件集和空间集的实体实例
+using BuildingSmart.Serialization.Xml;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -14,94 +15,12 @@ namespace Ifc2Json
 {
     public class Product : XmlSerializer
     {
-        ArrayList products = new ArrayList();//存储构件与其对应的属性实例
-        protected internal class ProductProperties
-        {
-            public string Type { get; set; }//构件的类型
-            public string Guid { get; set; }//构件的id
-            public bool IsBuildingStorey { get; set; }//一标志判断获取的stroey是否是楼层
-            public Dictionary<string, Dictionary<string, string>> properties { get; set; }
-        }
-
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
         public Product(Type typeProject) : base(typeProject)
         {
         }
-        //写json
-        public void WriteJson(Stream stream, object root)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            if (root == null)
-                throw new ArgumentNullException("root");
-            StreamWriter writer = new StreamWriter(stream);
-            GetProductAndProperties(root);
-            this.WriteHeader(writer);//写头部ifc:]
-            int count = 0;
-            foreach (ProductProperties e in products)
-            {
-                count++;
-                string json = JsonConvert.SerializeObject(e, Newtonsoft.Json.Formatting.Indented);
-                writer.WriteLine(json);
-                if (count != products.Count)
-                {
-                    writer.WriteLine(",");//最后一个对象不输出，
-                }
-
-            }
-            this.WriteFooter(writer);
-            writer.Flush();
-        }
-        //获取构件及其构件属性
-        public void GetProductAndProperties(object root)
-        {
-            TraverseProject(root);//遍历内部结构获取构件集
-            //获取空间结构的属性信息（先输出空间结构的，构件的位置信息会用到此）
-            foreach (object e in spatialElements)
-            {
-                //空间结构还有几何表达信息（此处还未添加）
-                //创建一对 
-                ProductProperties p = new ProductProperties();
-                Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
-                Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
-
-                GetDirectFieldsValue(e, BasicProperties);
-                string guid; string type = e.GetType().Name;
-                if (BasicProperties.TryGetValue("GlobalId", out guid))
-                {
-                    p.Guid = guid;
-                }
-                p.Type = type;
-                entityProperties.Add("基本属性", BasicProperties);
-                p.properties = entityProperties;
-                products.Add(p);
-            }
-            Console.WriteLine("spatialElements结束");
-            //物理构件
-            foreach (object e in elements)
-            {
-                //空间结构还有几何表达信息（此处还未添加）
-                //创建一对 
-                ProductProperties p = new ProductProperties();
-                Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
-                Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
-
-                GetDirectFieldsValue(e, BasicProperties);
-                string guid;string type=e.GetType().Name;
-                if (BasicProperties.TryGetValue("GlobalId", out guid))
-                {
-                    p.Guid = guid;
-                }
-                p.Type = type;
-                entityProperties.Add("基本属性", BasicProperties);
-                p.properties = entityProperties;
-                products.Add(p);
-            }
-            Console.WriteLine("结束");
-        }
-        //获取实体的直接属性的key-value值
+        //获取直接属性的值
         protected void GetDirectFieldsValue(object e, Dictionary<string, string> Specific)
         {
             //只获取基本属性实体的直接属性
@@ -740,15 +659,10 @@ namespace Ifc2Json
             return false;
         }
         // JSON字符串中回车符的处理
-        protected override void WriteHeader(StreamWriter writer)
-        {
-            writer.WriteLine("{");
-            this.WriteIndent(writer, 1);
-            writer.WriteLine("\"ifc\": [");
-        }
+
         protected override void WriteFooter(StreamWriter writer)
         {
-            writer.WriteLine("  ]");
+           // writer.WriteLine("  ]");
             writer.WriteLine("}");
         }
         protected string strToJson(string str)

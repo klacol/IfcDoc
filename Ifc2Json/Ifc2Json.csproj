@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GetProperties.cs" />
     <Compile Include="ifc2json_cmd.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="Program.cs" />

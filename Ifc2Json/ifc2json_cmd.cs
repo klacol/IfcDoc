@@ -512,7 +512,7 @@ namespace Ifc2Json
 
                     //Serializer formatTarget = null;
                     //formatTarget = new XmlSerializer(typeProject);
-                    Product formatTarget = new Product(typeProject);
+                    GetProperties formatTarget = new GetProperties(typeProject);
                     if (formatTarget != null)
                     {
                         using (System.IO.FileStream streamTarget = System.IO.File.OpenWrite(OutputFile))
