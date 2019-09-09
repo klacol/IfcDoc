@@ -22,7 +22,8 @@ namespace Ifc2Json
         protected internal class ProductProperties
         {
             public string Type { get; set; }//构件的类型
-            public string Guid { get; set; }//构件的id                                                     
+            public string Guid { get; set; }//构件的id            
+            public string TypePropertyId { get; set; }  //构件的类型属性的id                                       
             public Dictionary<string, Dictionary<string, string>> properties { get; set; }
         }
         //写json
@@ -34,8 +35,9 @@ namespace Ifc2Json
             if (root == null)
                 throw new ArgumentNullException("root");
             StreamWriter writer = new StreamWriter(stream);
-            GetProductAndProperties(root);
-            
+            TraverseProject(root);//遍历内部结构获取构件集
+            GetProductAndProperties();
+            GetTypeProperty();
             writer.WriteLine("{");//
             writer.Write("\"buildingStoreys\":");
             string json;
@@ -49,13 +51,31 @@ namespace Ifc2Json
             writer.Write("\"products\":");
             json = JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
             writer.WriteLine(json);
+            writer.WriteLine(",");
+            writer.Write("\"productsType\":");
+            json = JsonConvert.SerializeObject(productsType, Newtonsoft.Json.Formatting.Indented);
+            writer.WriteLine(json);
             this.WriteFooter(writer);
             writer.Flush();
         }
-        //获取构件及其构件属性
-        public void GetProductAndProperties(object root)
+        //type类型属性
+        public void GetTypeProperty()
         {
-            TraverseProject(root);//遍历内部结构获取构件集
+            foreach (object e in elementsType)
+            {
+                ProductProperties p = new ProductProperties();
+                Dictionary<string, Dictionary<string, string>> entityTypeProperties = new Dictionary<string, Dictionary<string, string>>();
+                p.Type = e.GetType().Name;
+                p.Guid = GetEntityId(e);
+                ProductTypePropertiesValue(e, entityTypeProperties);
+                p.properties = entityTypeProperties;
+                productsType.Add(p);
+            }
+        }
+        //获取构件及其构件属性
+        public void GetProductAndProperties()
+        {
+            
             //获取空间结构的属性信息（先输出空间结构的，构件的位置信息会用到此）
             foreach (object e in spatialElements)
             {
@@ -68,19 +88,18 @@ namespace Ifc2Json
                 HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
                 GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
                 GetDirectFieldsValue(e, BasicProperties);
-                string guid; string type = e.GetType().Name;
-                if (BasicProperties.TryGetValue("GlobalId", out guid))
-                {
-                    p.Guid = guid;
-                }
+                string type = e.GetType().Name;
+                p.Guid = GetEntityId(e);
                 p.Type = type;
                 if (p.Type == "IfcSpace")
                 {
                     string floor = GetStoreyName(e);
                     BasicProperties.Add("floor", floor);
+                    string TypePropertyid=GetTypePropertyEntitiesId(TypePropertyEntities);
+                    BasicProperties.Add("TypePropertyid", TypePropertyid);
                     entityProperties.Add("基本属性", BasicProperties);
                     GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                    GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
+                    p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
                     p.properties = entityProperties;
                     rooms.Add(p);
                 }
@@ -88,7 +107,7 @@ namespace Ifc2Json
                 {
                     entityProperties.Add("基本属性", BasicProperties);
                     GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                    GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
+                    p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
                     p.properties = entityProperties;
                     buildingStoreys.Add(p);
                 }
@@ -103,24 +122,18 @@ namespace Ifc2Json
                 ProductProperties p = new ProductProperties();
                 Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
-
-                GetDirectFieldsValue(e, BasicProperties);
-                string guid; string type = e.GetType().Name;
-                if (BasicProperties.TryGetValue("GlobalId", out guid))
-                {
-                    p.Guid = guid;
-                }
-                p.Type = type;
-
-                string floor = GetStoreyName(e);
-                BasicProperties.Add("floor", floor);
-                entityProperties.Add("基本属性", BasicProperties);
-
                 HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
                 HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
                 GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
+                GetDirectFieldsValue(e, BasicProperties);
+                string type = e.GetType().Name;
+                p.Guid = GetEntityId(e);
+                p.Type = type;
+                p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
+                string floor = GetStoreyName(e);
+                BasicProperties.Add("floor", floor);
+                entityProperties.Add("基本属性", BasicProperties);
                 GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
                 p.properties = entityProperties;
                 products.Add(p);
             }
@@ -177,43 +190,38 @@ namespace Ifc2Json
                 }
             }
         }
-        protected void GetTypePropertyEntitiesValue(HashSet<object> RelTypeEntities, Dictionary<string, Dictionary<string, string>> entityProperties)
+        protected string  GetTypePropertyEntitiesId(HashSet<object> RelTypeEntities)
         {
-            if (RelTypeEntities.Count > 1)
+            string value = "";
+            if (RelTypeEntities.Count == 0)
+            {
+                //该构件无相关的类型属性
+                return value;
+            }
+            else if (RelTypeEntities.Count > 1)
             {
                 Console.WriteLine("RelTypeEntitiesc相关的实体Type有多个");
             }
-            foreach (object e in RelTypeEntities)
+            else
             {
-                object typeEntity;
-                Type t; PropertyInfo f;
-             
-                Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
-                t = e.GetType();
-                f = t.GetProperty("RelatingType");
-                typeEntity = f.GetValue(e);//得到相关的Type,例如IfcDoorType
-                //IfcTypeObject  HasPropertySets: OPTIONAL SET[1:?] OF IfcPropertySetDefinition;
-                f = typeEntity.GetType().GetProperty("HasPropertySets");
-                Type ft = f.PropertyType;
-                if (IsEntityCollection(ft))
+                foreach (object e in RelTypeEntities)
                 {
-                    object v= f.GetValue(typeEntity);
-                    IEnumerable list = (IEnumerable)v;
-                    foreach (object propertySet in list)
+                    object typeEntity;
+                    Type t; PropertyInfo f;
+
+                    Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
+                    t = e.GetType();
+                    f = t.GetProperty("RelatingType");
+                    typeEntity = f.GetValue(e);//得到相关的Type,例如IfcDoorType
+                                               //获取type的id 
+                    if (!elementsType.Contains(typeEntity))
                     {
-                        string propertySetName = "";
-                        GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
-                        if (propertySetName != "")
-                        {
-                            if (entityProperties.ContainsKey(propertySetName))//会出现type属性和关系属性名称起的一样
-                            {
-                                propertySetName = propertySetName + "(Type)";
-                            }
-                            entityProperties.Add(propertySetName, propertiesFields);
-                        }
-                    }
+                        Console.WriteLine("elementsType实体实例不全");
+                    }           
+                    value = GetEntityId(typeEntity);
                 }
             }
+            return value;
         }
         //获取楼层的名称
         protected string GetStoreyName(object e)
@@ -223,10 +231,7 @@ namespace Ifc2Json
             {
                 Console.Write("所处楼层信息出错");
             }
-            string value="";
-            PropertyInfo f = stoery.GetType().GetProperty("GlobalId");
-            GetPropertyInfoValue(stoery, f, ref value);
-            return value;
+            return GetEntityId(stoery);
         }
         //获取构件所在楼层实体
         protected object GetStoreyEntity(object o)
@@ -327,6 +332,40 @@ namespace Ifc2Json
                     }
                 }
             }
+        }
+        //获取类型属性单独存储
+        public void ProductTypePropertiesValue(object o, Dictionary<string, Dictionary<string, string>> entityTypeProperties)
+        {
+            //IfcTypeObject  HasPropertySets: OPTIONAL SET[1:?] OF IfcPropertySetDefinition;
+            PropertyInfo f = o.GetType().GetProperty("HasPropertySets");          
+            Type ft = f.PropertyType;
+            if (IsEntityCollection(ft))
+            {
+                object v = f.GetValue(o);
+                IEnumerable list = (IEnumerable)v;
+                foreach (object propertySet in list)
+                {
+                    string propertySetName = "";
+                    Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
+                    GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
+                    if (propertySetName != "")
+                    {
+                        if (entityTypeProperties.ContainsKey(propertySetName))//会出现type属性和关系属性名称起的一样
+                        {
+                            propertySetName = propertySetName + "(Type)";
+                        }
+                        entityTypeProperties.Add(propertySetName, propertiesFields);
+                    }
+                }
+            }
+        }
+        //获取某一实体的id
+        public string GetEntityId(object o)
+        {
+            string value = "";
+            PropertyInfo f = o.GetType().GetProperty("GlobalId");
+            GetPropertyInfoValue(o, f, ref value);
+            return value;
         }
     }
 }
