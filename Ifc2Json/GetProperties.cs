@@ -13,6 +13,7 @@ namespace Ifc2Json
     class GetProperties : Product
     {
         ArrayList products = new ArrayList();//存储构件与其对应的属性实例
+        ArrayList productsType = new ArrayList();//若将类型属性写在构件json文件大
         ArrayList rooms = new ArrayList();//存储房间及其相关属性
         ArrayList buildingStoreys = new ArrayList();//存储楼层及其相关属性
         public GetProperties(Type typeProject) : base(typeProject)
@@ -21,8 +22,7 @@ namespace Ifc2Json
         protected internal class ProductProperties
         {
             public string Type { get; set; }//构件的类型
-            public string Guid { get; set; }//构件的id
-           // public bool IsBuildingStorey { get; set; }//一标志判断获取的stroey是否是楼层
+            public string Guid { get; set; }//构件的id                                                     
             public Dictionary<string, Dictionary<string, string>> properties { get; set; }
         }
         //写json
@@ -74,16 +74,22 @@ namespace Ifc2Json
                     p.Guid = guid;
                 }
                 p.Type = type;
-                entityProperties.Add("基本属性", BasicProperties);
-                GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
-                p.properties = entityProperties;
                 if (p.Type == "IfcSpace")
                 {
+                    string floor = GetStoreyName(e);
+                    BasicProperties.Add("floor", floor);
+                    entityProperties.Add("基本属性", BasicProperties);
+                    GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
+                    GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
+                    p.properties = entityProperties;
                     rooms.Add(p);
                 }
                 else if (p.Type == "IfcBuildingStorey")
                 {
+                    entityProperties.Add("基本属性", BasicProperties);
+                    GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
+                    GetTypePropertyEntitiesValue(TypePropertyEntities, entityProperties);//获取Type的属性
+                    p.properties = entityProperties;
                     buildingStoreys.Add(p);
                 }
                 //products.Add(p);
@@ -105,6 +111,9 @@ namespace Ifc2Json
                     p.Guid = guid;
                 }
                 p.Type = type;
+
+                string floor = GetStoreyName(e);
+                BasicProperties.Add("floor", floor);
                 entityProperties.Add("基本属性", BasicProperties);
 
                 HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
@@ -162,7 +171,10 @@ namespace Ifc2Json
                 string propertySetName = "";
                 Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
                 GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
-                entityProperties.Add(propertySetName, propertiesFields);
+                if (propertySetName != "")
+                {
+                    entityProperties.Add(propertySetName, propertiesFields);
+                }
             }
         }
         protected void GetTypePropertyEntitiesValue(HashSet<object> RelTypeEntities, Dictionary<string, Dictionary<string, string>> entityProperties)
@@ -185,12 +197,133 @@ namespace Ifc2Json
                 Type ft = f.PropertyType;
                 if (IsEntityCollection(ft))
                 {
-                    IEnumerable list = (IEnumerable)typeEntity;
+                    object v= f.GetValue(typeEntity);
+                    IEnumerable list = (IEnumerable)v;
                     foreach (object propertySet in list)
                     {
                         string propertySetName = "";
                         GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
-                        entityProperties.Add(propertySetName, propertiesFields);
+                        if (propertySetName != "")
+                        {
+                            if (entityProperties.ContainsKey(propertySetName))//会出现type属性和关系属性名称起的一样
+                            {
+                                propertySetName = propertySetName + "(Type)";
+                            }
+                            entityProperties.Add(propertySetName, propertiesFields);
+                        }
+                    }
+                }
+            }
+        }
+        //获取楼层的名称
+        protected string GetStoreyName(object e)
+        {
+            object stoery=GetStoreyEntity(e);
+            if (stoery == null)
+            {
+                Console.Write("所处楼层信息出错");
+            }
+            string value="";
+            PropertyInfo f = stoery.GetType().GetProperty("GlobalId");
+            GetPropertyInfoValue(stoery, f, ref value);
+            return value;
+        }
+        //获取构件所在楼层实体
+        protected object GetStoreyEntity(object o)
+        {
+            object RelatingStructure = null;
+            HashSet<object> SpatialProperties = new HashSet<object>();
+            //只获取ifcspce的楼层信息
+            GetSpatialProperty(o, SpatialProperties);
+            if (SpatialProperties.Count == 0)
+            {
+                if (o.GetType().Name == "IfcOpeningElement")
+                {
+                    //do nothing 开洞实体无楼层信息---需要之后验证 
+                }
+                else
+                {
+                    Console.WriteLine(o.GetType().Name + "与该构件的空间信息出错");
+                }
+                return null;
+            }
+            else
+            {
+                if (SpatialProperties.Count > 1)
+                {
+                    //若其body有多个，返回第一个
+                    Console.WriteLine(o.GetType().Name + "与该构件有关的实体从属关系有多个");
+                }
+                foreach (object e in SpatialProperties)//如果是构件的空间位置是个 IfcRelContainedInSpatialStructure实体
+                {
+                    Type t = e.GetType();
+                    if (t.Name == "IfcRelContainedInSpatialStructure")
+                    {
+                        //获取其属性RelatingStructure: IfcSpatialStructureElement;
+                        PropertyInfo f = t.GetProperty("RelatingStructure");
+                        RelatingStructure = f.GetValue(e);
+                        break;
+                    }
+                    else if (t.Name == "IfcRelAggregates")//ifcspace的空间位置是IfcRelAggregates实体
+                    {
+                        //RelatingObject	 : 	IfcObjectDefinition;
+                        PropertyInfo f = t.GetProperty("RelatingObject");
+                        RelatingStructure = f.GetValue(e);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine(o.GetType().Name + "该构件的空间位置还会用其他实体表示");
+                    }
+                }
+                if (RelatingStructure.GetType().Name == "IfcBuildingStorey")
+                {
+                    return RelatingStructure;
+                }
+                else
+                {
+                    return GetStoreyEntity(RelatingStructure);//递归
+                }
+            }
+        }
+        //获取构件实体的位置信息（该空间所属楼层）
+        public void GetSpatialProperty(object o, HashSet<object> SpatialProperties)
+        {
+            Type t = o.GetType();
+            PropertyInfo f;
+            object v;
+            //Decomposes: 	SET [0:1] OF IfcRelDecomposes FOR RelatedObjects;ifcspace实体的空间位置所在属性
+            //ContainedInStructure: SET[0:1] OF IfcRelContainedInSpatialStructure FOR RelatedElements;物理构件的空间位置所在的属性
+            if (t.BaseType.Name == "IfcSpatialStructureElement")
+            {
+                f = t.GetProperty("Decomposes");
+            }
+            else
+            {
+                f = t.GetProperty("ContainedInStructure");
+            }
+            v = f.GetValue(o);//获取其属性值
+            Type ft = f.PropertyType;
+            if (IsEntityCollection(ft))
+            {
+                IEnumerable list = (IEnumerable)v;
+                foreach (object invobj in list)
+                {
+                    SpatialProperties.Add(invobj);
+                }
+            }
+            //有个别实体类型例如ifcplate （不会直接与空间产生联系例如开洞实体）
+            if (SpatialProperties.Count == 0)
+            {
+                f = t.GetProperty("Decomposes");
+                v = f.GetValue(o);//获取其属性值
+                ft = f.PropertyType;
+                if (IsEntityCollection(ft))
+                {
+                    IEnumerable list = (IEnumerable)v;
+                    foreach (object invobj in list)
+                    {
+                        SpatialProperties.Add(invobj);
                     }
                 }
             }

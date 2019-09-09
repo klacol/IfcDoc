@@ -16,6 +16,7 @@ namespace Ifc2Json
     public class Product : XmlSerializer
     {
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
+        public HashSet<object> elementsType = new HashSet<object>();//保存物理构件
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
         public Product(Type typeProject) : base(typeProject)
         {
@@ -650,34 +651,43 @@ namespace Ifc2Json
         public void EntityClassify(object e)
         {
             Type t = e.GetType();
-            if (Basetype(t))
-            {
-                elements.Add(e);
-            }
-            else if (t.BaseType.Name == "IfcSpatialStructureElement")
+            if (t.BaseType.Name == "IfcSpatialStructureElement")
             {
                 spatialElements.Add(e);  //将空间实体和物理实体存储至Element中
             }
+            else  if (Basetype(t) == 1)
+            {
+                elements.Add(e);
+            }
+            else if (Basetype(t) == 2)
+            {
+                elementsType.Add(e);
+            }
         }
         //判断物体类型是否为ifcElement，墙、门等构件的定义都是此基类
-        public bool Basetype(Type t)
+        //IfcElementType类型返回2
+        public int  Basetype(Type t)
         {
             int i = 0;
             if (t.Name == "IfcOpeningElement")
             {
-                return false;//开洞元素暂且不考虑
+                return 0;//开洞元素暂且不考虑
             }
             while (t != null)
             {
                 if (i > 3)
                 {
-                    return false;
+                    return 0;
                 }
                 else
                 {
                     if (t.Name == "IfcElement")
                     {
-                        return true;
+                        return 1;
+                    }
+                    else if (t.Name == "IfcElementType")
+                    {
+                        return 2;
                     }
                     else
                     {
@@ -687,7 +697,7 @@ namespace Ifc2Json
                 }
 
             }
-            return false;
+            return 0;
         }
         // JSON字符串中回车符的处理
 
