@@ -432,6 +432,35 @@ namespace Ifc2Json
             }
             return SpatialShapeEntity;
         }
+        public void DealSweptSolid(object o)
+        {
+            Dictionary <string, string> shape= new Dictionary<string, string>();
+            //获取其Items	 : 	SET [1:?] OF IfcRepresentationItem;
+            PropertyInfo f;
+            f= o.GetType().GetProperty("Items");         
+            Type ft = f.PropertyType;
+            if (IsEntityCollection(ft))
+            { 
+                object v = f.GetValue(o);
+                IEnumerable list = (IEnumerable)v;
+                foreach (object e in list)
+                {
+                    //只处理第一个
+                    if (e.GetType().Name == "IfcExtrudedAreaSolid")
+                    {
+                        string height="";//拉伸高度
+                        f = e.GetType().GetProperty("Depth");
+                        GetPropertyInfoValue(o, f, ref height);
+                        shape.Add("height", height);
+                        //position 位置信息是个对象，有多个key-value值
+
+
+
+                    }
+
+                }
+            }
+        }
         //获取某一实体的id
         public string GetEntityId(object o)
         {
@@ -440,5 +469,40 @@ namespace Ifc2Json
             GetPropertyInfoValue(o, f, ref value);
             return value;
         }
+        //获取点的坐标，输出为string
+        public void GetPolyline(object o)
+        {
+            List<string> points = new List<string>();
+            if (o.GetType().Name == "IfcPolyline")
+            {
+                //获取其Points
+                PropertyInfo f = o.GetType().GetProperty("Points");
+                object v = f.GetValue(o);
+                IEnumerable list = (IEnumerable)v;
+                foreach (object point in list)
+                {
+                    string pointValue = GetPoint(point);
+                    if (pointValue != "")
+                    {
+                        points.Add(pointValue);
+                    }
+                    else
+                    {
+                        Console.WriteLine("获取点的坐标失败");
+                    }
+                }
+            }
+        }
+        public string GetPoint(object CartesianPoint)
+        {
+            string point = "";//获得的点的坐标用空格隔开
+            if (CartesianPoint.GetType().Name == "IfcCartesianPoint")
+            {               
+                PropertyInfo f = CartesianPoint.GetType().GetProperty("Coordinates");
+                GetPropertyInfoValue(CartesianPoint, f, ref point);              
+            }
+            return point;
+        }
+
     }
 }
