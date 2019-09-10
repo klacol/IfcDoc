@@ -101,6 +101,7 @@ namespace Ifc2Json
                     GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                     p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
                     p.properties = entityProperties;
+                    ShapeRepresentationWay(GetSpaceShapeEntity(e));
                     rooms.Add(p);
                 }
                 else if (p.Type == "IfcBuildingStorey")
@@ -214,11 +215,20 @@ namespace Ifc2Json
                     f = t.GetProperty("RelatingType");
                     typeEntity = f.GetValue(e);//得到相关的Type,例如IfcDoorType
                                                //获取type的id 
-                    if (!elementsType.Contains(typeEntity))
+                    if (elementsType.Contains(typeEntity))
                     {
-                        Console.WriteLine("elementsType实体实例不全");
-                    }           
-                    value = GetEntityId(typeEntity);
+                        value = GetEntityId(typeEntity);
+                        //会出现ifcdoorstyle,目前不需要style
+                    }
+                    else if (typeEntity.GetType().Name== "IfcDoorStyle"|| typeEntity.GetType().Name == "IfcWindowStyle")
+                    {
+                        return value;                        
+                    }
+                    else
+                    {
+                        Console.WriteLine("elementsType实体实例不全" + typeEntity.GetType().Name);
+                    }
+                   
                 }
             }
             return value;
@@ -358,6 +368,69 @@ namespace Ifc2Json
                     }
                 }
             }
+        }
+        //处理空间的几何的描述方式，目前讨论拉伸和边界生成实体两种方式
+        public void ShapeRepresentationWay(object SpatialShapeEntity)
+        {
+            if (SpatialShapeEntity != null)
+            {
+                //IfcProductDefinitionShape Representations	 : 	LIST [1:?] OF IfcRepresentation;
+                //IfcRepresentation中包含了style 和shape，只处理shape
+                PropertyInfo f; Type ft;
+                f = SpatialShapeEntity.GetType().GetProperty("Representations");
+                ft = f.PropertyType;
+                if (IsEntityCollection(ft))
+                {
+                    object v = f.GetValue(SpatialShapeEntity);
+                    IEnumerable list = (IEnumerable)v;
+                    foreach (object e in list)
+                    {
+                        if (e.GetType().Name == "IfcShapeRepresentation")
+                        {
+                            string value = "";
+                            //RepresentationType	 : 	OPTIONAL IfcLabel;描述方式
+                            f = e.GetType().GetProperty("RepresentationType");
+                            GetPropertyInfoValue(e, f, ref value);
+                            if (value == "SweptSolid")
+                            {
+                                //拉伸
+                            }
+                            else if (value == "Brep")
+                            {
+                                //边界生成实体
+                            }
+                            else
+                            {
+                                Console.Write("空间的几何描述还有其他方式" + value);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Console.Write("空间的几何表达获取失败");
+            }
+        }
+        //获取描述空间几何的实体
+        public object GetSpaceShapeEntity(object o)
+        {
+            //错误，会有多个
+            object SpatialShapeEntity = null;
+            //Representation	 : 	OPTIONAL IfcProductRepresentation;
+            Type t = o.GetType();
+            PropertyInfo f = t.GetProperty("Representation");
+            object v = f.GetValue(o);//获取其属性值
+                                     //IsDefinedBy:SET OF IfcRelDefines FOR RelatedObjects;
+            if (v.GetType().Name == "IfcProductDefinitionShape")
+            {
+                SpatialShapeEntity = v;
+            }
+            else if (v.GetType().Name == "IfcMaterialDefinitionRepresentation")
+            {
+                Console.WriteLine(o.GetType().Name + "该实体的几何描述实体应该在其他地方");              
+            }
+            return SpatialShapeEntity;
         }
         //获取某一实体的id
         public string GetEntityId(object o)
