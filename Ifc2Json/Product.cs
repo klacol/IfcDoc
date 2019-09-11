@@ -244,18 +244,17 @@ namespace Ifc2Json
                             {
                                 ft = ft.GetGenericArguments()[0];
                                 PropertyInfo fieldValue = ft.GetProperty("Value");
-
                                 IEnumerable list = (IEnumerable)value;
                                 int i = 0;
                                 string va = "";
                                 foreach (object o in list)
                                 {
-                                    if (e != null) // should never be null, but be safe
+                                    if (o != null) // should never be null, but be safe
                                     {
-                                        object elem = e;
+                                        object elem = o;
                                         if (fieldValue != null)
                                         {
-                                            elem = fieldValue.GetValue(e);
+                                            elem = fieldValue.GetValue(o);
                                         }
                                         if (elem is byte[])
                                         {
@@ -273,7 +272,11 @@ namespace Ifc2Json
                                     {
                                         v = va;
                                     }
-                                    v = v+ " "+va;
+                                    else
+                                    {
+                                        v = v + " " + va;
+                                    }
+                                    i++;
                                 }
                             }
                             else
