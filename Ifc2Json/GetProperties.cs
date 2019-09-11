@@ -494,6 +494,25 @@ namespace Ifc2Json
                         value=positionValue;
                         shape.Add("Position", value);
                         //SweptArea:截面的定义（截面的表示也有多种，多种实体类型表示）
+                        f = e.GetType().GetProperty("SweptArea");
+                        object SweptArea = f.GetValue(e);
+                        //内外曲线
+                        string sweptName = SweptArea.GetType().Name;
+                        if (sweptName == "IfcArbitraryProfileDefWithVoids" || sweptName == "IfcArbitraryClosedProfileDef")
+                        {
+                            f = SweptArea.GetType().GetProperty("OuterCurve");
+                            object poly = f.GetValue(SweptArea);
+                            shape.Add("OuterCurve", GetPolyline(poly));
+                            f = SweptArea.GetType().GetProperty("InnerCurves");
+                            if (f != null)
+                            {
+                                poly = f.GetValue(SweptArea);
+                                shape.Add("InnerCurves", GetPolyline(poly));
+                            }
+                        }
+                        else {
+                            Console.WriteLine("截面的表达还有" + sweptName);
+                        }
                     }
 
                 }
@@ -507,7 +526,6 @@ namespace Ifc2Json
             GetPropertyInfoValue(o, f, ref value);
             return value;
         }
-
         //获取空间的Position信息
         public void GetPosition(object position, Dictionary<string, object> positionValue)
         {
@@ -577,6 +595,33 @@ namespace Ifc2Json
                 direction.Add(value);
             }
             return direction;
-        }  
+        }
+        //线段的表示
+        public object GetPolyline(object o)
+        {
+            object polyLine=null;
+            List<object> points = new List<object>();
+            if (o.GetType().Name == "IfcPolyline")
+            {
+                //获取其Points
+                PropertyInfo f = o.GetType().GetProperty("Points");
+                object v = f.GetValue(o);
+                IEnumerable list = (IEnumerable)v;
+                foreach (object point in list)
+                {
+                    Dictionary<string, float> value = GetPoint(point);
+                    if (value != null)
+                    {
+                        points.Add(value);
+                    }
+                    else
+                    {
+                        Console.WriteLine("获取点的坐标失败");
+                    }
+                }
+                polyLine = points;               
+            }
+            return polyLine;
+        }
     }
 }
