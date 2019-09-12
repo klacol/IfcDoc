@@ -411,6 +411,7 @@ namespace Ifc2Json
                     IEnumerable list = (IEnumerable)v;
                     foreach (object e in list)
                     {
+                        int i = 0;
                         if (e.GetType().Name == "IfcShapeRepresentation")
                         {
                             string value = "";
@@ -425,12 +426,15 @@ namespace Ifc2Json
                             else if (value == "Brep")
                             {
                                 //边界生成实体
+                                DealBrep(e, shape);
                             }
                             else
                             {
                                 Console.Write("空间的几何描述还有其他方式" + value);
                             }
                         }
+                        i++;
+                        if (i > 1) { Console.Write("相关联的几何表达实体有多个" + SpatialShapeEntity.GetType().Name); }
                     }
                 }
             }
@@ -468,22 +472,22 @@ namespace Ifc2Json
             Type ft = f.PropertyType;
             if (IsEntityCollection(ft))
             {
-                object v = f.GetValue(o);
-                IEnumerable list = (IEnumerable)v;
+                object v = f.GetValue(o); 
+                IEnumerable list = (IEnumerable)v;                
                 foreach (object e in list)
-                {
+                {                   
                     //只处理第一个
                     if (e.GetType().Name == "IfcExtrudedAreaSolid")
                     {
                         //IfcExtrudedAreaSolid中的属性（ExtrudedDirection拉伸方向、Depth拉伸长度、Position位置信息）                     
                         //拉伸高度
                         f = e.GetType().GetProperty("Depth");
-                        GetPropertyInfoValue(e, f, ref height);                                         
+                        GetPropertyInfoValue(e, f, ref height);
                         //拉伸方向                        
                         f = e.GetType().GetProperty("ExtrudedDirection");
                         object Direction = f.GetValue(e);
                         List<float> ExtrudedDirection = GetDirection(Direction);
-                        object value = ExtrudedDirection;                       
+                        object value = ExtrudedDirection;
                         shape.Add("ExtrudedDirection", value);
                         //value.Clear();会导致shape中存的value清空                       
                         //Position：IfcAxis2Placement3D位置信息
@@ -491,7 +495,7 @@ namespace Ifc2Json
                         object Position = f.GetValue(e);
                         Dictionary<string, object> positionValue = new Dictionary<string, object>();
                         GetPosition(Position, positionValue);
-                        value=positionValue;
+                        value = positionValue;
                         shape.Add("Position", value);
                         //SweptArea:截面的定义（截面的表示也有多种，多种实体类型表示）
                         f = e.GetType().GetProperty("SweptArea");
@@ -503,18 +507,44 @@ namespace Ifc2Json
                             f = SweptArea.GetType().GetProperty("OuterCurve");
                             object poly = f.GetValue(SweptArea);
                             shape.Add("OuterCurve", GetPolyline(poly));
-                            f = SweptArea.GetType().GetProperty("InnerCurves");
+                            f = SweptArea.GetType().GetProperty("InnerCurves");//InnerCurves	 : 	SET [1:?] OF IfcCurve;
                             if (f != null)
                             {
                                 poly = f.GetValue(SweptArea);
-                                shape.Add("InnerCurves", GetPolyline(poly));
+                                IEnumerable list1 = (IEnumerable)poly;
+                                foreach (object po in list1)
+                                {
+                                    shape.Add("InnerCurves", GetPolyline(po));
+                                }
                             }
                         }
-                        else {
+                        else if (sweptName == "IfcRectangleProfileDef")//矩形面
+                        {
+                            string x="";
+                            f = SweptArea.GetType().GetProperty("XDim");
+                            GetPropertyInfoValue(SweptArea, f, ref x);
+                            shape.Add("XDim", x);
+                            f = SweptArea.GetType().GetProperty("YDim");
+                            GetPropertyInfoValue(SweptArea, f, ref x);
+                            shape.Add("YDim", x);
+                        }
+                        else if (sweptName == "IfcCircleProfileDef")//圆面
+                        {
+                            string radius="";
+                            f = SweptArea.GetType().GetProperty("Radius");
+                            GetPropertyInfoValue(SweptArea, f, ref radius);
+                            shape.Add("Radius", radius);
+                        }
+                        else
+                        {
                             Console.WriteLine("截面的表达还有" + sweptName);
                         }
                     }
-
+                    else
+                    {
+                        Console.WriteLine(e.GetType().Name + "该几何表达方式需要处理");
+                    }
+                    return;                   
                 }
             } 
         }
@@ -599,29 +629,74 @@ namespace Ifc2Json
         //线段的表示
         public object GetPolyline(object o)
         {
-            object polyLine=null;
+            object polyLine=null; PropertyInfo f = null;
             List<object> points = new List<object>();
             if (o.GetType().Name == "IfcPolyline")
             {
                 //获取其Points
-                PropertyInfo f = o.GetType().GetProperty("Points");
-                object v = f.GetValue(o);
-                IEnumerable list = (IEnumerable)v;
-                foreach (object point in list)
-                {
-                    Dictionary<string, float> value = GetPoint(point);
-                    if (value != null)
-                    {
-                        points.Add(value);
-                    }
-                    else
-                    {
-                        Console.WriteLine("获取点的坐标失败");
-                    }
-                }
-                polyLine = points;               
+                f= o.GetType().GetProperty("Points");               
             }
+            else if(o.GetType().Name == "IfcPolyLoop")
+            {
+                f = o.GetType().GetProperty("Polygon");
+            }
+            object v = f.GetValue(o);
+            IEnumerable list = (IEnumerable)v;
+            foreach (object point in list)
+            {
+                Dictionary<string, float> value = GetPoint(point);
+                if (value != null)
+                {
+                   points.Add(value);
+                 }
+                else
+                 {
+                    Console.WriteLine("获取点的坐标失败");
+                 }
+            }
+            polyLine = points;
             return polyLine;
         }
+        //处理边界描述几何的方式
+        public void DealBrep(object o, Dictionary<string, object> shape)
+        {
+            //"IfcFacetedBrep",
+            PropertyInfo f;ArrayList points = new ArrayList();
+            f = o.GetType().GetProperty("Items");
+            Type ft = f.PropertyType;
+            object v = f.GetValue(o);
+            IEnumerable list = (IEnumerable)v;
+            foreach (object e in list)
+            {
+                if (e.GetType().Name == "IfcFacetedBrep")
+                {
+                    f = e.GetType().GetProperty("Outer");
+                    v = f.GetValue(e);
+                    f = v.GetType().GetProperty("CfsFaces");
+                    v = f.GetValue(v);//其类型是set                   
+                    IEnumerable list1 = (IEnumerable)v;
+                    foreach (object e1 in list1)
+                    {
+                        if (e1.GetType().Name == "IfcFace")
+                        {
+                            f = e1.GetType().GetProperty("Bounds");
+                            //set
+                            v = f.GetValue(e1);//其类型是set IfcFaceOuterBound     
+                            IEnumerable list2 = (IEnumerable)v;
+                            foreach (object e2 in list2)
+                            {
+                                f = e2.GetType().GetProperty("Bound");//IfcPolyLoop
+                                v = f.GetValue(e2);
+                                object value=GetPolyline(v);
+                                points.Add(value);
+                            }
+                        }
+                    }                  
+                }
+            }
+            object polyhedron = points;
+            shape.Add("polyhedron", polyhedron);
+        }
+        
     }
 }
