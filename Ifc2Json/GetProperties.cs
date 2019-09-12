@@ -17,7 +17,7 @@ namespace Ifc2Json
         ArrayList productsType = new ArrayList();//若将类型属性写在构件json文件大
         ArrayList rooms = new ArrayList();//存储房间及其相关属性
         ArrayList buildingStoreys = new ArrayList();//存储楼层及其相关属性
-        double lengthUnit;//ifc中定义的长度单位
+        float lengthUnit;//ifc中定义的长度单位
         public GetProperties(Type typeProject) : base(typeProject)
         {
         }
@@ -64,7 +64,7 @@ namespace Ifc2Json
                 throw new ArgumentNullException("root");
             StreamWriter writer = new StreamWriter(stream);
             TraverseProject(root);//遍历内部结构获取构件集
-            DealUnits();
+            DealUnits(root);
             GetProductAndProperties();
             GetRoomAndProperties();
             GetTypeProperty();
@@ -612,7 +612,7 @@ namespace Ifc2Json
                 for(int i=0;i<ps.Length;i++)
                 {
                     string p = ps[i];
-                    float value = float.Parse(p, System.Globalization.NumberStyles.Float);//将字符串转换为float
+                    float value = float.Parse(p, System.Globalization.NumberStyles.Float)* lengthUnit;//将字符串转换为float
 
                     point.Add(str[i], value);
                 }
@@ -712,31 +712,49 @@ namespace Ifc2Json
             object polyhedron = points;
             shape.Add("polyhedron", polyhedron);
         }
-        public void DealUnits()
+        public void DealUnits(object root)
         {
-            foreach (object unit in unitEntities)
+            //单位的集合在ifcProject中
+            if (root.GetType().Name == "IfcProject")
             {
-                Unit u = new Unit();
-                u.UnitType = GetDirectPropertyValueByName(unit, "UnitType");
-                u.Prefix = GetDirectPropertyValueByName(unit, "Prefix");
-                u.Name = GetDirectPropertyValueByName(unit, "Name");
-                if (u.UnitType == "lengthunit")
+                //UnitsInContext	 : 	IfcUnitAssignment;
+                PropertyInfo f = root.GetType().GetProperty("UnitsInContext");
+                object unitAssignment = f.GetValue(root);
+                f = unitAssignment.GetType().GetProperty("Units");
+                object Ifcunit = f.GetValue(unitAssignment);
+                IEnumerable list = (IEnumerable)Ifcunit;
+                foreach (object unit in list)
                 {
-                    if (u.Prefix == "milli" && u.Name == "metre")
+                    if (unit.GetType().Name == "IfcSIUnit")//不处理派生单位和转换单位
                     {
-                        lengthUnit = 0.001;
-                    }
-                    else if (u.Prefix == "" && u.Name == "metre")
-                    {
-                        lengthUnit = 1;
-                    }
-                    else
-                    {
-                        Console.WriteLine("该文件的长度单位还有其他定义"+ u.Prefix+ u.Name);
+                        Unit u = new Unit();
+                        u.UnitType = GetDirectPropertyValueByName(unit, "UnitType");
+                        u.Prefix = GetDirectPropertyValueByName(unit, "Prefix");
+                        u.Name = GetDirectPropertyValueByName(unit, "Name");
+                        if (u.UnitType == "lengthunit")
+                        {
+                            if (u.Prefix == "milli" && u.Name == "metre")
+                            {
+                                lengthUnit = 0.001f;
+                            }
+                            else if (u.Prefix == "" && u.Name == "metre")
+                            {
+                                lengthUnit = 1;
+                            }
+                            else
+                            {
+                                Console.WriteLine("该文件的长度单位还有其他定义" + u.Prefix + u.Name);
+                            }
+                        }
+                        units.Add(u);
                     }
                 }
-                units.Add(u);
             }
+            else
+            {
+                Console.WriteLine("内部结构的root不是IfcProject实体");
+            }
+            
         }
         //根据字符串获取直接属性的值
         public string GetDirectPropertyValueByName(object o, string name)

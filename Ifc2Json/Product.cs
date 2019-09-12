@@ -14,8 +14,7 @@ using System.Threading.Tasks;
 namespace Ifc2Json
 {
     public class Product : XmlSerializer
-    {
-        public HashSet<object> unitEntities = new HashSet<object>();
+    {       
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
         public HashSet<object> elementsType = new HashSet<object>();//保存物理构件
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
@@ -384,10 +383,6 @@ namespace Ifc2Json
             //存储
             EntityClassify(o); 
             Type t = o.GetType();
-            if (t.Name == "IfcSIUnit")
-            {
-                unitEntities.Add(o);
-            }
             //不遍历几何信息实体（节省遍历时间）
             if (t.Name == "IfcLocalPlacement" || t.Name == "IfcPolyline" || t.Name == "IfcShapeRepresentation" || t.Name == "IfcExtrudedAreaSolid" || t.Name == "IfcIShapeProfileDef" ||
                t.Name == "IfcProductDefinitionShape" || t.Name == "IfcGeometricRepresentationSubContext" || t.Name == "IfcFacetedBrep" || t.Name == "IfcClosedShell" || t.Name == "IfcFace" ||
