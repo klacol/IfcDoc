@@ -12,10 +12,12 @@ namespace Ifc2Json
 {
     class GetProperties : Product
     {
+        ArrayList units = new ArrayList();
         ArrayList products = new ArrayList();//存储构件与其对应的属性实例
         ArrayList productsType = new ArrayList();//若将类型属性写在构件json文件大
         ArrayList rooms = new ArrayList();//存储房间及其相关属性
         ArrayList buildingStoreys = new ArrayList();//存储楼层及其相关属性
+        double lengthUnit;//ifc中定义的长度单位
         public GetProperties(Type typeProject) : base(typeProject)
         {
         }
@@ -45,6 +47,13 @@ namespace Ifc2Json
             public Dictionary<string, Dictionary<string, string>> properties { get; set; }//属性信息
             public Dictionary<string, object> shape {get; set;}//房间的几何信息
         }
+        protected internal class Unit
+        {
+            public string UnitType { get; set; }
+            public string Prefix { get; set; }
+            public string Name { get; set; }
+
+        }
         //写json
         public void WriteJson(Stream stream, object root)
         {
@@ -55,12 +64,17 @@ namespace Ifc2Json
                 throw new ArgumentNullException("root");
             StreamWriter writer = new StreamWriter(stream);
             TraverseProject(root);//遍历内部结构获取构件集
+            DealUnits();
             GetProductAndProperties();
             GetRoomAndProperties();
             GetTypeProperty();
             writer.WriteLine("{");//
-            writer.Write("\"buildingStoreys\":");
+            writer.Write("\"units\":");
             string json;
+            json = JsonConvert.SerializeObject(units, Newtonsoft.Json.Formatting.Indented);
+            writer.Write(json);
+            writer.WriteLine(",");
+            writer.Write("\"buildingStoreys\":");           
             json = JsonConvert.SerializeObject(buildingStoreys, Newtonsoft.Json.Formatting.Indented);
             writer.Write(json);
             writer.WriteLine(",");
@@ -98,8 +112,6 @@ namespace Ifc2Json
             //物理构件
             foreach (object e in elements)
             {
-                //空间结构还有几何表达信息（此处还未添加）
-                //创建一对 
                 ProductProperties p = new ProductProperties();
                 Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
@@ -139,9 +151,7 @@ namespace Ifc2Json
                     p.Guid = GetEntityId(e);
                     p.Type = type;
                     string floor = GetStoreyName(e);
-                    BasicProperties.Add("floor", floor);
-                    string TypePropertyid = GetTypePropertyEntitiesId(TypePropertyEntities);
-                    BasicProperties.Add("TypePropertyid", TypePropertyid);
+                    BasicProperties.Add("floor", floor);                   
                     entityProperties.Add("基本属性", BasicProperties);
                     GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                     p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
@@ -603,6 +613,7 @@ namespace Ifc2Json
                 {
                     string p = ps[i];
                     float value = float.Parse(p, System.Globalization.NumberStyles.Float);//将字符串转换为float
+
                     point.Add(str[i], value);
                 }
             }
@@ -634,11 +645,15 @@ namespace Ifc2Json
             if (o.GetType().Name == "IfcPolyline")
             {
                 //获取其Points
-                f= o.GetType().GetProperty("Points");               
+                f = o.GetType().GetProperty("Points");
             }
-            else if(o.GetType().Name == "IfcPolyLoop")
+            else if (o.GetType().Name == "IfcPolyLoop")
             {
                 f = o.GetType().GetProperty("Polygon");
+            }
+            else
+            {
+                Console.WriteLine("曲线还有其他表达方式"+ o.GetType().Name);
             }
             object v = f.GetValue(o);
             IEnumerable list = (IEnumerable)v;
@@ -697,6 +712,39 @@ namespace Ifc2Json
             object polyhedron = points;
             shape.Add("polyhedron", polyhedron);
         }
-        
+        public void DealUnits()
+        {
+            foreach (object unit in unitEntities)
+            {
+                Unit u = new Unit();
+                u.UnitType = GetDirectPropertyValueByName(unit, "UnitType");
+                u.Prefix = GetDirectPropertyValueByName(unit, "Prefix");
+                u.Name = GetDirectPropertyValueByName(unit, "Name");
+                if (u.UnitType == "lengthunit")
+                {
+                    if (u.Prefix == "milli" && u.Name == "metre")
+                    {
+                        lengthUnit = 0.001;
+                    }
+                    else if (u.Prefix == "" && u.Name == "metre")
+                    {
+                        lengthUnit = 1;
+                    }
+                    else
+                    {
+                        Console.WriteLine("该文件的长度单位还有其他定义"+ u.Prefix+ u.Name);
+                    }
+                }
+                units.Add(u);
+            }
+        }
+        //根据字符串获取直接属性的值
+        public string GetDirectPropertyValueByName(object o, string name)
+        {
+            string value="";
+            PropertyInfo f =o.GetType().GetProperty(name);            
+            GetPropertyInfoValue(o, f, ref value);
+            return value;
+        }
     }
 }
