@@ -69,6 +69,7 @@ namespace Ifc2Json
             GetRoomAndProperties();
             GetTypeProperty();
             writer.WriteLine("{");//
+            WriteHead(writer);
             writer.Write("\"units\":");
             string json;
             json = JsonConvert.SerializeObject(units, Newtonsoft.Json.Formatting.Indented);
@@ -152,10 +153,6 @@ namespace Ifc2Json
                     {
                         RoomProperties p = new RoomProperties();
                         p.Guid = GetEntityId(e);
-                        if (p.Guid == "2xZ3C9SQrCoQGH8P7QmHne")
-                        {
-                            Console.WriteLine("hehe");
-                        }
                         p.Type = type;
                         string floor = GetStoreyName(e);
                         BasicProperties.Add("floor", floor);
@@ -188,7 +185,6 @@ namespace Ifc2Json
                     Console.WriteLine(xx.Message);
                     Console.WriteLine(e.GetType().Name);
                 }
-
             }
             Console.WriteLine("spatialElements结束");
         }
@@ -863,6 +859,16 @@ namespace Ifc2Json
             PropertyInfo f =o.GetType().GetProperty(name);            
             GetPropertyInfoValue(o, f, ref value);
             return value;
+        }
+        public void WriteHead(StreamWriter writer)
+        {           
+            string ApplicationFullName = GetDirectPropertyValueByName(application,"ApplicationFullName");
+            writer.WriteLine("\"Head\": {");
+            writer.Write("\"applicationFullName\": \"");
+            writer.Write(ApplicationFullName);
+            writer.WriteLine("\",");
+            writer.WriteLine("\"Schema\": \"IFC2X3\"");
+            writer.WriteLine("},");
         }
     }
 }

@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 namespace Ifc2Json
 {
     public class Product : XmlSerializer
-    {       
+    {
+        public object application;//记录产出软件
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
         public HashSet<object> elementsType = new HashSet<object>();//保存物理构件
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
@@ -170,6 +171,7 @@ namespace Ifc2Json
                         GetPropertyInfoValue(invobj, f, ref key);
     
                         f = invobj.GetType().GetProperty("LengthValue");
+                       
                         GetPropertyInfoValue(invobj, f, ref value);
 
                         PropertiesFields.Add(key, value);
@@ -391,7 +393,10 @@ namespace Ifc2Json
             {
                 return true;
             }
-
+            if (t.Name == "IfcApplication")
+            {
+                application = o;
+            }
             this.TraverseEntityAttributes(o, saved, queue);
             return true;
         }
