@@ -43,7 +43,7 @@ namespace Ifc2Json
             public string Type { get; set; }
             public string Guid { get; set; }           
             public string TypePropertyId { get; set; } //房间的类型属性还未处理    
-            public string height { get; set; }      //拉伸高度                          
+            public float height { get; set; }      //拉伸高度                          
             public Dictionary<string, Dictionary<string, string>> properties { get; set; }//属性信息
             public Dictionary<string, object> shape {get; set;}//房间的几何信息
         }
@@ -112,6 +112,7 @@ namespace Ifc2Json
             //物理构件
             foreach (object e in elements)
             {
+             
                 ProductProperties p = new ProductProperties();
                 Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
@@ -130,14 +131,16 @@ namespace Ifc2Json
                 p.properties = entityProperties;
                 products.Add(p);
             }
-            Console.WriteLine("结束");
+            Console.WriteLine("物理构件结束");
         }
         public void GetRoomAndProperties()
         {
             //获取空间结构的属性信息（先输出空间结构的，构件的位置信息会用到此）
             foreach (object e in spatialElements)
             {
-                //空间结构还有几何表达信息（此处还未添加）               
+                try
+                {
+                    //空间结构还有几何表达信息（此处还未添加）               
                 Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
                 HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
@@ -145,35 +148,47 @@ namespace Ifc2Json
                 GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
                 GetDirectFieldsValue(e, BasicProperties);
                 string type = e.GetType().Name;
-                if (type == "IfcSpace")
-                {
-                    RoomProperties p = new RoomProperties();
-                    p.Guid = GetEntityId(e);
-                    p.Type = type;
-                    string floor = GetStoreyName(e);
-                    BasicProperties.Add("floor", floor);                   
-                    entityProperties.Add("基本属性", BasicProperties);
-                    GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                    p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                    p.properties = entityProperties;
-                    string height = "";
-                    Dictionary<string, object> shape = new Dictionary<string, object>();
-                    ShapeRepresentationWay(GetSpaceShapeEntity(e), ref height, shape);
-                    p.height = height;
-                    p.shape = shape;
-                    rooms.Add(p);                   
+                    if (type == "IfcSpace")
+                    {
+                        RoomProperties p = new RoomProperties();
+                        p.Guid = GetEntityId(e);
+                        if (p.Guid == "2xZ3C9SQrCoQGH8P7QmHne")
+                        {
+                            Console.WriteLine("hehe");
+                        }
+                        p.Type = type;
+                        string floor = GetStoreyName(e);
+                        BasicProperties.Add("floor", floor);
+                        entityProperties.Add("基本属性", BasicProperties);
+                        GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
+                        p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
+                        p.properties = entityProperties;
+                        float height=0;
+                        Dictionary<string, object> shape = new Dictionary<string, object>();
+                        ShapeRepresentationWay(GetSpaceShapeEntity(e), ref height, shape);
+                        p.height = height;
+                        p.shape = shape;
+                        rooms.Add(p);
+                    }
+                    else if (type == "IfcBuildingStorey")
+                    {
+                        ProductProperties p = new ProductProperties();
+                        p.Guid = GetEntityId(e);
+                        p.Type = type;
+                        entityProperties.Add("基本属性", BasicProperties);
+                        GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
+                        p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
+                        p.properties = entityProperties;
+                        buildingStoreys.Add(p);
+                    }
                 }
-                else if (type == "IfcBuildingStorey")
+                catch (Exception xx)
                 {
-                    ProductProperties p = new ProductProperties();
-                    p.Guid = GetEntityId(e);
-                    p.Type = type;
-                    entityProperties.Add("基本属性", BasicProperties);
-                    GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                    p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                    p.properties = entityProperties;
-                    buildingStoreys.Add(p);
+                    //MessageBox.Show(xx.Message);
+                    Console.WriteLine(xx.Message);
+                    Console.WriteLine(e.GetType().Name);
                 }
+
             }
             Console.WriteLine("spatialElements结束");
         }
@@ -406,7 +421,7 @@ namespace Ifc2Json
             }
         }
         //处理空间的几何的描述方式，目前讨论拉伸和边界生成实体两种方式
-        public void ShapeRepresentationWay(object SpatialShapeEntity, ref string height,Dictionary<string,object> shape)
+        public void ShapeRepresentationWay(object SpatialShapeEntity, ref float height,Dictionary<string,object> shape)
         {
             if (SpatialShapeEntity != null)
             {
@@ -474,7 +489,7 @@ namespace Ifc2Json
             return SpatialShapeEntity;
         }
         //处理拉伸方式
-        public void DealSweptSolid(object o, ref string height, Dictionary<string, object> shape)
+        public void DealSweptSolid(object o, ref float height, Dictionary<string, object> shape)
         {                                
            //获取其Items	 : 	SET [1:?] OF IfcRepresentationItem;
             PropertyInfo f;
@@ -491,8 +506,10 @@ namespace Ifc2Json
                     {
                         //IfcExtrudedAreaSolid中的属性（ExtrudedDirection拉伸方向、Depth拉伸长度、Position位置信息）                     
                         //拉伸高度
+                        string depth = "";
                         f = e.GetType().GetProperty("Depth");
-                        GetPropertyInfoValue(e, f, ref height);
+                        GetPropertyInfoValue(e, f, ref depth);
+                        height = float.Parse(depth, System.Globalization.NumberStyles.Float) * lengthUnit;
                         //拉伸方向                        
                         f = e.GetType().GetProperty("ExtrudedDirection");
                         object Direction = f.GetValue(e);
@@ -522,9 +539,12 @@ namespace Ifc2Json
                             {
                                 poly = f.GetValue(SweptArea);
                                 IEnumerable list1 = (IEnumerable)poly;
+                                int i = 1;
                                 foreach (object po in list1)
-                                {
-                                    shape.Add("InnerCurves", GetPolyline(po));
+                                {                                    
+                                    //注：内曲线可能有多个，所以此处Dictionary不能添加重复键
+                                    shape.Add("InnerCurves_"+i, GetPolyline(po));
+                                    i++;
                                 }
                             }
                         }
@@ -550,7 +570,7 @@ namespace Ifc2Json
                             Console.WriteLine("截面的表达还有" + sweptName);
                         }
                     }
-                    else
+                    else 
                     {
                         Console.WriteLine(e.GetType().Name + "该几何表达方式需要处理");
                     }
@@ -569,33 +589,48 @@ namespace Ifc2Json
         //获取空间的Position信息
         public void GetPosition(object position, Dictionary<string, object> positionValue)
         {
+            //IfcPlacement IfcAxis2Placement2D无axis IfcAxis1Placement无 RefDirection
             //IfcAxis2Placement3D获取其location、axis\RefDirection
-            PropertyInfo f;object v;
+            PropertyInfo f; object v;
             object value;//获取的属性对应的值
-            Dictionary<string, float> point=new Dictionary<string, float> ();
+            Dictionary<string, float> point = new Dictionary<string, float>();
             f = position.GetType().GetProperty("Location");
             v = f.GetValue(position);//Location	 : 	IfcCartesianPoint;
             point = GetPoint(v);
-            value=point;
-            positionValue.Add("Location", value);            
+            value = point;
+            positionValue.Add("Location", value);
             List<float> direct;
             //Axis	 : 	OPTIONAL IfcDirection 可以为空
-            f = position.GetType().GetProperty("Axis");
-            v = f.GetValue(position);
-            if(v!=null)
+            if (position.GetType().Name == "IfcAxis2Placement2D")
             {
-                direct = GetDirection(v);
-                value=direct;
-                positionValue.Add("Axis", value);
-            }         
+                //do nothing ;
+            }
+            else
+            {
+                f = position.GetType().GetProperty("Axis");
+                v = f.GetValue(position);
+                if (v != null)
+                {
+                    direct = GetDirection(v);
+                    value = direct;
+                    positionValue.Add("Axis", value);
+                }
+            }
             //RefDirection	 : 	OPTIONAL IfcDirection;
-            f = position.GetType().GetProperty("RefDirection");
-            v = f.GetValue(position);
-            if (v != null)
+            if (position.GetType().Name == "IfcAxis1Placement")
             {
-                direct = GetDirection(v);
-                value=direct;
-                positionValue.Add("RefDirection", value);
+                //do nothing;
+            }
+            else
+            {
+                f = position.GetType().GetProperty("RefDirection");
+                v = f.GetValue(position);
+                if (v != null)
+                {
+                    direct = GetDirection(v);
+                    value = direct;
+                    positionValue.Add("RefDirection", value);
+                }
             }
         }
         //获取IfcCartesianPoint点的坐标，结果显示的形式为x:12,y:12,Z:1
@@ -613,7 +648,6 @@ namespace Ifc2Json
                 {
                     string p = ps[i];
                     float value = float.Parse(p, System.Globalization.NumberStyles.Float)* lengthUnit;//将字符串转换为float
-
                     point.Add(str[i], value);
                 }
             }
@@ -651,9 +685,30 @@ namespace Ifc2Json
             {
                 f = o.GetType().GetProperty("Polygon");
             }
+            else if (o.GetType().Name == "IfcCompositeCurve")//复合曲线,由多个曲线段组成
+            {
+                PropertyInfo f1 = o.GetType().GetProperty("Segments");
+                object v1 = f1.GetValue(o);
+                IEnumerable Segments = (IEnumerable)v1;
+                ArrayList lines = new ArrayList();
+                foreach (object segment in Segments)
+                {
+                    f1 = segment.GetType().GetProperty("ParentCurve");
+                    v1 = f1.GetValue(segment);//v1是IfcPolyline
+                    object line = GetPolyline(v1);
+                    lines.Add(line);
+                }
+                polyLine = lines;
+                return polyLine;
+            }
+            else if (o.GetType().Name == "IfcTrimmedCurve")
+            {
+                return DealTrimmedCurve(o);
+            }
             else
             {
-                Console.WriteLine("曲线还有其他表达方式"+ o.GetType().Name);
+                Console.WriteLine("曲线还有其他表达方式" + o.GetType().Name);
+                return polyLine;
             }
             object v = f.GetValue(o);
             IEnumerable list = (IEnumerable)v;
@@ -671,6 +726,51 @@ namespace Ifc2Json
             }
             polyLine = points;
             return polyLine;
+        }
+        //修剪曲线,只获取了其基本的曲线，修剪的点还未处理
+        public object  DealTrimmedCurve(object o)
+        {
+            object trimmedCurve = null;
+            Dictionary<string, object> line = new Dictionary<string, object>();
+            PropertyInfo f = o.GetType().GetProperty("BasisCurve");           
+            object v = f.GetValue(o);//IfcCurve
+            if (v.GetType().Name == "IfcLine")
+            {
+                //Pnt:  IfcCartesianPoint线的位置 Dir：线的方向
+                f = v.GetType().GetProperty("Pnt");
+                object temp = f.GetValue(v);
+                Dictionary<string, float> point = GetPoint(temp);                
+                line.Add("Pnt", point);
+                f = v.GetType().GetProperty("Dir");// IfcVector
+                temp = f.GetValue(v);
+                if (temp.GetType().Name == "IfcVector")
+                {
+                    f = temp.GetType().GetProperty("Orientation");
+                    object dir = f.GetValue(temp);
+                    List<float> direction = GetDirection(dir);                   
+                    line.Add("Dir", direction);
+                }
+                trimmedCurve = line;
+            }
+            else if (v.GetType().Name == "IfcCircle")
+            {
+                f = v.GetType().GetProperty("Position");
+                object Position = f.GetValue(v);
+                Dictionary<string, object> positionValue = new Dictionary<string, object>();
+                GetPosition(Position, positionValue);
+                line.Add("Position", positionValue);
+                string radius = "";
+                f = v.GetType().GetProperty("Radius");
+                GetPropertyInfoValue(v, f, ref radius);
+                line.Add("Radius", radius);
+                trimmedCurve = line;
+
+            }
+            else
+            {
+                Console.WriteLine("IfcTrimmedCurve中还有类型未处理" + v.GetType().Name);
+            }              
+            return trimmedCurve;
         }
         //处理边界描述几何的方式
         public void DealBrep(object o, Dictionary<string, object> shape)

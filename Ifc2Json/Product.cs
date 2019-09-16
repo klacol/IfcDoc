@@ -168,8 +168,8 @@ namespace Ifc2Json
                         string key = "", value = "";
                         f = invobj.GetType().GetProperty("Name");
                         GetPropertyInfoValue(invobj, f, ref key);
-
-                        f = invobj.GetType().GetProperty("LengthValue");//可用正则表达式进行匹配
+    
+                        f = invobj.GetType().GetProperty("LengthValue");
                         GetPropertyInfoValue(invobj, f, ref value);
 
                         PropertiesFields.Add(key, value);
