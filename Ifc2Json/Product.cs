@@ -22,31 +22,6 @@ namespace Ifc2Json
         public Product(Type typeProject) : base(typeProject)
         {
         }
-        //获取直接属性的值
-        protected void GetDirectFieldsValue(object e, Dictionary<string, string> Specific)
-        {
-            //只获取基本属性实体的直接属性
-            Type t = e.GetType(), stringType = typeof(String);
-            //实体名称
-            //Specific.Add("IfcEntity", t.Name);
-            IList<PropertyInfo> fields = this.GetFieldsAll(t);
-            foreach (PropertyInfo f in fields)
-            {
-                //获取属性对应的值
-                string key = f.Name;
-                string v = "";
-                GetPropertyInfoValue(e, f, ref v);
-                //过滤出值""
-                if (v == "")
-                {
-                    continue;
-                }
-                else
-                {
-                    Specific.Add(key, v);
-                }
-            }
-        }
         //获取IfcPropertySet集中的信息key-valuez值
         protected void GetPropertySetProperties(object propertySet, ref string name, Dictionary<string, string> PropertiesFields)
         {
@@ -208,7 +183,7 @@ namespace Ifc2Json
                             //string key = f.Name;
                             if (ft == stringType && string.IsNullOrEmpty(value.ToString()))
                                 return;
-                            if (isvaluelistlist)
+                            if (isvaluelistlist)//ft为泛型类型且为集合
                             {
                                 ft = ft.GetGenericArguments()[0].GetGenericArguments()[0];
                                 PropertyInfo fieldValue = ft.GetProperty("Value");
@@ -242,7 +217,7 @@ namespace Ifc2Json
                                     System.Diagnostics.Debug.WriteLine("XXX Error serializing ValueListlist" + e.ToString());
                                 }
                             }
-                            else if (isvaluelist)
+                            else if (isvaluelist)//ft是集合类型
                             {
                                 ft = ft.GetGenericArguments()[0];
                                 PropertyInfo fieldValue = ft.GetProperty("Value");
@@ -289,12 +264,13 @@ namespace Ifc2Json
                                     ft = ft.GetGenericArguments()[0];
                                 }
                                 Type typewrap = null;
-                                while (ft.IsValueType && !ft.IsPrimitive)
+                                while (ft.IsValueType && !ft.IsPrimitive)//判断该属性的定义是否是值类型并且不是基元类型
                                 {
                                     PropertyInfo fieldValue = ft.GetProperty("Value");
                                     if (fieldValue != null)
                                     {
-                                        value = fieldValue.GetValue(value);
+                                        value = fieldValue.GetValue(value);//在此处判断value的值类型来添加单位
+                                        
                                         if (typewrap == null)
                                         {
                                             typewrap = ft;
@@ -307,12 +283,12 @@ namespace Ifc2Json
                                     }
                                 }
 
-                                if (ft.IsEnum || ft == typeof(bool))
+                                if (ft.IsEnum || ft == typeof(bool))//枚举或者是布尔
                                 {
                                     value = value.ToString().ToLowerInvariant();
                                 }
 
-                                if (value is IList)
+                                if (value is IList)//数据集
                                 {
                                     // IfcCompoundPlaneAngleMeasure
                                     IList list = (IList)value;

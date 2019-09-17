@@ -13,6 +13,7 @@ namespace Ifc2Json
     class GetProperties : Product
     {
         ArrayList units = new ArrayList();
+        Dictionary<string, string> unitSymbol = new Dictionary<string, string>();//将单位与其symbol另存储，方便在属性值后加单位时查找
         ArrayList products = new ArrayList();//存储构件与其对应的属性实例
         ArrayList productsType = new ArrayList();//若将类型属性写在构件json文件大
         ArrayList rooms = new ArrayList();//存储房间及其相关属性
@@ -52,6 +53,7 @@ namespace Ifc2Json
             public string UnitType { get; set; }
             public string Prefix { get; set; }
             public string Name { get; set; }
+            public string Symbol { get; set; }
 
         }
         //写json
@@ -827,30 +829,108 @@ namespace Ifc2Json
                         u.UnitType = GetDirectPropertyValueByName(unit, "UnitType");
                         u.Prefix = GetDirectPropertyValueByName(unit, "Prefix");
                         u.Name = GetDirectPropertyValueByName(unit, "Name");
-                        if (u.UnitType == "lengthunit")
-                        {
-                            if (u.Prefix == "milli" && u.Name == "metre")
-                            {
-                                lengthUnit = 0.001f;
-                            }
-                            else if (u.Prefix == "" && u.Name == "metre")
-                            {
-                                lengthUnit = 1;
-                            }
-                            else
-                            {
-                                Console.WriteLine("该文件的长度单位还有其他定义" + u.Prefix + u.Name);
-                            }
-                        }
+                        DealUnitsSymbol(u);
                         units.Add(u);
                     }
-                }
+                }                
             }
             else
             {
                 Console.WriteLine("内部结构的root不是IfcProject实体");
             }
             
+        }
+        public void DealUnitsSymbol(Unit u)
+        {
+            if (u.UnitType == "lengthunit")
+            {
+                if (u.Prefix == "milli" && u.Name == "metre")
+                {
+                    lengthUnit = 0.001f; u.Symbol = "mm";
+                }
+                else if (u.Prefix == "" && u.Name == "metre")
+                {
+                    lengthUnit = 1; u.Symbol = "m";
+                }
+                else
+                {
+                    Console.WriteLine("该文件的长度单位还有其他定义" + u.Prefix + u.Name);
+                }
+                unitSymbol.Add("lengthunit", u.Symbol);
+            }
+            else if (u.UnitType == "areaunit")
+            {
+                if (u.Prefix == "" && u.Name == "square_metre")
+                {
+                    u.Symbol = "㎡";
+                    unitSymbol.Add("areaunit", u.Symbol);
+                }              
+            }
+            else if (u.UnitType == "volumeunit")
+            {
+                if (u.Prefix == "" && u.Name == "cubic_metre")
+                {
+                    u.Symbol = "m³";
+                    unitSymbol.Add("volumeunit", u.Symbol);
+                }              
+            }
+            else
+            {
+                u.Symbol = "";
+            }           
+        }
+        //获取直接属性的值
+        protected void GetDirectFieldsValue(object e, Dictionary<string, string> Specific)
+        {
+            //只获取基本属性实体的直接属性
+            Type t = e.GetType(), stringType = typeof(String);
+            //实体名称
+            //Specific.Add("IfcEntity", t.Name);
+            IList<PropertyInfo> fields = this.GetFieldsAll(t);
+            foreach (PropertyInfo f in fields)
+            {        
+                //获取属性对应的值
+                string key = f.Name;
+                string v = "";
+                GetPropertyInfoValue(e, f, ref v);
+                string unitname=GetPropertyUnit(e, f);
+                //过滤出值""
+                if (v == "")
+                {
+                    continue;
+                }
+                else
+                {
+                    if (unitname != "")
+                    {
+                        v = v + unitname;
+                     }
+                    Specific.Add(key, v);
+                }
+            }
+        }
+        //处理属性值类型,添加单位，例如：IfcLengthMeasure
+        public string GetPropertyUnit(object e, PropertyInfo f)
+        {
+            string unitStr = "";
+            object value = f.GetValue(e);
+            if (value == null)
+                return unitStr;
+            Type valueType = value.GetType();
+            if (valueType.Name == "IfcLengthMeasure" || valueType.Name == "IfcPositiveLengthMeasure")
+            {
+                //获取单位
+                unitSymbol.TryGetValue("lengthunit", out unitStr);
+            }
+            else if (valueType.Name == "IfcAreaMeasure")
+            {
+                unitSymbol.TryGetValue("areaunit", out unitStr);
+            }
+            else if (valueType.Name == "IfcVolumeMeasure")
+            {
+                unitSymbol.TryGetValue("volumeunit", out unitStr);
+            }
+            return unitStr;
         }
         //根据字符串获取直接属性的值
         public string GetDirectPropertyValueByName(object o, string name)
