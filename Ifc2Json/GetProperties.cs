@@ -101,9 +101,12 @@ namespace Ifc2Json
             foreach (object e in elementsType)
             {
                 ProductProperties p = new ProductProperties();
+                Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
                 Dictionary<string, Dictionary<string, string>> entityTypeProperties = new Dictionary<string, Dictionary<string, string>>();
                 p.Type = e.GetType().Name;
                 p.Guid = GetEntityId(e);
+                GetDirectFieldsValue(e, BasicProperties);
+                entityTypeProperties.Add("基本属性", BasicProperties);
                 ProductTypePropertiesValue(e, entityTypeProperties);
                 p.properties = entityTypeProperties;
                 productsType.Add(p);
@@ -407,7 +410,7 @@ namespace Ifc2Json
                     string propertySetName = "";
                     Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
                     GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
-                    if (propertySetName != "")
+                    if (propertySetName != ""&& propertiesFields!=null)
                     {
                         if (entityTypeProperties.ContainsKey(propertySetName))//会出现type属性和关系属性名称起的一样
                         {
@@ -948,6 +951,16 @@ namespace Ifc2Json
             writer.Write(ApplicationFullName);
             writer.WriteLine("\",");
             writer.WriteLine("\"Schema\": \"IFC2X3\"");
+            writer.Write(",");
+            writer.Write("\"楼层数目\":");
+            writer.Write(buildingStoreys.Count);
+            writer.WriteLine(",");
+            writer.Write("\"房间数目\":");
+            writer.Write(rooms.Count);
+            writer.WriteLine(",");
+            writer.Write("\"构件数目\":");
+            writer.WriteLine(products.Count);
+
             writer.WriteLine("},");
         }
     }

@@ -303,8 +303,9 @@ namespace BuildingSmart.Serialization
 			{
 				if (type.IsEnum)
 				{
-					int i = (int)value;
-					if (i == 0)
+					int i = (int)value;//此处出错，当时枚举类型的第一个时返回0       
+                    i++;
+                    if (i == 0)
 						return null;
 				}
 				else if (type.IsValueType)

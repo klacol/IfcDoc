@@ -669,7 +669,7 @@ namespace Ifc2Json
                     {
                         return 1;
                     }
-                    else if (t.Name == "IfcTypeProduct")
+                    else if (t.Name == "IfcElementType"|| t.Name == "IfcSpatialElementType")//去除ifcDoorStyle
                     {
                         return 2;
                     }
