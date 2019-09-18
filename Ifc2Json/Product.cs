@@ -108,10 +108,13 @@ namespace Ifc2Json
                                     {
                                         encodedvalue = System.Security.SecurityElement.Escape(v.ToString());
                                     }
-
                                     value = encodedvalue;
                                 }
-                                PropertiesFields.Add(key, value);
+                                //处理单位：
+                                if(!PropertiesFields.ContainsKey(key))
+                                { 
+                                    PropertiesFields.Add(key, value);//在IFC中会出现有相同的key的情况
+                                }
                             }
                             else
                             {
@@ -148,10 +151,8 @@ namespace Ifc2Json
                         f = invobj.GetType().GetProperty("LengthValue");
                        
                         GetPropertyInfoValue(invobj, f, ref value);
-
                         PropertiesFields.Add(key, value);
                     }
-
                 }
             }
             else

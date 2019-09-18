@@ -303,12 +303,16 @@ namespace BuildingSmart.Serialization
 			{
 				if (type.IsEnum)
 				{
-					int i = (int)value;//此处出错，当时枚举类型的第一个时返回0       
-                    i++;
-                    if (i == 0)
-						return null;
-				}
-				else if (type.IsValueType)
+                    //int i = (int)value;//当前将枚举类型转换为int，返回的结果确实是默认从0开始。（在AssemblyInfo中设置不使用IFCKit中的定义 ）                        
+                    //  if (i == 0)
+                    //	return null;
+                    string v = value.ToString().ToLowerInvariant();
+                    if (v == "notdefined")
+                    {
+                        return null;
+                    }
+                }
+                else if (type.IsValueType)
 				{
 					if(value is bool)
 					{

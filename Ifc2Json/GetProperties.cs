@@ -115,27 +115,36 @@ namespace Ifc2Json
         //获取构件及其构件属性
         public void GetProductAndProperties()
         {
-            //物理构件
-            foreach (object e in elements)
-            {
-             
+
+           //物理构件
+           foreach (object e in elements)
+           {
                 ProductProperties p = new ProductProperties();
-                Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
-                Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
-                HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
-                HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
-                GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
-                GetDirectFieldsValue(e, BasicProperties);
-                string type = e.GetType().Name;
-                p.Guid = GetEntityId(e);
-                p.Type = type;
-                p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                string floor = GetStoreyName(e);
-                BasicProperties.Add("floor", floor);
-                entityProperties.Add("基本属性", BasicProperties);
-                GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                p.properties = entityProperties;
-                products.Add(p);
+                try
+                {               
+                    Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
+                    Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
+                    HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
+                    HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
+                    GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
+                    GetDirectFieldsValue(e, BasicProperties);
+                    string type = e.GetType().Name;
+                    p.Guid = GetEntityId(e);
+                    p.Type = type;
+                    p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
+                    string floor = GetStoreyName(e);
+                    BasicProperties.Add("floor", floor);
+                    entityProperties.Add("基本属性", BasicProperties);
+                    GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
+                    p.properties = entityProperties;
+                    products.Add(p);
+                }
+                catch (Exception xx)
+                {
+                    //MessageBox.Show(xx.Message);
+                    Console.WriteLine(xx.Message);
+                    Console.WriteLine(p.Guid);//当出现错误时输出当前构件的id
+                }
             }
             Console.WriteLine("物理构件结束");
         }
@@ -319,6 +328,7 @@ namespace Ifc2Json
                 if (SpatialProperties.Count > 1)
                 {
                     //若其body有多个，返回第一个
+                    //与管道有关的例如IfcFlowController、IfcFlowFitting(三通)等连接性的会出现多个的情况
                     Console.WriteLine(o.GetType().Name + "与该构件有关的实体从属关系有多个");
                 }
                 foreach (object e in SpatialProperties)//如果是构件的空间位置是个 IfcRelContainedInSpatialStructure实体
@@ -341,7 +351,7 @@ namespace Ifc2Json
                     else
                     {
                         Console.WriteLine(o.GetType().Name + "该构件的空间位置还会用其他实体表示");
-                    }
+                    }                   
                 }
                 if (RelatingStructure.GetType().Name == "IfcBuildingStorey")
                 {
@@ -895,6 +905,8 @@ namespace Ifc2Json
                 //获取属性对应的值
                 string key = f.Name;
                 string v = "";
+                if (key == "GlobalId")
+                    continue;//基本属性中不显示id
                 GetPropertyInfoValue(e, f, ref v);
                 string unitname=GetPropertyUnit(e, f);
                 //过滤出值""
