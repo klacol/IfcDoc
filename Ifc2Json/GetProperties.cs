@@ -955,6 +955,149 @@ namespace Ifc2Json
             GetPropertyInfoValue(o, f, ref value);
             return value;
         }
+        //获取IfcPropertySet集中的信息key-valuez值
+        protected void GetPropertySetProperties(object propertySet, ref string name, Dictionary<string, string> PropertiesFields)
+        {
+            Type setType = propertySet.GetType();
+            if (setType.Name == "IfcPropertySet")
+            {
+                PropertyInfo f; Type ft = null;
+                f = setType.GetProperty("Name");
+                GetPropertyInfoValue(propertySet, f, ref name);//返回其name值
+                // HasProperties: 	SET [1:?] OF IfcProperty;
+                f = setType.GetProperty("HasProperties");
+                object properties = f.GetValue(propertySet);
+                ft = f.PropertyType;
+                if (IsEntityCollection(ft))
+                {
+                    IEnumerable list = (IEnumerable)properties;
+                    foreach (object invobj in list)
+                    {
+                        if (invobj != null)
+                        {
+                            Type type = invobj.GetType();
+                            if (type.Name == "IfcPropertySingleValue")//属性信息
+                            {
+                                //Name	 : 	IfcIdentifier;//名称此名称与其他的Name：IfcLable定义不同
+                                //NominalValue: OPTIONAL IfcValue;//对应的值信息
+                                //Unit: OPTIONAL IfcUnit;单位 给出其id 都是导出属性
+                                string key = "";
+                                string value = "";
+                                f = type.GetProperty("Name");
+                                GetPropertyInfoValue(invobj, f, ref key);
+                                f = type.GetProperty("NominalValue");//
+                                ft = f.PropertyType;
+                                object v = f.GetValue(invobj);
+                                if (ft.IsInterface && v is ValueType)
+                                {
+                                    Type vt = v.GetType();
+                                    PropertyInfo fieldValue = vt.GetProperty("Value");
+                                    while (fieldValue != null)
+                                    {
+                                        v = fieldValue.GetValue(v);
+                                        if (v != null)
+                                        {
+                                            Type wt = v.GetType();
+                                            if (wt.IsEnum || wt == typeof(bool))
+                                            {
+                                                v = v.ToString().ToLowerInvariant();
+                                            }
+
+                                            fieldValue = wt.GetProperty("Value");
+                                        }
+                                        else
+                                        {
+                                            fieldValue = null;
+                                        }
+                                    }
+                                    string encodedvalue = String.Empty;
+                                    if (v is IEnumerable && !(v is string))
+                                    {
+                                        // IfcIndexedPolyCurve.Segments
+                                        IEnumerable list1 = (IEnumerable)v;
+                                        StringBuilder sb = new StringBuilder();
+                                        foreach (object o in list1)
+                                        {
+                                            if (sb.Length > 0)
+                                            {
+                                                sb.Append(" ");
+                                            }
+
+                                            PropertyInfo fieldValueInner = o.GetType().GetProperty("Value");
+                                            if (fieldValueInner != null)
+                                            {
+                                                //...todo: recurse for multiple levels of indirection, e.g. 
+                                                object vInner = fieldValueInner.GetValue(o);
+                                                sb.Append(vInner.ToString());
+                                            }
+                                            else
+                                            {
+                                                sb.Append(o.ToString());
+                                            }
+                                        }
+                                        encodedvalue = sb.ToString();
+                                    }
+                                    else if (v != null)
+                                    {
+                                        encodedvalue = System.Security.SecurityElement.Escape(v.ToString());
+                                    }
+                                    value = encodedvalue;
+                                }
+                                //处理单位
+                                string str = DealIfcPropertySingleValueUnit(invobj);
+                                if (str != "")
+                                {
+                                    value = value + str;
+                                }
+                                if (!PropertiesFields.ContainsKey(key))
+                                {
+                                    PropertiesFields.Add(key, value);//在IFC中会出现有相同的key的情况
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("IfcPropertySet中还包含了实体" + type.Name);
+                            }
+                        }
+                        //IsDefinedBy:SET OF IfcRelDefines FOR RelatedObjects;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("HasProperties属性处理出错");
+                }
+            }
+            else if (setType.Name == "IfcElementQuantity")
+            {
+                PropertyInfo f;
+                f = setType.GetProperty("Name");
+                GetPropertyInfoValue(propertySet, f, ref name);//返回其name值
+                                                               //Quantities: SET[1:?] OF IfcPhysicalQuantity;
+                f = setType.GetProperty("Quantities");
+                object Quantities = f.GetValue(propertySet);
+                //获取其name和value
+                Type ft = f.PropertyType;
+                if (IsEntityCollection(ft))
+                {
+                    IEnumerable list = (IEnumerable)Quantities;
+                    foreach (object invobj in list)
+                    {
+                        string key = "", value = "";
+                        f = invobj.GetType().GetProperty("Name");
+                        GetPropertyInfoValue(invobj, f, ref key);
+
+                        f = invobj.GetType().GetProperty("LengthValue");
+
+                        GetPropertyInfoValue(invobj, f, ref value);
+                        PropertiesFields.Add(key, value);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine(setType.Name + "这一类型属性集需要处理");
+            }
+        }
         public void WriteHead(StreamWriter writer)
         {           
             string ApplicationFullName = GetDirectPropertyValueByName(application,"ApplicationFullName");
@@ -974,6 +1117,35 @@ namespace Ifc2Json
             writer.WriteLine(products.Count);
 
             writer.WriteLine("},");
+        }
+        public string DealIfcPropertySingleValueUnit(object o)
+        {
+            //处理单位：o类型为IfcPropertySingleValue
+            string str = "";
+            Type type = o.GetType();
+            PropertyInfo f = type.GetProperty("Unit");
+            object unitstr = f.GetValue(o);
+            if (unitstr != null)
+            {
+                if (unitstr.GetType().Name == "IfcSIUnit")
+                {
+                    string unitname=GetDirectPropertyValueByName(unitstr, "UnitType");
+                    unitSymbol.TryGetValue(unitname, out str);//查找其对应的符号表示
+                }
+                else
+                {
+                    //类型可能为转换单位等（非直接）需要另外处理
+                    Console.WriteLine("IfcPropertySingleValue中自带单位" + unitstr.GetType().Name);
+                }
+
+            }
+            else
+            {
+                //使用全局默认的
+                f = type.GetProperty("NominalValue"); //IfcValue
+                str = GetPropertyUnit(o, f);
+            }
+            return str;
         }
     }
 }
