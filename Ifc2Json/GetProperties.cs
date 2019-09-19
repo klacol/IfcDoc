@@ -575,18 +575,21 @@ namespace Ifc2Json
                         {
                             string x="";
                             f = SweptArea.GetType().GetProperty("XDim");
-                            GetPropertyInfoValue(SweptArea, f, ref x);
-                            shape.Add("XDim", x);
+                            GetPropertyInfoValue(SweptArea, f, ref x);//几何信息输出都为float
+                            float xValue = float.Parse(x, System.Globalization.NumberStyles.Float) * lengthUnit;                         
+                            shape.Add("XDim", xValue);
                             f = SweptArea.GetType().GetProperty("YDim");
                             GetPropertyInfoValue(SweptArea, f, ref x);
-                            shape.Add("YDim", x);
+                            xValue = float.Parse(x, System.Globalization.NumberStyles.Float) * lengthUnit;
+                            shape.Add("YDim", xValue);
                         }
                         else if (sweptName == "IfcCircleProfileDef")//圆面
                         {
                             string radius="";
                             f = SweptArea.GetType().GetProperty("Radius");
                             GetPropertyInfoValue(SweptArea, f, ref radius);
-                            shape.Add("Radius", radius);
+                            float radiusValue= float.Parse(radius, System.Globalization.NumberStyles.Float) * lengthUnit;
+                            shape.Add("Radius", radiusValue);
                         }
                         else
                         {
@@ -1149,7 +1152,7 @@ namespace Ifc2Json
                 else
                 {
                     //类型可能为转换单位等（非直接）需要另外处理
-                    Console.WriteLine("IfcPropertySingleValue中自带单位" + unitstr.GetType().Name);
+                    Console.WriteLine("IfcPropertySingleValue中自带单位" +unitstr.GetType().Name);
                 }
 
             }

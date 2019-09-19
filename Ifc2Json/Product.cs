@@ -25,6 +25,7 @@ namespace Ifc2Json
         //根据属性PropertyInfo获取其对应的值只讨论直接属性
         protected void GetPropertyInfoValue(object e, PropertyInfo f, ref string v)
         {
+            v = "";//初始化为空
             Type t = e.GetType(), stringType = typeof(String);
             if (f != null) // derived fields are null
             {
@@ -221,9 +222,8 @@ namespace Ifc2Json
         {
             if (o == null)
                 return false;
-            //存储
-            EntityClassify(o); 
-            Type t = o.GetType();
+
+            Type t = o.GetType();          
             //不遍历几何信息实体（节省遍历时间）
             if (t.Name == "IfcLocalPlacement" || t.Name == "IfcPolyline" || t.Name == "IfcShapeRepresentation" || t.Name == "IfcExtrudedAreaSolid" || t.Name == "IfcIShapeProfileDef" ||
                t.Name == "IfcProductDefinitionShape" || t.Name == "IfcGeometricRepresentationSubContext" || t.Name == "IfcFacetedBrep" || t.Name == "IfcClosedShell" || t.Name == "IfcFace" ||
@@ -232,6 +232,8 @@ namespace Ifc2Json
             {
                 return true;
             }
+            //存储
+            EntityClassify(o);
             if (t.Name == "IfcApplication")
             {
                 application = o;
@@ -518,15 +520,16 @@ namespace Ifc2Json
             int i = 0;
             while (t != null)
             {
-                if (i > 3)
+                if (i > 5)
                 {
-                    return 0;
+                    return 0;//该值设置的范围小，IfcLightFixtureType属于IfcElementType但需要四次
                 }
                 else
                 {
                     if (t.Name == "IfcElement")
                     {
                         return 1;
+                       
                     }
                     else if (t.Name == "IfcElementType"|| t.Name == "IfcSpatialElementType")//去除ifcDoorStyle
                     {
@@ -534,11 +537,10 @@ namespace Ifc2Json
                     }
                     else
                     {
-                        t = t.BaseType; //BaseType(t)
+                        t = t.BaseType; //获取其父类名称
                         i++;
                     }
                 }
-
             }
             return 0;
         }
