@@ -58,7 +58,7 @@ namespace Ifc2Json
         }
         //写json
         public void WriteJson(Stream stream, object root)
-        {
+        {          
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
@@ -550,13 +550,16 @@ namespace Ifc2Json
                             {
                                 poly = f.GetValue(SweptArea);
                                 IEnumerable list1 = (IEnumerable)poly;
-                                int i = 1;
+                                // int i = 1;
+                                List<object> InnerCurves = new List<object>();
                                 foreach (object po in list1)
-                                {                                    
+                                {
+                                    InnerCurves.Add(GetPolyline(po));
                                     //注：内曲线可能有多个，所以此处Dictionary不能添加重复键
-                                    shape.Add("InnerCurves_"+i, GetPolyline(po));
-                                    i++;
+                                    // shape.Add("InnerCurves_"+i, GetPolyline(po));
+                                    //   i++;
                                 }
+                                shape.Add("InnerCurves", InnerCurves);
                             }
                         }
                         else if (sweptName == "IfcRectangleProfileDef")//矩形面
@@ -1051,7 +1054,10 @@ namespace Ifc2Json
                                 }
                                 if (!PropertiesFields.ContainsKey(key))
                                 {
-                                    PropertiesFields.Add(key, value);//在IFC中会出现有相同的key的情况
+                                    if (value != "")//去除空值
+                                    {
+                                        PropertiesFields.Add(key, value);//在IFC中会出现有相同的key的情况}
+                                    }
                                 }
                             }
                             else
