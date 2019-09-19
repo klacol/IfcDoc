@@ -313,14 +313,7 @@ namespace Ifc2Json
             GetSpatialProperty(o, SpatialProperties);
             if (SpatialProperties.Count == 0)
             {
-                if (o.GetType().Name == "IfcOpeningElement")
-                {
-                    //do nothing 开洞实体无楼层信息---需要之后验证 
-                }
-                else
-                {
-                    Console.WriteLine(o.GetType().Name + "与该构件的空间信息出错");
-                }
+                Console.WriteLine(o.GetType().Name + "与该构件的空间信息出错");
                 return null;
             }
             else
@@ -348,8 +341,13 @@ namespace Ifc2Json
                         RelatingStructure = f.GetValue(e);
                         break;
                     }
-                    else
+                    else if (t.Name == "IfcRelVoidsElement")//开洞实体IfcOpeningElement的空间位置所在
                     {
+                        PropertyInfo f = t.GetProperty("RelatingBuildingElement");
+                        RelatingStructure = f.GetValue(e);
+                        break;
+                    }
+                    else{
                         Console.WriteLine(o.GetType().Name + "该构件的空间位置还会用其他实体表示");
                     }                   
                 }
@@ -369,6 +367,17 @@ namespace Ifc2Json
             Type t = o.GetType();
             PropertyInfo f;
             object v;
+            if (t.Name == "IfcOpeningElement")
+            {
+                //开洞实体的所在空间实体的关系为VoidsElements: 	IfcRelVoidsElement FOR RelatedOpeningElement;
+                f = t.GetProperty("VoidsElements");
+                v = f.GetValue(o);
+                if (v != null)
+                {
+                    SpatialProperties.Add(v);
+                }              
+                return;
+            }
             //Decomposes: 	SET [0:1] OF IfcRelDecomposes FOR RelatedObjects;ifcspace实体的空间位置所在属性
             //ContainedInStructure: SET[0:1] OF IfcRelContainedInSpatialStructure FOR RelatedElements;物理构件的空间位置所在的属性
             if (t.BaseType.Name == "IfcSpatialStructureElement")
@@ -1111,8 +1120,7 @@ namespace Ifc2Json
             writer.Write("\"applicationFullName\": \"");
             writer.Write(ApplicationFullName);
             writer.WriteLine("\",");
-            writer.WriteLine("\"Schema\": \"IFC2X3\"");
-            writer.Write(",");
+            writer.WriteLine("\"Schema\": \"IFC2×3\",");
             writer.Write("\"楼层数目\":");
             writer.Write(buildingStoreys.Count);
             writer.WriteLine(",");

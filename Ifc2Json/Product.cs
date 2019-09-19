@@ -516,10 +516,6 @@ namespace Ifc2Json
         public int  Basetype(Type t)
         {
             int i = 0;
-            if (t.Name == "IfcOpeningElement")
-            {
-                return 0;//开洞元素暂且不考虑
-            }
             while (t != null)
             {
                 if (i > 3)
@@ -547,7 +543,6 @@ namespace Ifc2Json
             return 0;
         }
         // JSON字符串中回车符的处理
-
         protected override void WriteFooter(StreamWriter writer)
         {
            // writer.WriteLine("  ]");
