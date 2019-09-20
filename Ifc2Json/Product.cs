@@ -38,6 +38,7 @@ namespace Ifc2Json
                     if (dataMemberAttribute != null && (xsdformat == null || xsdformat == DocXsdFormatEnum.Attribute))
                     {
                         // direct field
+                        Type vaType=null;//最终获取的属性值的类型，如果是维度，就确定单位
                         bool isvaluelist = IsValueCollection(ft);
                         bool isvaluelistlist = ft.IsGenericType && // e.g. IfcTriangulatedFaceSet.Normals
                             typeof(System.Collections.IEnumerable).IsAssignableFrom(ft.GetGenericTypeDefinition()) &&
@@ -133,6 +134,7 @@ namespace Ifc2Json
                                     PropertyInfo fieldValue = ft.GetProperty("Value");
                                     if (fieldValue != null)
                                     {
+                                        vaType = value.GetType();
                                         value = fieldValue.GetValue(value);//在此处判断value的值类型来添加单位
                                         
                                         if (typewrap == null)
@@ -155,29 +157,41 @@ namespace Ifc2Json
                                 if (value is IList)//数据集
                                 {
                                     // IfcCompoundPlaneAngleMeasure
+                                    string[] AngleUnit = { "","°", "′", "″" };
                                     IList list = (IList)value;
-                                    string va = "";
+                                    string va = " ";
                                     for (int i = 0; i < list.Count; i++)
                                     {
+                                        if (vaType.Name == "IfcCompoundPlaneAngleMeasure")
+                                        {
+                                            va = AngleUnit[i];
+                                        }
                                         object elem = list[i];
                                       
                                         if (elem != null) // should never be null, but be safe
                                         {
                                             string encodedvalue = System.Security.SecurityElement.Escape(elem.ToString());
                                             // 对Json字符串中回车符处理
-                                          //  v = this.strToJson(encodedvalue);//eg:(39,54,57,601318)
-                                          if (i == 0)
-                                          {
-                                              va =  this.strToJson(encodedvalue);
-                                          }
-                                          va = va+ " "+ this.strToJson(encodedvalue) ;
+                                            //  v = this.strToJson(encodedvalue);//eg:(39,54,57,601318)
+                                            if (i == 0)
+                                            {
+                                                v = this.strToJson(encodedvalue);
+                                            }
+                                            else
+                                            {
+                                                v = v + va + this.strToJson(encodedvalue);
+                                            }
                                         }
-                                    }
-                                    v = va;
+                                    }                                  
                                 }
                                 else if (value != null)
                                 {
                                     string encodedvalue = System.Security.SecurityElement.Escape(value.ToString());
+                                    if (value.GetType().Name == "Double")
+                                    {
+                                        float val = float.Parse(encodedvalue, System.Globalization.NumberStyles.Float);//强制转换为float,减少精度
+                                        encodedvalue = val.ToString();
+                                    }                                   
                                     v = this.strToJson(encodedvalue);
                                 }
                             }

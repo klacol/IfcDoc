@@ -246,7 +246,7 @@ namespace Ifc2Json
                 string propertySetName = "";
                 Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
                 GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
-                if (propertySetName != "")
+                if (propertySetName != ""&& propertiesFields!=null)
                 {
                     entityProperties.Add(propertySetName, propertiesFields);
                 }
@@ -1055,6 +1055,11 @@ namespace Ifc2Json
                                     else if (v != null)
                                     {
                                         encodedvalue = System.Security.SecurityElement.Escape(v.ToString());
+                                        if (v.GetType().Name == "Double")
+                                        {
+                                            float val = float.Parse(encodedvalue, System.Globalization.NumberStyles.Float);//强制转换为float
+                                            encodedvalue = val.ToString();
+                                        }
                                     }
                                     value = encodedvalue;
                                 }
