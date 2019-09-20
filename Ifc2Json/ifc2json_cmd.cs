@@ -518,6 +518,7 @@ namespace Ifc2Json
                         using (System.IO.FileStream streamTarget = System.IO.File.OpenWrite(OutputFile))
                         {
                             formatTarget.WriteJson(streamTarget, project);
+                            streamTarget.Close();//关闭流
                         }
                     }
 

@@ -208,9 +208,9 @@ namespace Ifc2Json
             DateTime endT = DateTime.Now;
             TimeSpan ts = endT - startT;
             Console.WriteLine("遍历project内部结构所需的时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
-            Console.WriteLine("总共实体（去除几何表达）的个数:" + saved.Count);
             Console.WriteLine("空间实体的个数:" + spatialElements.Count);
             Console.WriteLine("构件实体的个数:" + elements.Count);
+            Console.WriteLine("类型实体的个数:" + elementsType.Count);
         }
         /// <summary>
         /// 遍历过程中将物件实体和空间实体存储
@@ -232,8 +232,7 @@ namespace Ifc2Json
             {
                 return true;
             }
-            //存储
-            EntityClassify(o);
+
             if (t.Name == "IfcApplication")
             {
                 application = o;
@@ -250,6 +249,8 @@ namespace Ifc2Json
             {
                 return;
             }
+            //存储
+            EntityClassify(o);
             saved.Add(o);
             IList<PropertyInfo> fields = this.GetFieldsAll(t);//获取其所有属性
             //直接属性不获取其具体的值，其不包含实体
@@ -499,19 +500,23 @@ namespace Ifc2Json
         //获取空间结构实体集和构件结构实体集
         public void EntityClassify(object e)
         {
-            Type t = e.GetType();
+            Type t = e.GetType();           
             if (t.BaseType.Name == "IfcSpatialStructureElement")
             {
                 spatialElements.Add(e);  //将空间实体和物理实体存储至Element中
             }
-            else  if (Basetype(t) == 1)
+            else
             {
-                elements.Add(e);
-            }
-            else if (Basetype(t) == 2)
-            {
-                elementsType.Add(e);
-            }
+                int i = Basetype(t);
+                if ( i==1)
+                {
+                    elements.Add(e);
+                }
+                else if (i == 2)
+                {
+                    elementsType.Add(e);
+                }
+            } 
         }
         //判断物体类型是否为ifcElement，墙、门等构件的定义都是此基类
         //IfcElementType类型返回2
@@ -528,11 +533,11 @@ namespace Ifc2Json
                 {
                     if (t.Name == "IfcElement")
                     {
-                        return 1;
-                       
+                        return 1;                       
                     }
                     else if (t.Name == "IfcElementType"|| t.Name == "IfcSpatialElementType")//去除ifcDoorStyle
                     {
+
                         return 2;
                     }
                     else

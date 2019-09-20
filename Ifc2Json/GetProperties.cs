@@ -475,7 +475,7 @@ namespace Ifc2Json
                             }
                             else
                             {
-                                Console.Write("空间的几何描述还有其他方式" + value);
+                                Console.Write("空间的几何描述还有其他方式" + value);//还有一种SurfaceModel方式
                             }
                         }
                         i++;
