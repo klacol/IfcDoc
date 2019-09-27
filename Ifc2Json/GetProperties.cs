@@ -573,15 +573,8 @@ namespace Ifc2Json
                         }
                         else if (sweptName == "IfcRectangleProfileDef")//矩形面
                         {
-                            string x="";
-                            f = SweptArea.GetType().GetProperty("XDim");
-                            GetPropertyInfoValue(SweptArea, f, ref x);//几何信息输出都为float
-                            float xValue = float.Parse(x, System.Globalization.NumberStyles.Float) * lengthUnit;                         
-                            shape.Add("XDim", xValue);
-                            f = SweptArea.GetType().GetProperty("YDim");
-                            GetPropertyInfoValue(SweptArea, f, ref x);
-                            xValue = float.Parse(x, System.Globalization.NumberStyles.Float) * lengthUnit;
-                            shape.Add("YDim", xValue);
+                            object OuterCurve = DealRectangleProfileDef(SweptArea);                     
+                            shape.Add("OuterCurve", OuterCurve);//将长宽处理为四个点
                         }
                         else if (sweptName == "IfcCircleProfileDef")//圆面
                         {
@@ -1168,6 +1161,26 @@ namespace Ifc2Json
                 str = GetPropertyUnit(o, f);
             }
             return str;
+        }
+        public object DealRectangleProfileDef(object SweptArea)
+        {
+            string x = "";
+            PropertyInfo f = SweptArea.GetType().GetProperty("XDim");
+            GetPropertyInfoValue(SweptArea, f, ref x);//几何信息输出都为float
+            float length = float.Parse(x, System.Globalization.NumberStyles.Float) * lengthUnit;  //获取长宽                       
+
+            f = SweptArea.GetType().GetProperty("YDim");
+            GetPropertyInfoValue(SweptArea, f, ref x);
+            float width = float.Parse(x, System.Globalization.NumberStyles.Float) * lengthUnit;
+
+            float[][] points = new float[4][];
+
+            points[0] = new float[] { -length / 2, -width / 2 };
+            points[1] = new float[] { +length / 2, -width / 2 };
+            points[2] = new float[] { +length / 2, +width / 2 };
+            points[3] = new float[] { -length / 2, +width / 2 };
+
+            return points;
         }
     }
 }
