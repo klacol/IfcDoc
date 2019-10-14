@@ -40,6 +40,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -49,21 +50,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler.cs" />
+    <Compile Include="CtlExpressG.cs" />
+    <Compile Include="DocumentationISO.cs" />
     <Compile Include="GetProperties.cs" />
     <Compile Include="ifc2json_cmd.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schema.cs" />
+    <Compile Include="SchemaCNF.cs" />
+    <Compile Include="SchemaDoc.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IfcDoc.csproj">
-      <Project>{BD604C7F-1CA2-4399-AC38-AD9CA45E7413}</Project>
-      <Name>IfcDoc</Name>
-    </ProjectReference>
     <ProjectReference Include="..\IfcKit\formats\BuildingSmart.Serialization\BuildingSmart.Serialization.csproj">
       <Project>{36a0328b-1a60-4f07-bc34-4d22a7f65cac}</Project>
       <Name>BuildingSmart.Serialization</Name>
@@ -79,6 +82,10 @@
     <ProjectReference Include="..\IfcKit\formats\xml\BuildingSmart.Serialization.Xml.csproj">
       <Project>{55cd2497-80a6-49b9-880b-ab0743b7deca}</Project>
       <Name>BuildingSmart.Serialization.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IfcKit\utilities\BuildingSmart.Utilities.Conversion\BuildingSmart.Utilities.Conversion.csproj">
+      <Project>{048106c1-7d68-4b3c-b7b1-eb437f2c15b0}</Project>
+      <Name>BuildingSmart.Utilities.Conversion</Name>
     </ProjectReference>
     <ProjectReference Include="..\IfcKit\utilities\BuildingSmart.Utilities.Dictionary\BuildingSmart.Utilities.Dictionary.csproj">
       <Project>{ecb9f199-28f2-48b9-82e9-b4edade8aebb}</Project>

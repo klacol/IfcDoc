@@ -4,13 +4,12 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 
-using IfcDoc.Schema;
-using IfcDoc.Schema.DOC;
+using Ifc2Json.Schema;
+using Ifc2Json.Schema.DOC;
 
 using BuildingSmart.Serialization;
 using BuildingSmart.Serialization.Step;
 using BuildingSmart.Serialization.Xml;
-using IfcDoc;
 
 #if MDB
     using IfcDoc.Format.MDB;
