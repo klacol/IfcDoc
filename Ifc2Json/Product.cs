@@ -10,12 +10,15 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Ifc2Json
 {
     public class Product : XmlSerializer
     {
+        private static System.Timers.Timer testTimer;
         public object application;//记录产出软件
+        Queue<object> queue = new Queue<object>();//存储反转属性实体当作根（递归遍历）
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
         public HashSet<object> elementsType = new HashSet<object>();//保存物理构件
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
@@ -203,10 +206,14 @@ namespace Ifc2Json
         //遍历project
         public void TraverseProject(object root)
         {
+            testTimer = new System.Timers.Timer(); // 5 seconds
+            testTimer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);//到达指定时间时执行
+            testTimer.Interval = 1000;
+            testTimer.Enabled = true;//是否执行ElapsedEventArgs事件
             if (root == null)
                 throw new ArgumentNullException("root");
 
-            Queue<object> queue = new Queue<object>();//存储反转属性实体当作根（递归遍历）
+
             HashSet<object> saved = new HashSet<object>();//保存之前遇到的实体，不重复遍历
             queue.Enqueue(root);
 
@@ -218,6 +225,7 @@ namespace Ifc2Json
                 {
                     this.TraverseEntity(ent, saved, queue);//遍历当前实体
                 }
+               // Console.WriteLine("queue的长度" + queue.Count);
             }
             DateTime endT = DateTime.Now;
             TimeSpan ts = endT - startT;
@@ -572,6 +580,10 @@ namespace Ifc2Json
         protected string strToJson(string str)
         {
             return str.Replace("\n", "\\n").Replace("\r", "").Replace("\\", "\\\\");
+        }
+        private void OnTimerElapsed(object source, ElapsedEventArgs e)
+        {
+            Console.WriteLine("扫描文件时剩余队列数:"+queue.Count);
         }
     }
 }

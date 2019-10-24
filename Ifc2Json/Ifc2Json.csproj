@@ -71,10 +71,6 @@
       <Project>{36a0328b-1a60-4f07-bc34-4d22a7f65cac}</Project>
       <Name>BuildingSmart.Serialization</Name>
     </ProjectReference>
-    <ProjectReference Include="..\IfcKit\formats\json\BuildingSmart.Serialization.Json.csproj">
-      <Project>{2d912a6f-3f73-480c-b023-f1d7ef0dc954}</Project>
-      <Name>BuildingSmart.Serialization.Json</Name>
-    </ProjectReference>
     <ProjectReference Include="..\IfcKit\formats\spf\BuildingSmart.Serialization.Step.csproj">
       <Project>{9dc23719-6569-4f9a-a676-aad97d1d233f}</Project>
       <Name>BuildingSmart.Serialization.Step</Name>

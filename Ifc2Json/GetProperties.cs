@@ -121,7 +121,7 @@ namespace Ifc2Json
            {
                 ProductProperties p = new ProductProperties();
                 try
-                {               
+                {  
                     Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
                     Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
                     HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
@@ -143,10 +143,10 @@ namespace Ifc2Json
                 {
                     //MessageBox.Show(xx.Message);
                     Console.WriteLine(xx.Message);
-                    Console.WriteLine(p.Guid);//当出现错误时输出当前构件的id
+                    Console.WriteLine(p.Guid+" _"+p.Type);//当出现错误时输出当前构件的id
                 }
             }
-            Console.WriteLine("物理构件结束");
+           // Console.WriteLine("物理构件结束");
         }
         public void GetRoomAndProperties()
         {
@@ -200,7 +200,7 @@ namespace Ifc2Json
                     Console.WriteLine(e.GetType().Name);
                 }
             }
-            Console.WriteLine("spatialElements结束");
+            //Console.WriteLine("spatialElements结束");
         }
         //获取属性集，//其属性在构件的属性集IsDefinedBy
         public void GetpropertyEntities(object o, HashSet<object> RelPropertyEntities, HashSet<object> TypePropertyEntities)
@@ -248,7 +248,20 @@ namespace Ifc2Json
                 GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
                 if (propertySetName != ""&& propertiesFields!=null)
                 {
-                    entityProperties.Add(propertySetName, propertiesFields);
+                    //出现有相同的propertySetName名称
+                    if (entityProperties.ContainsKey(propertySetName))
+                    {
+                        propertySetName = propertySetName + "Type";
+                    }
+                    try
+                    {
+                        entityProperties.Add(propertySetName, propertiesFields);
+                    }
+                    catch(Exception xx)
+                    {
+                        Console.Write(xx.Message);
+                        Console.Write(propertySetName);
+                    }                   
                 }
             }
         }

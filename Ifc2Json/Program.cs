@@ -20,7 +20,7 @@ namespace Ifc2Json
             ifc2json_cmd convert = new ifc2json_cmd();
 
 
-            Console.WriteLine("开始转换 …………");
+            Console.WriteLine("IFC转换为JSON开始");
             DateTime startT = DateTime.Now;
 
             int iSuccess = convert.StartConvert(args[0], args[1]);
