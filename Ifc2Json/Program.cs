@@ -19,8 +19,6 @@ namespace Ifc2Json
 
             ifc2json_cmd convert = new ifc2json_cmd();
 
-
-            Console.WriteLine("IFC转换为JSON开始");
             DateTime startT = DateTime.Now;
 
             int iSuccess = convert.StartConvert(args[0], args[1]);
@@ -31,13 +29,13 @@ namespace Ifc2Json
 
             if (iSuccess == 0)
             {
-                Console.WriteLine("成功完成转换！\r\n此次转换总共耗时 {0}秒！", ts.TotalSeconds.ToString("0.00"));
+                Console.WriteLine("成功完成转换！此次转换总共耗时:{0}秒！", ts.TotalSeconds.ToString("0.00"));
                 return 0;
 
             }
             else
             {
-                Console.WriteLine("转换出错！\r\n此次不成功转换总共耗时 {0}秒！", ts.TotalSeconds.ToString("0.00"));
+                Console.WriteLine("转换出错！此次不成功转换总共耗时:{0}秒！", ts.TotalSeconds.ToString("0.00"));
                 return -1;
             }
         }

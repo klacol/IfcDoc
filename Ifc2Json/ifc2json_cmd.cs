@@ -383,7 +383,7 @@ namespace Ifc2Json
                 {
                     // 需要先对ifc文件标准化，主要是去除不必要的回车行，目前发现SmartPlant导出的ifc文件随意断行
 
-                    Console.WriteLine("扫描ifc文件中不合法的回车符！");
+                    //Console.WriteLine("排除ifc文件中不合法的回车符！");
 
                     byte[] bytes = new byte[streamSource.Length];
                     streamSource.Read(bytes, 0, bytes.Length);
@@ -492,7 +492,7 @@ namespace Ifc2Json
                     MemoryStream streamInput = new MemoryStream(array);             //convert stream 2 string      
                     endT = DateTime.Now;
                     ts = endT - startT;
-                    Console.WriteLine("扫描结束，总时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
+                    Console.WriteLine("排除ifc文件中不合法的回车符总时间:{0}秒", ts.TotalSeconds.ToString("0.00"));
                     startT = endT;
 
 
@@ -500,13 +500,13 @@ namespace Ifc2Json
                     formatSource = new StepSerializer(typeProject);
                     endT = DateTime.Now;
                     ts = endT - startT;
-                    Console.WriteLine("初始化工作时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
+                    Console.WriteLine("初始化工作时间:{0}秒", ts.TotalSeconds.ToString("0.00"));
                     startT = endT;
                     project = formatSource.ReadObject(streamInput);
 
                     endT = DateTime.Now;
                     ts = endT - startT;
-                    Console.WriteLine("转换为step工作时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
+                    Console.WriteLine("转换为step工作时间:{0}秒", ts.TotalSeconds.ToString("0.00"));
 
 
                     //Serializer formatTarget = null;

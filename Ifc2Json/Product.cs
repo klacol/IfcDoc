@@ -225,11 +225,11 @@ namespace Ifc2Json
                 {
                     this.TraverseEntity(ent, saved, queue);//遍历当前实体
                 }
-               // Console.WriteLine("queue的长度" + queue.Count);
             }
             DateTime endT = DateTime.Now;
             TimeSpan ts = endT - startT;
-            Console.WriteLine("遍历project内部结构所需的时间：   {0}秒！\r\n", ts.TotalSeconds.ToString("0.00"));
+            Console.WriteLine("扫描文件所需的时间:{0}秒", ts.TotalSeconds.ToString("0.00"));
+            testTimer.Stop();
             Console.WriteLine("空间实体的个数:" + spatialElements.Count);
             Console.WriteLine("构件实体的个数:" + elements.Count);
             Console.WriteLine("类型实体的个数:" + elementsType.Count);
@@ -544,6 +544,11 @@ namespace Ifc2Json
         //IfcElementType类型返回2
         public int  Basetype(Type t)
         {
+            //IfcOpeningElement表示元素内的空隙，不代表具体的构件
+            if (t.Name == "IfcOpeningElement")
+            {
+                return 0;
+            }
             int i = 0;
             while (t != null)
             {

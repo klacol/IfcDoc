@@ -248,13 +248,15 @@ namespace Ifc2Json
                 GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
                 if (propertySetName != ""&& propertiesFields!=null)
                 {
-                    //出现有相同的propertySetName名称
-                    if (entityProperties.ContainsKey(propertySetName))
-                    {
-                        propertySetName = propertySetName + "Type";
-                    }
+                    //出现有相同的propertySetName名称                
                     try
                     {
+                        int repeatedkey = 0;
+                        if (entityProperties.ContainsKey(propertySetName))
+                        {
+                            repeatedkey++;
+                            propertySetName = propertySetName +"_" + repeatedkey;//例如其他_1
+                        }
                         entityProperties.Add(propertySetName, propertiesFields);
                     }
                     catch(Exception xx)
@@ -1004,6 +1006,7 @@ namespace Ifc2Json
                                 //Unit: OPTIONAL IfcUnit;单位 给出其id 都是导出属性
                                 string key = "";
                                 string value = "";
+                                int repeatedKey = 0;//重复的键的次数
                                 f = type.GetProperty("Name");
                                 GetPropertyInfoValue(invobj, f, ref key);
                                 f = type.GetProperty("NominalValue");//
@@ -1075,12 +1078,15 @@ namespace Ifc2Json
                                 {
                                     value = value + str;
                                 }
-                                if (!PropertiesFields.ContainsKey(key))
+                                //当属性中出现相同的key时                               
+                                if (PropertiesFields.ContainsKey(key))
                                 {
-                                    if (value != "")//去除空值
-                                    {
-                                        PropertiesFields.Add(key, value);//在IFC中会出现有相同的key的情况}
-                                    }
+                                    repeatedKey++;
+                                    key = key + "_" + repeatedKey;
+                                }
+                                if (value != "")//去除空值
+                                {
+                                    PropertiesFields.Add(key, value);//在IFC中会出现有相同的key的情况}
                                 }
                             }
                             else
@@ -1160,12 +1166,11 @@ namespace Ifc2Json
                     string unitname=GetDirectPropertyValueByName(unitstr, "UnitType");
                     unitSymbol.TryGetValue(unitname, out str);//查找其对应的符号表示
                 }
-                else
-                {
+               //else
+              //  {
                     //类型可能为转换单位等（非直接）需要另外处理
-                    Console.WriteLine("IfcPropertySingleValue中自带单位" +unitstr.GetType().Name);
-                }
-
+                   // Console.WriteLine("IfcPropertySingleValue中自带单位" +unitstr.GetType().Name);
+              //  }
             }
             else
             {
