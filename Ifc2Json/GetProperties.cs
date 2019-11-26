@@ -133,8 +133,11 @@ namespace Ifc2Json
                     p.Type = type;
                     p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
                     string floor = GetStoreyName(e);
+                    string layer = GetProductLayer(e);
                     BasicProperties.Add("floor", floor);
+                    BasicProperties.Add("layer", layer);
                     entityProperties.Add("基本属性", BasicProperties);
+
                     GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                     p.properties = entityProperties;
                     products.Add(p);
@@ -1199,6 +1202,40 @@ namespace Ifc2Json
             points[3] = new float[] { -length / 2, +width / 2 };
 
             return points;
+        }
+
+        // 获取构件的层级
+        public string GetProductLayer(object e)
+        {
+            string layer = "";
+            //Representation	 : 	OPTIONAL IfcProductRepresentation;
+            Type t = e.GetType();
+            PropertyInfo f = t.GetProperty("Representation");
+            object v = f.GetValue(e);//获取其属性值
+            if (v.GetType().Name == "IfcProductDefinitionShape")
+            {
+                f = v.GetType().GetProperty("Representations");
+                t = f.PropertyType;
+                if (IsEntityCollection(t))
+                {
+                    object v1 = f.GetValue(v);
+                    IEnumerable list = (IEnumerable)v1;
+                    foreach (object list1 in list)
+                    {
+                        f = list1.GetType().GetProperty("LayerAssignments");
+                        v1 = f.GetValue(list1);
+                        IEnumerable list2 = (IEnumerable)v1;
+                        foreach (object list3 in list2)
+                        {
+                            f = list3.GetType().GetProperty("Name");
+                            GetPropertyInfoValue(list3, f, ref layer);
+                            break;
+                        }                     
+                        break;
+                    }
+                }               
+            }
+            return layer;
         }
     }
 }
