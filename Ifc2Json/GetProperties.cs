@@ -57,8 +57,14 @@ namespace Ifc2Json
 
         }
         //写json
+        protected internal class Project
+        {
+            public string Type { get; set; }//项目的实体名称
+            public string Guid { get; set; }//项目的 guid 
+            public object properties { get; set; }//项目的属性
+        }
         public void WriteJson(Stream stream, object root)
-        {          
+        {
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
@@ -70,10 +76,15 @@ namespace Ifc2Json
             GetProductAndProperties();
             GetRoomAndProperties();
             GetTypeProperty();
-            writer.WriteLine("{");//
-            WriteHead(writer);
-            writer.Write("\"units\":");
+            Project project = new Project();
+            GetProjectProperties(root, project);//获取项目的相关信息
             string json;
+            writer.WriteLine("{");//
+            writer.Write("\"IfcProject\":");
+            json= JsonConvert.SerializeObject(project, Newtonsoft.Json.Formatting.Indented);
+            writer.Write(json);
+            writer.WriteLine(",");
+            writer.Write("\"units\":");
             json = JsonConvert.SerializeObject(units, Newtonsoft.Json.Formatting.Indented);
             writer.Write(json);
             writer.WriteLine(",");
@@ -948,7 +959,6 @@ namespace Ifc2Json
                         float va = float.Parse(v, System.Globalization.NumberStyles.Float) * lengthUnit;
                         Specific.Add(key, va);
                     }
-
                     else
                     {
                         string unitname = GetPropertyUnit(e, f);
@@ -1147,25 +1157,6 @@ namespace Ifc2Json
                 Console.WriteLine(setType.Name + "这一类型属性集需要处理");
             }
         }
-        public void WriteHead(StreamWriter writer)
-        {           
-            string ApplicationFullName = GetDirectPropertyValueByName(application,"ApplicationFullName");
-            writer.WriteLine("\"Head\": {");
-            writer.Write("\"applicationFullName\": \"");
-            writer.Write(ApplicationFullName);
-            writer.WriteLine("\",");
-            writer.WriteLine("\"Schema\": \"IFC2×3\",");
-            writer.Write("\"楼层数目\":");
-            writer.Write(buildingStoreys.Count);
-            writer.WriteLine(",");
-            writer.Write("\"房间数目\":");
-            writer.Write(rooms.Count);
-            writer.WriteLine(",");
-            writer.Write("\"构件数目\":");
-            writer.WriteLine(products.Count);
-
-            writer.WriteLine("},");
-        }
         public string DealIfcPropertySingleValueUnit(object o)
         {
             //处理单位：o类型为IfcPropertySingleValue
@@ -1223,30 +1214,51 @@ namespace Ifc2Json
             Type t = e.GetType();
             PropertyInfo f = t.GetProperty("Representation");
             object v = f.GetValue(e);//获取其属性值
-            if (v.GetType().Name == "IfcProductDefinitionShape")
+            if (v != null)
             {
-                f = v.GetType().GetProperty("Representations");
-                t = f.PropertyType;
-                if (IsEntityCollection(t))
+                if (v.GetType().Name == "IfcProductDefinitionShape")
                 {
-                    object v1 = f.GetValue(v);
-                    IEnumerable list = (IEnumerable)v1;
-                    foreach (object list1 in list)
+                    f = v.GetType().GetProperty("Representations");
+                    t = f.PropertyType;
+                    if (IsEntityCollection(t))
                     {
-                        f = list1.GetType().GetProperty("LayerAssignments");
-                        v1 = f.GetValue(list1);
-                        IEnumerable list2 = (IEnumerable)v1;
-                        foreach (object list3 in list2)
+                        object v1 = f.GetValue(v);
+                        IEnumerable list = (IEnumerable)v1;
+                        foreach (object list1 in list)
                         {
-                            f = list3.GetType().GetProperty("Name");
-                            GetPropertyInfoValue(list3, f, ref layer);
+                            f = list1.GetType().GetProperty("LayerAssignments");
+                            v1 = f.GetValue(list1);
+                            IEnumerable list2 = (IEnumerable)v1;
+                            foreach (object list3 in list2)
+                            {
+                                f = list3.GetType().GetProperty("Name");
+                                GetPropertyInfoValue(list3, f, ref layer);
+                                break;
+                            }
                             break;
-                        }                     
-                        break;
+                        }
                     }
-                }               
+                }
             }
             return layer;
+        }
+        //获取项目的相关信息
+        public void GetProjectProperties(object root,Project project)
+        {           
+            if (root.GetType().Name == "IfcProject")
+            {
+                project.Type = root.GetType().Name;
+                project.Guid = GetEntityId(root);
+                Dictionary <string, object> BasicProperties = new Dictionary<string, object>();
+                GetDirectFieldsValue(root, BasicProperties);              
+                string ApplicationFullName = GetDirectPropertyValueByName(application, "ApplicationFullName");//软件名称
+                BasicProperties.Add("ApplicationFullName", ApplicationFullName);
+                BasicProperties.Add("Schema Identifiers", "IFC2x3");
+                BasicProperties.Add("楼层数目", buildingStoreys.Count);//楼层数目
+                BasicProperties.Add("房间数目", rooms.Count);
+                BasicProperties.Add("构件数目", products.Count);
+                project.properties = BasicProperties;
+            }
         }
     }
 }
