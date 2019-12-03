@@ -956,7 +956,9 @@ namespace Ifc2Json
                     object value = f.GetValue(e);
                     if (value.GetType().Name == "IfcLengthMeasure")
                     {
-                        float va = float.Parse(v, System.Globalization.NumberStyles.Float) * lengthUnit;
+                        float va;                        if (v.Contains("E") || v.Contains("e"))//将科学计数法转为数值
+                        {                            decimal data = Convert.ToDecimal(Decimal.Parse(v, System.Globalization.NumberStyles.Float));                            va = float.Parse(data.ToString("0.00"));                        }                        else                        {                            va = float.Parse(v, System.Globalization.NumberStyles.Float) * lengthUnit;
+                        }
                         Specific.Add(key, va);
                     }
                     else
