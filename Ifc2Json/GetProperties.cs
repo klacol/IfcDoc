@@ -27,7 +27,7 @@ namespace Ifc2Json
             public string Type { get; set; }//构件的类型
             public string Guid { get; set; }//构件的id            
             public string TypePropertyId { get; set; }  //构件的类型属性的id                                       
-            public Dictionary<string, Dictionary<string, string>> properties { get; set; }
+            public Dictionary<string, object> properties { get; set; }
         }
         /// <summary>
         /// 空间几何表示的定义,点定义为key-value,方向定义为数组
@@ -45,7 +45,7 @@ namespace Ifc2Json
             public string Guid { get; set; }           
             public string TypePropertyId { get; set; } //房间的类型属性还未处理    
             public float height { get; set; }      //拉伸高度                          
-            public Dictionary<string, Dictionary<string, string>> properties { get; set; }//属性信息
+            public Dictionary<string, object> properties { get; set; }//属性信息
             public Dictionary<string, object> shape {get; set;}//房间的几何信息
         }
         protected internal class Unit
@@ -101,12 +101,13 @@ namespace Ifc2Json
             foreach (object e in elementsType)
             {
                 ProductProperties p = new ProductProperties();
-                Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
-                Dictionary<string, Dictionary<string, string>> entityTypeProperties = new Dictionary<string, Dictionary<string, string>>();
+                Dictionary<string, object> BasicProperties = new Dictionary<string, object>();
+                //Dictionary<string, Dictionary<string, string>> entityTypeProperties = new Dictionary<string, Dictionary<string, string>>();
+                Dictionary<string, object> entityTypeProperties = new Dictionary<string, object>();
                 p.Type = e.GetType().Name;
                 p.Guid = GetEntityId(e);
                 GetDirectFieldsValue(e, BasicProperties);
-                entityTypeProperties.Add("基本属性", BasicProperties);
+                entityTypeProperties.Add("BasicProperties", BasicProperties);
                 ProductTypePropertiesValue(e, entityTypeProperties);
                 p.properties = entityTypeProperties;
                 productsType.Add(p);
@@ -122,8 +123,8 @@ namespace Ifc2Json
                 ProductProperties p = new ProductProperties();
                 try
                 {  
-                    Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
-                    Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
+                    Dictionary<string, object> entityProperties = new Dictionary<string, object>();
+                    Dictionary<string, object> BasicProperties = new Dictionary<string, object>();
                     HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
                     HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
                     GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
@@ -136,7 +137,7 @@ namespace Ifc2Json
                     string layer = GetProductLayer(e);
                     BasicProperties.Add("floor", floor);
                     BasicProperties.Add("layer", layer);
-                    entityProperties.Add("基本属性", BasicProperties);
+                    entityProperties.Add("BasicProperties", BasicProperties);
 
                     GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                     p.properties = entityProperties;
@@ -159,8 +160,8 @@ namespace Ifc2Json
                 try
                 {
                     //空间结构还有几何表达信息（此处还未添加）               
-                Dictionary<string, Dictionary<string, string>> entityProperties = new Dictionary<string, Dictionary<string, string>>();
-                Dictionary<string, string> BasicProperties = new Dictionary<string, string>();
+                Dictionary<string, object> entityProperties = new Dictionary<string, object>();
+                Dictionary<string, object> BasicProperties = new Dictionary<string, object>();
                 HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
                 HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
                 GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
@@ -173,7 +174,7 @@ namespace Ifc2Json
                         p.Type = type;
                         string floor = GetStoreyName(e);
                         BasicProperties.Add("floor", floor);
-                        entityProperties.Add("基本属性", BasicProperties);
+                        entityProperties.Add("BasicProperties", BasicProperties);
                         GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                         p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
                         p.properties = entityProperties;
@@ -189,7 +190,7 @@ namespace Ifc2Json
                         ProductProperties p = new ProductProperties();
                         p.Guid = GetEntityId(e);
                         p.Type = type;
-                        entityProperties.Add("基本属性", BasicProperties);
+                        entityProperties.Add("BasicProperties", BasicProperties);
                         GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                         p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
                         p.properties = entityProperties;
@@ -235,7 +236,7 @@ namespace Ifc2Json
             }
         }
         //获取与构件的关系实体中的PropertySet
-        protected void GetRelPropertyEntitiesValue(HashSet<object> RelEntities, Dictionary<string, Dictionary<string, string>> entityProperties)
+        protected void GetRelPropertyEntitiesValue(HashSet<object> RelEntities, Dictionary<string, object> entityProperties)
         {
             //RelatingPropertyDefinition: IfcPropertySetDefinition;
             //每个IfcRelDefinesByProperties中包含了一个IfcPropertySet实体
@@ -433,7 +434,7 @@ namespace Ifc2Json
             }
         }
         //获取类型属性单独存储
-        public void ProductTypePropertiesValue(object o, Dictionary<string, Dictionary<string, string>> entityTypeProperties)
+        public void ProductTypePropertiesValue(object o, Dictionary<string, object> entityTypeProperties)
         {
             //IfcTypeObject  HasPropertySets: OPTIONAL SET[1:?] OF IfcPropertySetDefinition;
             PropertyInfo f = o.GetType().GetProperty("HasPropertySets");
@@ -919,7 +920,7 @@ namespace Ifc2Json
             }           
         }
         //获取直接属性的值
-        protected void GetDirectFieldsValue(object e, Dictionary<string, string> Specific)
+        protected void GetDirectFieldsValue(object e, Dictionary<string, object> Specific)
         {
             //只获取基本属性实体的直接属性
             Type t = e.GetType(), stringType = typeof(String);
@@ -933,8 +934,7 @@ namespace Ifc2Json
                 string v = "";
                 if (key == "GlobalId")
                     continue;//基本属性中不显示id
-                GetPropertyInfoValue(e, f, ref v);
-                string unitname=GetPropertyUnit(e, f);
+                GetPropertyInfoValue(e, f, ref v);               
                 //过滤出值""
                 if (v == "")
                 {
@@ -942,11 +942,22 @@ namespace Ifc2Json
                 }
                 else
                 {
-                    if (unitname != "")
+                    object value = f.GetValue(e);
+                    if (value.GetType().Name == "IfcLengthMeasure")
                     {
-                        v = v + unitname;
-                     }
-                    Specific.Add(key, v);
+                        float va = float.Parse(v, System.Globalization.NumberStyles.Float) * lengthUnit;
+                        Specific.Add(key, va);
+                    }
+
+                    else
+                    {
+                        string unitname = GetPropertyUnit(e, f);
+                        if (unitname != "")
+                        {
+                            v = v + unitname;
+                        }
+                        Specific.Add(key, v);
+                    }
                 }
             }
         }
