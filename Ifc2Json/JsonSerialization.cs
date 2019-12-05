@@ -170,10 +170,10 @@ namespace Ifc2Json
                 string ApplicationFullName = GetDirectPropertyValueByName(application, "ApplicationFullName");//软件名称
                 BasicProperties.Add("ApplicationFullName", ApplicationFullName);
                 BasicProperties.Add("Schema Identifiers", "IFC2x3");
+                GetInformation(root, BasicProperties);
                 BasicProperties.Add("楼层数目", buildingStoreys.Count);//楼层数目
                 BasicProperties.Add("房间数目", rooms.Count);
                 BasicProperties.Add("构件数目", products.Count);
-                GetInformation(root, BasicProperties);
                 project.properties = BasicProperties;
             }
         }
@@ -193,6 +193,17 @@ namespace Ifc2Json
                 dtStart.Add(toNow);
                 BasicProperties.Add("CreationDate", targetDt.ToString());
             }
+            f = o.GetType().GetProperty("OwningUser");
+            object v = f.GetValue(o);
+            if (v != null) {
+               object v1 = GetPropertyObject(v, "ThePerson");
+               string name = GetDirectPropertyValueByName(v1, "GivenName");//获取作者信息
+               BasicProperties.Add("Author", name);
+               v1 = GetPropertyObject(v1, "Roles");
+               BasicProperties.Add("role", GetDirectPropertyValueByName(v1, "Role"));//添加角色
+               v1 = GetPropertyObject(v, "TheOrganization");
+               BasicProperties.Add("Organization", GetDirectPropertyValueByName(v1, "Name"));//获取单位信息
+            }
         }
         public void WriteObject(StreamWriter writer,string key,object e)
         {
@@ -200,6 +211,21 @@ namespace Ifc2Json
             string json = JsonConvert.SerializeObject(e, Newtonsoft.Json.Formatting.Indented);
             writer.Write(json);
             writer.WriteLine(",");
+        }
+        public object GetPropertyObject(object o, string key)
+        {
+            PropertyInfo f = o.GetType().GetProperty(key);
+            object v = f.GetValue(o);
+            if (IsEntityCollection(f.PropertyType))//如果是集合使用第一个元素
+            {                
+                IEnumerable list = (IEnumerable)v;
+                foreach (object invobj in list)
+                {
+                    v = invobj;
+                    break;
+                }
+            }        
+            return v;
         }
     }
 }

@@ -450,8 +450,11 @@ namespace Ifc2Json
         public string GetDirectPropertyValueByName(object o, string name)
         {
             string value="";
-            PropertyInfo f =o.GetType().GetProperty(name);            
-            GetPropertyInfoValue(o, f, ref value);
+            if (o != null)
+            {
+                PropertyInfo f = o.GetType().GetProperty(name);
+                GetPropertyInfoValue(o, f, ref value);
+            }
             return value;
         }
         //获取IfcPropertySet集中的信息key-valuez值
