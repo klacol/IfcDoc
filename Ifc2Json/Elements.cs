@@ -12,12 +12,8 @@ namespace Ifc2Json
 {
     class Elements : Basic
     {
-        ArrayList units = new ArrayList();
+        public ArrayList units = new ArrayList();
         Dictionary<string, string> unitSymbol = new Dictionary<string, string>();//将单位与其symbol另存储，方便在属性值后加单位时查找
-        ArrayList products = new ArrayList();//存储构件与其对应的属性实例
-        ArrayList productsType = new ArrayList();//若将类型属性写在构件json文件大
-        ArrayList rooms = new ArrayList();//存储房间及其相关属性
-        ArrayList buildingStoreys = new ArrayList();//存储楼层及其相关属性
         public float lengthUnit;//ifc中定义的长度单位
         public Elements(Type typeProject) : base(typeProject)
         {
@@ -29,7 +25,7 @@ namespace Ifc2Json
             public string TypePropertyId { get; set; }  //构件的类型属性的id                                       
             public Dictionary<string, object> properties { get; set; }
         }
- 
+        //单位的结构
         protected internal class Unit
         {
             public string UnitType { get; set; }
@@ -38,167 +34,14 @@ namespace Ifc2Json
             public string Symbol { get; set; }
 
         }
-        //写json
+        //项目的结构
         protected internal class Project
         {
             public string Type { get; set; }//项目的实体名称
             public string Guid { get; set; }//项目的 guid 
             public object properties { get; set; }//项目的属性
         }
-        public void WriteJson(Stream stream, object root)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
 
-            if (root == null)
-                throw new ArgumentNullException("root");
-            StreamWriter writer = new StreamWriter(stream);
-            TraverseProject(root);//遍历内部结构获取构件集
-            DealUnits(root);
-            GetProductAndProperties();
-            GetRoomAndProperties();
-            GetTypeProperty();
-            Project project = new Project();
-            GetProjectProperties(root, project);//获取项目的相关信息
-            string json;
-            writer.WriteLine("{");//
-            writer.Write("\"IfcProject\":");
-            json= JsonConvert.SerializeObject(project, Newtonsoft.Json.Formatting.Indented);
-            writer.Write(json);
-            writer.WriteLine(",");
-            writer.Write("\"units\":");
-            json = JsonConvert.SerializeObject(units, Newtonsoft.Json.Formatting.Indented);
-            writer.Write(json);
-            writer.WriteLine(",");
-            writer.Write("\"buildingStoreys\":");           
-            json = JsonConvert.SerializeObject(buildingStoreys, Newtonsoft.Json.Formatting.Indented);
-            writer.Write(json);
-            writer.WriteLine(",");
-            writer.Write("\"rooms\":");
-            json = JsonConvert.SerializeObject(rooms, Newtonsoft.Json.Formatting.Indented);
-            writer.Write(json);
-            writer.WriteLine(",");
-            writer.Write("\"products\":");
-            json = JsonConvert.SerializeObject(products, Newtonsoft.Json.Formatting.Indented);
-            writer.WriteLine(json);
-            writer.WriteLine(",");
-            writer.Write("\"productsType\":");
-            json = JsonConvert.SerializeObject(productsType, Newtonsoft.Json.Formatting.Indented);
-            writer.WriteLine(json);
-            this.WriteFooter(writer);
-            writer.Flush();
-        }
-        //type类型属性
-        public void GetTypeProperty()
-        {
-            foreach (object e in elementsType)
-            {
-                ProductProperties p = new ProductProperties();
-                Dictionary<string, object> BasicProperties = new Dictionary<string, object>();
-                //Dictionary<string, Dictionary<string, string>> entityTypeProperties = new Dictionary<string, Dictionary<string, string>>();
-                Dictionary<string, object> entityTypeProperties = new Dictionary<string, object>();
-                p.Type = e.GetType().Name;
-                p.Guid = GetEntityId(e);
-                GetDirectFieldsValue(e, BasicProperties);
-                entityTypeProperties.Add("BasicProperties", BasicProperties);
-                ProductTypePropertiesValue(e, entityTypeProperties);
-                p.properties = entityTypeProperties;
-                productsType.Add(p);
-            }
-        }
-        //获取构件及其构件属性
-        public void GetProductAndProperties()
-        {
-
-           //物理构件
-           foreach (object e in elements)
-           {
-                ProductProperties p = new ProductProperties();
-                try
-                {  
-                    Dictionary<string, object> entityProperties = new Dictionary<string, object>();
-                    Dictionary<string, object> BasicProperties = new Dictionary<string, object>();
-                    HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
-                    HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
-                    GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
-                    GetDirectFieldsValue(e, BasicProperties);
-                    string type = e.GetType().Name;
-                    p.Guid = GetEntityId(e);
-                    p.Type = type;
-                    p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                    string floor = GetStoreyName(e);
-                    string layer = GetProductLayer(e);
-                    BasicProperties.Add("floor", floor);
-                    BasicProperties.Add("layer", layer);
-                    entityProperties.Add("BasicProperties", BasicProperties);
-
-                    GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                    p.properties = entityProperties;
-                    products.Add(p);
-                }
-                catch (Exception xx)
-                {
-                    //MessageBox.Show(xx.Message);
-                    Console.WriteLine(xx.Message);
-                    Console.WriteLine(p.Guid+" _"+p.Type);//当出现错误时输出当前构件的id
-                }
-            }
-           // Console.WriteLine("物理构件结束");
-        }
-        public void GetRoomAndProperties()
-        {
-            //获取空间结构的属性信息（先输出空间结构的，构件的位置信息会用到此）
-            foreach (object e in spatialElements)
-            {
-                try
-                {
-                    //空间结构还有几何表达信息（此处还未添加）               
-                Dictionary<string, object> entityProperties = new Dictionary<string, object>();
-                Dictionary<string, object> BasicProperties = new Dictionary<string, object>();
-                HashSet<object> RelPropertyEntities = new HashSet<object>();//该构件的属性信息所在的实体
-                HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
-                GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
-                GetDirectFieldsValue(e, BasicProperties);
-                string type = e.GetType().Name;
-                    if (type == "IfcSpace")
-                    {
-                        RoomProperties p = new RoomProperties();
-                        p.Guid = GetEntityId(e);
-                        p.Type = type;
-                        string floor = GetStoreyName(e);
-                        BasicProperties.Add("floor", floor);
-                        entityProperties.Add("BasicProperties", BasicProperties);
-                        GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                        p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                        p.properties = entityProperties;
-                        float height=0;
-                        Dictionary<string, object> shape = new Dictionary<string, object>();
-                        ShapeRepresentationWay(GetSpaceShapeEntity(e), ref height, shape);
-                        p.height = height;
-                        p.shape = shape;
-                        rooms.Add(p);
-                    }
-                    else if (type == "IfcBuildingStorey")
-                    {
-                        ProductProperties p = new ProductProperties();
-                        p.Guid = GetEntityId(e);
-                        p.Type = type;
-                        entityProperties.Add("BasicProperties", BasicProperties);
-                        GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
-                        p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                        p.properties = entityProperties;
-                        buildingStoreys.Add(p);
-                    }
-                }
-                catch (Exception xx)
-                {
-                    //MessageBox.Show(xx.Message);
-                    Console.WriteLine(xx.Message);
-                    Console.WriteLine(e.GetType().Name);
-                }
-            }
-            //Console.WriteLine("spatialElements结束");
-        }
         //获取属性集，//其属性在构件的属性集IsDefinedBy
         public void GetpropertyEntities(object o, HashSet<object> RelPropertyEntities, HashSet<object> TypePropertyEntities)
         {
@@ -556,8 +399,15 @@ namespace Ifc2Json
                     object value = f.GetValue(e);
                     if (value.GetType().Name == "IfcLengthMeasure")
                     {
-                        float va;                        if (v.Contains("E") || v.Contains("e"))//将科学计数法转为数值
-                        {                            decimal data = Convert.ToDecimal(Decimal.Parse(v, System.Globalization.NumberStyles.Float));                            va = float.Parse(data.ToString("0.00"));                        }                        else                        {                            va = float.Parse(v, System.Globalization.NumberStyles.Float) * lengthUnit;
+                        float va;
+                        if (v.Contains("E") || v.Contains("e"))//将科学计数法转为数值
+                        {
+                            decimal data = Convert.ToDecimal(Decimal.Parse(v, System.Globalization.NumberStyles.Float));
+                            va = float.Parse(data.ToString("0.00"));
+                        }
+                        else
+                        {
+                            va = float.Parse(v, System.Globalization.NumberStyles.Float) * lengthUnit;
                         }
                         Specific.Add(key, va);
                     }
@@ -787,8 +637,6 @@ namespace Ifc2Json
             }
             return str;
         }
-  
-
         // 获取构件的层级
         public string GetProductLayer(object e)
         {
@@ -824,24 +672,6 @@ namespace Ifc2Json
                 }
             }
             return layer;
-        }
-        //获取项目的相关信息
-        public void GetProjectProperties(object root,Project project)
-        {           
-            if (root.GetType().Name == "IfcProject")
-            {
-                project.Type = root.GetType().Name;
-                project.Guid = GetEntityId(root);
-                Dictionary <string, object> BasicProperties = new Dictionary<string, object>();
-                GetDirectFieldsValue(root, BasicProperties);              
-                string ApplicationFullName = GetDirectPropertyValueByName(application, "ApplicationFullName");//软件名称
-                BasicProperties.Add("ApplicationFullName", ApplicationFullName);
-                BasicProperties.Add("Schema Identifiers", "IFC2x3");
-                BasicProperties.Add("楼层数目", buildingStoreys.Count);//楼层数目
-                BasicProperties.Add("房间数目", rooms.Count);
-                BasicProperties.Add("构件数目", products.Count);
-                project.properties = BasicProperties;
-            }
         }
     }
 }

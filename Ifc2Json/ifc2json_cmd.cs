@@ -511,7 +511,7 @@ namespace Ifc2Json
 
                     //Serializer formatTarget = null;
                     //formatTarget = new XmlSerializer(typeProject);
-                    Elements formatTarget = new Elements(typeProject);
+                    JsonSerialization formatTarget = new JsonSerialization(typeProject);
                     if (formatTarget != null)
                     {
                         using (System.IO.FileStream streamTarget = System.IO.File.OpenWrite(OutputFile))
