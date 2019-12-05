@@ -53,14 +53,15 @@
     <Compile Include="Compiler.cs" />
     <Compile Include="CtlExpressG.cs" />
     <Compile Include="DocumentationISO.cs" />
-    <Compile Include="GetProperties.cs" />
+    <Compile Include="Elements.cs" />
     <Compile Include="ifc2json_cmd.cs" />
-    <Compile Include="Product.cs" />
+    <Compile Include="Basic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schema.cs" />
     <Compile Include="SchemaCNF.cs" />
     <Compile Include="SchemaDoc.cs" />
+    <Compile Include="SpatialElements.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

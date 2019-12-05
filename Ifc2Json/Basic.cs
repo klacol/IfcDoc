@@ -1,4 +1,5 @@
-﻿//获取构件集和空间集的实体实例
+﻿//保存构件集和空间集的实体实例
+//提供一些基本函数
 using BuildingSmart.Serialization.Xml;
 using Newtonsoft.Json;
 using System;
@@ -14,15 +15,15 @@ using System.Timers;
 
 namespace Ifc2Json
 {
-    public class Product : XmlSerializer
+    public class Basic : XmlSerializer
     {
         private static System.Timers.Timer testTimer;
         public object application;//记录产出软件
         Queue<object> queue = new Queue<object>();//存储反转属性实体当作根（递归遍历）
         public HashSet<object> elements = new HashSet<object>();//保存物理构件
-        public HashSet<object> elementsType = new HashSet<object>();//保存物理构件
+        public HashSet<object> elementsType = new HashSet<object>();//保存物理构件的type属性，一些公共属性
         public HashSet<object> spatialElements = new HashSet<object>();//保存空间构件ifspace、ifcbuilding等
-        public Product(Type typeProject) : base(typeProject)
+        public Basic(Type typeProject) : base(typeProject)
         {
         }
         //根据属性PropertyInfo获取其对应的值只讨论直接属性
@@ -212,8 +213,6 @@ namespace Ifc2Json
             testTimer.Enabled = true;//是否执行ElapsedEventArgs事件
             if (root == null)
                 throw new ArgumentNullException("root");
-
-
             HashSet<object> saved = new HashSet<object>();//保存之前遇到的实体，不重复遍历
             queue.Enqueue(root);
 
