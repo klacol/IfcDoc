@@ -14,6 +14,8 @@ namespace Ifc2Json
         ArrayList productsType = new ArrayList();//若将类型属性写在构件json文件大
         ArrayList rooms = new ArrayList();//存储房间及其相关属性
         ArrayList buildingStoreys = new ArrayList();//存储楼层及其相关属性
+        ArrayList sites = new ArrayList();//存储场地
+        ArrayList buildings = new ArrayList();//建筑
 
         public JsonSerialization(Type typeProject) : base(typeProject)
         {
@@ -29,7 +31,7 @@ namespace Ifc2Json
             TraverseProject(root);//遍历内部结构获取构件集
             DealUnits(root);//处理单位
             GetProductAndProperties();//获取构件与其属性
-            GetRoomAndProperties();//获取房间与其属性
+            GetSpatialElementAndProperties();//获取房间与其属性
             GetTypeProperty();//获取类型属性
             Project project = new Project();//一个IFC只会有一个项目project
             GetProjectProperties(root, project);//获取项目的相关信息
@@ -37,6 +39,8 @@ namespace Ifc2Json
             writer.WriteLine("{");
             WriteObject(writer, "IfcProject", project);
             WriteObject(writer, "units", units);
+            WriteObject(writer, "sites", sites);
+            WriteObject(writer, "buildings", buildings);
             WriteObject(writer, "buildingStoreys", buildingStoreys);
             WriteObject(writer, "rooms", rooms);
             WriteObject(writer, "products", products);            
@@ -67,7 +71,6 @@ namespace Ifc2Json
         //获取构件及其构件属性
         public void GetProductAndProperties()
         {
-
             //物理构件
             foreach (object e in elements)
             {
@@ -104,7 +107,7 @@ namespace Ifc2Json
             // Console.WriteLine("物理构件结束");
         }
         //获取房间及其相关属性
-        public void GetRoomAndProperties()
+        public void GetSpatialElementAndProperties()
         {
             //获取空间结构的属性信息（先输出空间结构的，构件的位置信息会用到此）
             foreach (object e in spatialElements)
@@ -137,7 +140,7 @@ namespace Ifc2Json
                         p.shape = shape;
                         rooms.Add(p);
                     }
-                    else if (type == "IfcBuildingStorey")
+                    else 
                     {
                         ProductProperties p = new ProductProperties();
                         p.Guid = GetEntityId(e);
@@ -145,8 +148,16 @@ namespace Ifc2Json
                         entityProperties.Add("BasicProperties", BasicProperties);
                         GetRelPropertyEntitiesValue(RelPropertyEntities, entityProperties);//获取关系实体集中的key-value
                         p.TypePropertyId = GetTypePropertyEntitiesId(TypePropertyEntities);
-                        p.properties = entityProperties;
-                        buildingStoreys.Add(p);
+                        p.properties = entityProperties;                      
+                        switch (type) {
+                            case "IfcBuildingStorey":
+                                buildingStoreys.Add(p);break;
+                            case "IfcSite":
+                                sites.Add(p); break;
+                            case "IfcBuilding":
+                                buildings.Add(p); break;
+                            default:break;
+                        }
                     }
                 }
                 catch (Exception xx)
