@@ -86,7 +86,7 @@ namespace Ifc2Json
                 string propertySetName = "";
                 Dictionary<string, string> propertiesFields = new Dictionary<string, string>();
                 GetPropertySetProperties(propertySet, ref propertySetName, propertiesFields);
-                if (propertySetName != ""&& propertiesFields!=null)
+                if (propertySetName != ""&& propertiesFields.Count!=0)
                 {
                     //出现有相同的propertySetName名称                
                     try
@@ -130,13 +130,14 @@ namespace Ifc2Json
                     t = e.GetType();
                     f = t.GetProperty("RelatingType");
                     typeEntity = f.GetValue(e);//得到相关的Type,例如IfcDoorType
+                    string EntityName = typeEntity.GetType().Name;
                                                //获取type的id 
                     if (elementsType.Contains(typeEntity))
                     {
                         value = GetEntityId(typeEntity);
                         //会出现ifcdoorstyle,目前不需要style
                     }
-                    else if (typeEntity.GetType().Name == "IfcDoorStyle" || typeEntity.GetType().Name == "IfcWindowStyle")
+                    else if (EntityName == "IfcDoorStyle" || EntityName == "IfcWindowStyle"|| EntityName == "IfcTypeProduct")
                     {
                         return value;
                     }
@@ -466,6 +467,7 @@ namespace Ifc2Json
                 PropertyInfo f; Type ft = null;
                 f = setType.GetProperty("Name");
                 GetPropertyInfoValue(propertySet, f, ref name);//返回其name值
+                name = name.Replace(".", "");
                 // HasProperties: 	SET [1:?] OF IfcProperty;
                 f = setType.GetProperty("HasProperties");
                 object properties = f.GetValue(propertySet);
@@ -552,6 +554,7 @@ namespace Ifc2Json
                                     value = encodedvalue;
                                 }
                                 //处理单位
+                                key = key.Replace(".", "");
                                 string str = DealIfcPropertySingleValueUnit(invobj);
                                 if (str != "")
                                 {
