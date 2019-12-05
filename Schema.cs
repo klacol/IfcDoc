@@ -225,6 +225,7 @@ namespace IfcDoc.Schema
 
 			return clone;
 		}
+		
 	}
 
 }

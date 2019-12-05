@@ -92,6 +92,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.11.12.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>packages\HtmlAgilityPack.1.11.12\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Markdig, Version=0.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Markdig.0.17.1\lib\net40\Markdig.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -178,11 +184,23 @@
     <Compile Include="FormSaveFolder.Designer.cs">
       <DependentUpon>FormSaveFolder.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormSelectPropertyConstant.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSelectPropertyConstant.Designer.cs">
+      <DependentUpon>FormSelectPropertyConstant.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormSelectProperty.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormSelectProperty.Designer.cs">
       <DependentUpon>FormSelectProperty.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSelectConstant.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSelectConstant.Designer.cs">
+      <DependentUpon>FormSelectConstant.cs</DependentUpon>
     </Compile>
     <Compile Include="FormSelectQuantity.cs">
       <SubType>Form</SubType>
@@ -421,6 +439,9 @@
     <EmbeddedResource Include="FormSaveFolder.resx">
       <DependentUpon>FormSaveFolder.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormSelectPropertyConstant.resx">
+      <DependentUpon>FormSelectPropertyConstant.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormSelectEntity.ja.resx">
       <DependentUpon>FormSelectEntity.cs</DependentUpon>
     </EmbeddedResource>
@@ -429,6 +450,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormSelectProperty.resx">
       <DependentUpon>FormSelectProperty.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSelectConstant.resx">
+      <DependentUpon>FormSelectConstant.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormSelectQuantity.resx">
       <DependentUpon>FormSelectQuantity.cs</DependentUpon>
@@ -535,6 +559,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

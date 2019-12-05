@@ -452,9 +452,7 @@ namespace IfcDoc
 										// use hashed guid
 										if (qset.Uuid == Guid.Empty)
 										{
-											System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
-											byte[] hash = md5.ComputeHash(Encoding.Default.GetBytes(qset.Name));
-											qset.Uuid = new Guid(hash);
+											qset.Uuid = BuildingSmart.Utilities.Conversion.GlobalId.HashGuid(qset.Name);
 										}
 
 										// everything is currently named "Base Quantities"; get name from file instead; e.g. "Qto_Beam"
@@ -479,7 +477,7 @@ namespace IfcDoc
 
 										foreach (QtoDef qtodef in qto.QtoDefs)
 										{
-											DocQuantity q = qset.RegisterQuantity(qtodef.Name);
+											DocQuantity q = qset.RegisterQuantity(qtodef.Name, m_project);
 											q.Documentation = qtodef.Definition;
 
 											switch (qtodef.QtoType)
@@ -921,7 +919,7 @@ namespace IfcDoc
 				{
 					Dictionary<string, DocObject> mapEntity = new Dictionary<string, DocObject>();
 					Dictionary<string, string> mapSchema = new Dictionary<string, string>();
-					BuildMaps(mapEntity, mapSchema);
+					this.m_project.BuildMaps(mapEntity, mapSchema);
 
 					DocumentationISO.DoExport(this.m_project, null, this.saveFileDialogExport.FileName, views, locales, scope, schemaNamespace, mapEntity);
 				}
@@ -1827,92 +1825,7 @@ namespace IfcDoc
 
 		#region TOOL
 
-		private void BuildMaps(Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema)
-		{
-			foreach (DocPropertyEnumeration def in this.m_project.PropertyEnumerations)
-			{
-				if (!mapEntity.ContainsKey(def.Name))
-				{
-					mapEntity.Add(def.Name, def);
-				}
-			}
-			foreach (DocSection docSection in this.m_project.Sections)
-			{
-				foreach (DocSchema docSchema in docSection.Schemas)
-				{
-					foreach (DocEntity def in docSchema.Entities)
-					{
-						if (def.Name != null)
-						{
-							if (!mapSchema.ContainsKey(def.Name))
-							{
-								mapSchema.Add(def.Name, docSchema.Name);
-							}
-
-							if (!mapEntity.ContainsKey(def.Name))
-							{
-								mapEntity.Add(def.Name, def);
-							}
-						}
-
-					}
-					foreach (DocType def in docSchema.Types)
-					{
-						// bug in vex file: IfcNullStyle included twice (?)
-						if (!mapSchema.ContainsKey(def.Name))
-						{
-							mapSchema.Add(def.Name, docSchema.Name);
-						}
-
-						if (!mapEntity.ContainsKey(def.Name))
-						{
-							mapEntity.Add(def.Name, def);
-						}
-					}
-					foreach (DocFunction def in docSchema.Functions)
-					{
-						// e.g. IfcDotProduct defined in multiple schemas!!!
-						if (!mapSchema.ContainsKey(def.Name))
-						{
-							mapSchema.Add(def.Name, docSchema.Name);
-						}
-						if (!mapEntity.ContainsKey(def.Name))
-						{
-							mapEntity.Add(def.Name, def);
-						}
-					}
-					foreach (DocGlobalRule def in docSchema.GlobalRules)
-					{
-						mapSchema.Add(def.Name, docSchema.Name);
-						if (!mapEntity.ContainsKey(def.Name))
-						{
-							mapEntity.Add(def.Name, def);
-						}
-					}
-					foreach (DocPropertySet def in docSchema.PropertySets)
-					{
-						if (def.Name != null)
-						{
-							mapSchema.Add(def.Name, docSchema.Name);
-						}
-						if (!mapEntity.ContainsKey(def.Name))
-						{
-							mapEntity.Add(def.Name, def);
-						}
-					}
-
-					foreach (DocQuantitySet def in docSchema.QuantitySets)
-					{
-						mapSchema.Add(def.Name, docSchema.Name);
-						if (!mapEntity.ContainsKey(def.Name))
-						{
-							mapEntity.Add(def.Name, def);
-						}
-					}
-				}
-			}
-
-		}
+		
 
 		private void toolStripMenuItemToolsISO_Click(object sender, EventArgs e)
 		{
@@ -3092,6 +3005,9 @@ namespace IfcDoc
 					{
 						//toolStripMenuItemInsertEnumerationConstant.Enabled = true;
 
+						this.toolStripMenuItemContextInsertConstant.Visible = true;
+						this.toolStripMenuItemContextInsert.Visible = true;
+
 						this.toolStripMenuItemContextIncludeConstant.Visible = true;
 						this.toolStripMenuItemContextInclude.Visible = true;
 					}
@@ -3244,6 +3160,9 @@ namespace IfcDoc
 
 					this.toolStripMenuItemContextIncludeProperty.Visible = true;
 					this.toolStripMenuItemContextInclude.Visible = true;
+
+					this.toolStripMenuItemContextInsert.Visible = true;
+					this.toolStripMenuItemContextInsertProperty.Visible = true;
 
 					this.ToolStripMenuItemEditCut.Enabled = true;
 					this.toolStripMenuItemEditPaste.Enabled = (this.m_clipboard is DocProperty);
@@ -3527,7 +3446,7 @@ namespace IfcDoc
 
 							if (obj is DocExample)
 							{
-								imgnew = Properties.Settings.Default.InputPathExamples + "\\" + imgold;
+								imgnew = Properties.Settings.Default.InputPathGeneral + "\\examples\\" + imgold;
 							}
 
 							content = content.Substring(0, i + 10) + imgnew + content.Substring(t);
@@ -4686,13 +4605,14 @@ namespace IfcDoc
 				DocProperty docPset = (DocProperty)this.treeView.SelectedNode.Tag;
 				docPset.Elements.Add(docProp);
 			}
+			m_project.Properties.Add(docProp);
 			docProp.PropertyType = DocPropertyTemplateTypeEnum.P_SINGLEVALUE;
 			this.treeView.SelectedNode = this.LoadNode(this.treeView.SelectedNode, docProp, docProp.Name, false);
 			this.toolStripMenuItemEditRename_Click(sender, e);
 		}
 		private void toolStripMenuItemIncludeProperty_Click(object sender, EventArgs e)
 		{
-			using (FormSelectProperty form = new FormSelectPropertyFromSchema(this.m_project, false))
+			using (FormSelectProperty form = new FormSelectGlobalProperty(this.m_project, false))
 			{
 				if (form.ShowDialog(this) == DialogResult.OK && form.SelectedProperty != null)
 				{
@@ -4708,6 +4628,57 @@ namespace IfcDoc
 						docProperty.Elements.Add(docProp);
 					}
 					this.treeView.SelectedNode = this.LoadNode(this.treeView.SelectedNode, docProp, docProp.Name, false);
+				}
+			}
+		}
+
+		private void toolStripMenuItemContextIncludeConstant_Click(object sender, EventArgs e)
+		{
+			using (FormSelectConstant form = new FormSelectConstant(this.m_project, null))
+			{
+				if (form.ShowDialog(this) == DialogResult.OK && form.Selection != null)
+				{
+					DocConstant docConstant = form.Selection;
+					if (this.treeView.SelectedNode.Tag is DocEnumeration)
+					{
+						DocEnumeration docEnumeration = (DocEnumeration)this.treeView.SelectedNode.Tag;
+						docEnumeration.Constants.Add(docConstant);
+					}
+					this.treeView.SelectedNode = this.LoadNode(this.treeView.SelectedNode, docConstant, docConstant.Name, false);
+				}
+			}
+		}
+
+		private void toolStripMenuItemContextIncludePropertyConstant_Click(object sender, EventArgs e)
+		{
+			using (FormSelectPropertyConstant form = new FormSelectPropertyConstant(this.m_project, null))
+			{
+				if (form.ShowDialog(this) == DialogResult.OK && form.Selection != null)
+				{
+					DocPropertyConstant docConstant = form.Selection;
+					if (this.treeView.SelectedNode.Tag is DocPropertyEnumeration)
+					{
+						DocPropertyEnumeration docEnumeration = (DocPropertyEnumeration)this.treeView.SelectedNode.Tag;
+						docEnumeration.Constants.Add(docConstant);
+					}
+					this.treeView.SelectedNode = this.LoadNode(this.treeView.SelectedNode, docConstant, docConstant.Name, false);
+				}
+			}
+		}
+
+		private void toolStripMenuItemContextIncludeQuantity_Click(object sender, EventArgs e)
+		{
+			using (FormSelectQuantity form = new FormSelectQuantity(null, this.m_project, false))
+			{
+				if (form.ShowDialog(this) == DialogResult.OK && form.SelectedQuantity != null)
+				{
+					DocQuantity docQuantity = form.SelectedQuantity;
+					if (this.treeView.SelectedNode.Tag is DocQuantitySet)
+					{
+						DocQuantitySet docQuantitySet = (DocQuantitySet)this.treeView.SelectedNode.Tag;
+						docQuantitySet.Quantities.Add(docQuantity);
+					}
+					this.treeView.SelectedNode = this.LoadNode(this.treeView.SelectedNode, docQuantity, docQuantity.Name, false);
 				}
 			}
 		}
@@ -4792,12 +4763,15 @@ namespace IfcDoc
 
 		private void toolStripMenuItemInsertQuantity_Click(object sender, EventArgs e)
 		{
-			DocQuantitySet docPset = (DocQuantitySet)this.treeView.SelectedNode.Tag;
-			DocQuantity docProp = new DocQuantity();
-			docPset.Quantities.Add(docProp);
-			docProp.QuantityType = DocQuantityTemplateTypeEnum.Q_COUNT;
-			this.treeView.SelectedNode = this.LoadNode(this.treeView.SelectedNode, docProp, docProp.Name, false);
-			this.toolStripMenuItemEditRename_Click(sender, e);
+			TreeNode tn = this.treeView.SelectedNode;
+			if (tn.Tag == typeof(DocQuantity))
+			{
+				DocQuantity docQuantity = new DocQuantity();
+				this.m_project.Quantities.Add(docQuantity);
+
+				this.treeView.SelectedNode = this.LoadNode(tn, docQuantity, docQuantity.ToString(), false);
+				toolStripMenuItemEditRename_Click(this, e);
+			}
 		}
 
 		private void toolStripMenuItemInsertConceptRoot_Click(object sender, EventArgs e)
@@ -4849,7 +4823,7 @@ namespace IfcDoc
 				// build dictionary to map IFC type name to schema
 				Dictionary<string, string> mapSchema = new Dictionary<string, string>();
 
-				this.BuildMaps(mapEntity, mapSchema);
+				this.m_project.BuildMaps(mapEntity, mapSchema);
 
 				string path = Properties.Settings.Default.OutputPath;
 
@@ -4957,7 +4931,7 @@ namespace IfcDoc
 
 			Dictionary<string, DocObject> mapEntity = new Dictionary<string, DocObject>();
 			Dictionary<string, string> mapSchema = new Dictionary<string, string>();
-			BuildMaps(mapEntity, mapSchema);
+			this.m_project.BuildMaps(mapEntity, mapSchema);
 			FormatCSC.GenerateCode(this.m_project, folderBrowserDialog.SelectedPath, mapEntity, DocCodeEnum.All);
 		}
 		private void toolStripMenuItemInsertExample_Click(object sender, EventArgs e)
@@ -5448,7 +5422,7 @@ namespace IfcDoc
 			// new tabular validation
 			Dictionary<string, DocObject> mapEntity = new Dictionary<string, DocObject>();
 			Dictionary<string, string> mapSchema = new Dictionary<string, string>();
-			this.BuildMaps(mapEntity, mapSchema);
+			this.m_project.BuildMaps(mapEntity, mapSchema);
 			using (FormValidateMappings formMap = new FormValidateMappings(this.m_project, docView, mapEntity, this.m_testInstances))
 			{
 				formMap.ShowDialog();
@@ -6616,7 +6590,7 @@ namespace IfcDoc
 				{
 					Dictionary<string, DocObject> mapEntity = new Dictionary<string, DocObject>();
 					Dictionary<string, string> mapSchema = new Dictionary<string, string>();
-					BuildMaps(mapEntity, mapSchema);
+					this.m_project.BuildMaps(mapEntity, mapSchema);
 
 					switch (form.Language)
 					{
@@ -6889,7 +6863,7 @@ namespace IfcDoc
 		{
 			TreeNode tn = this.treeView.SelectedNode;
 
-			if (tn.Tag == typeof(DocEnumeration))
+			if (tn.Tag == typeof(DocPropertyEnumeration))
 			{
 				DocPropertyEnumeration docType = new DocPropertyEnumeration();
 				this.m_project.PropertyEnumerations.Add(docType);
@@ -6900,14 +6874,15 @@ namespace IfcDoc
 
 		private void toolStripMenuItemInsertPropertyConstant_Click(object sender, EventArgs e)
 		{
-			TreeNode tnParent = this.treeView.SelectedNode;
-			DocPropertyEnumeration docEnum = (DocPropertyEnumeration)tnParent.Tag;
+			TreeNode tn = this.treeView.SelectedNode;
+			if (tn.Tag == typeof(DocPropertyConstant))
+			{
+				DocPropertyConstant docPropertyConst = new DocPropertyConstant();
+				this.m_project.PropertyConstants.Add(docPropertyConst);
 
-			DocPropertyConstant docConst = new DocPropertyConstant();
-			docEnum.Constants.Add(docConst);
-
-			this.treeView.SelectedNode = this.LoadNode(tnParent, docConst, docConst.ToString(), false);
-			toolStripMenuItemEditRename_Click(this, e);
+				this.treeView.SelectedNode = this.LoadNode(tn, docPropertyConst, docPropertyConst.ToString(), false);
+				toolStripMenuItemEditRename_Click(this, e);
+			}
 		}
 
 		private void ctlExpressG_LinkOperation(object sender, EventArgs e)
@@ -7462,12 +7437,15 @@ namespace IfcDoc
 
 		private void toolStripMenuItemInsertEnumerationConstant_Click(object sender, EventArgs e)
 		{
-			TreeNode tnParent = this.treeView.SelectedNode;
-			DocEnumeration docEnum = (DocEnumeration)tnParent.Tag;
-			DocConstant docConstant = new DocConstant();
-			docEnum.Constants.Add(docConstant);
-			this.treeView.SelectedNode = this.LoadNode(tnParent, docConstant, docConstant.ToString(), false);
-			toolStripMenuItemEditRename_Click(this, e);
+			TreeNode tn = this.treeView.SelectedNode;
+			if (tn.Tag == typeof(DocConstant))
+			{
+				DocConstant docConst = new DocConstant();
+				this.m_project.Constants.Add(docConst);
+
+				this.treeView.SelectedNode = this.LoadNode(tn, docConst, docConst.ToString(), false);
+				toolStripMenuItemEditRename_Click(this, e);
+			}
 		}
 
 		private void toolStripMenuItemInsertComment_Click(object sender, EventArgs e)
@@ -8727,7 +8705,7 @@ namespace IfcDoc
 
 			Dictionary<string, DocObject> mapEntity = new Dictionary<string, DocObject>();
 			Dictionary<string, string> mapSchema = new Dictionary<string, string>();
-			BuildMaps(mapEntity, mapSchema);
+			this.m_project.BuildMaps(mapEntity, mapSchema);
 
 			Type t = instance.GetType();
 			DocDefinition docDef = this.m_project.GetDefinition(t.Name);
@@ -9811,7 +9789,7 @@ namespace IfcDoc
 			DialogResult res = folderBrowserDialog.ShowDialog();
 			if (res != System.Windows.Forms.DialogResult.OK)
 				return;
-
+			Properties.Settings.Default.InputPathGeneral = Path.Combine( folderBrowserDialog.SelectedPath, "figures");
 			this.SetCurrentFile(null);
 
 			this.m_mapTree.Clear();
@@ -9846,8 +9824,10 @@ namespace IfcDoc
 			DialogResult res = folderBrowserDialog.ShowDialog();
 			if (res != System.Windows.Forms.DialogResult.OK)
 				return;
+			Properties.Settings.Default.InputPathGeneral = Path.Combine( folderBrowserDialog.SelectedPath, "figures");
 			XmlFolderSerializer folderSerializer = new XmlFolderSerializer(typeof(DocProject));
 			folderSerializer.AddFilePrefix(typeof(DocDefinition), "Ifc");
+			folderSerializer.AddFilePrefix(typeof(DocPropertyEnumeration), "PEnum_");
 			folderSerializer.WriteObject(folderBrowserDialog.SelectedPath, this.m_project);
 
 			//using (FormSaveFolder form = new FormSaveFolder())
@@ -9946,7 +9926,7 @@ namespace IfcDoc
 
 			Dictionary<string, DocObject> mapEntity = new Dictionary<string, DocObject>();
 			Dictionary<string, string> mapSchema = new Dictionary<string, string>();
-			this.BuildMaps(mapEntity, mapSchema);
+			this.m_project.BuildMaps(mapEntity, mapSchema);
 
 			foreach (DocModelView docView in this.m_project.ModelViews)
 			{
@@ -10189,8 +10169,7 @@ namespace IfcDoc
 
 			this.LoadTree();
 		}
-
-
+		
 	}
 
 }

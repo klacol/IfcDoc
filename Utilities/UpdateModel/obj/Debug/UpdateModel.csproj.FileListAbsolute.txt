@@ -1,7 +1,0 @@
-F:\My Work\Open Source\building smart\IfcDoc\bin\x64\Debug\UpdateModel.exe.config
-F:\My Work\Open Source\building smart\IfcDoc\bin\x64\Debug\UpdateModel.exe
-F:\My Work\Open Source\building smart\IfcDoc\bin\x64\Debug\UpdateModel.pdb
-F:\My Work\Open Source\building smart\IfcDoc\Utilities\UpdateModel\obj\Debug\UpdateModel.csproj.CoreCompileInputs.cache
-F:\My Work\Open Source\building smart\IfcDoc\Utilities\UpdateModel\obj\Debug\UpdateModel.csproj.CopyComplete
-F:\My Work\Open Source\building smart\IfcDoc\Utilities\UpdateModel\obj\Debug\UpdateModel.exe
-F:\My Work\Open Source\building smart\IfcDoc\Utilities\UpdateModel\obj\Debug\UpdateModel.pdb

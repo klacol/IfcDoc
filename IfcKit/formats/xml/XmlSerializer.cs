@@ -111,6 +111,8 @@ namespace BuildingSmart.Serialization.Xml
 		private object ReadEntity(XmlReader reader, object parent, PropertyInfo propInfo, IDictionary<string, object> instances, string typename, QueuedObjects queuedObjects, bool nestedElementDefinition, int indent)
 		{
 			string readerLocalName = reader.LocalName;
+			while (reader.NodeType == XmlNodeType.XmlDeclaration || reader.NodeType == XmlNodeType.Whitespace || reader.NodeType == XmlNodeType.Comment || reader.NodeType == XmlNodeType.None)
+				reader.Read();
 			//System.Diagnostics.Debug.WriteLine(new string(' ', indent) + ">>ReadEntity: " + readerLocalName + " " + (parent == null ? "" : parent.GetType().Name + "." + (propInfo == null ? "null" : propInfo.Name)));
 			if (string.IsNullOrEmpty(typename))
 			{
@@ -118,7 +120,7 @@ namespace BuildingSmart.Serialization.Xml
 				if(string.IsNullOrEmpty(typename))
 				{
 					reader.Read();
-					while (reader.NodeType == XmlNodeType.XmlDeclaration || reader.NodeType == XmlNodeType.Whitespace)
+					while (reader.NodeType == XmlNodeType.Whitespace || reader.NodeType == XmlNodeType.Comment)
 						reader.Read();
 					typename = reader.LocalName;
 				}
@@ -313,8 +315,8 @@ namespace BuildingSmart.Serialization.Xml
 			bool isNested = (t == null || reader.AttributeCount == 0) && nestedElementDefinition;
 			while (reader.Read())
 			{
-				if (reader.NodeType == XmlNodeType.Whitespace)
-					continue; 
+				if (reader.NodeType == XmlNodeType.Whitespace || reader.NodeType == XmlNodeType.Comment)
+					continue;
 				if(reader.NodeType == XmlNodeType.EndElement)
 				{
 					//System.Diagnostics.Debug.WriteLine(new string(' ', indent) + "!!ReadEntity " + readerLocalName + " " + (t == null ? "" : ": " + t.Name + ".") + reader.LocalName + " " + entity.ToString() + " " + reader.NodeType);
@@ -613,12 +615,11 @@ namespace BuildingSmart.Serialization.Xml
 				throw new ArgumentNullException("root");
 
 			// pass 1: (first time ever encountering for serialization) -- determine which entities require IDs -- use a null stream
-			int nextID = 0;
-			writeFirstPassForIds(root, new HashSet<string>(), ref nextID);
+			writeFirstPassForIds(root, new HashSet<string>());
 			// pass 2: write to file -- clear save map; retain ID map
-			writeRootObject(stream, root, new HashSet<string>(), false, ref nextID);
+			writeRootObject(stream, root, new HashSet<string>(), false);
 		}
-		internal protected void writeFirstPassForIds(object root, HashSet<string> propertiesToIgnore, ref int nextID)
+		internal protected void writeFirstPassForIds(object root, HashSet<string> propertiesToIgnore)
 		{
 			int indent = 0;
 			StreamWriter writer = new StreamWriter(Stream.Null);
@@ -627,17 +628,16 @@ namespace BuildingSmart.Serialization.Xml
 			while (queue.Count > 0)
 			{
 				object ent = queue.Dequeue();
-				if (string.IsNullOrEmpty(_ObjectStore.EncounteredId(ent)))
+				if (!_ObjectStore.isSerialized(ent))
 				{
-					this.WriteEntity(writer, ref indent, ent, propertiesToIgnore, queue, true, ref nextID, "", "");
+					this.WriteEntity(writer, ref indent, ent, propertiesToIgnore, queue, true, "", "");
 				}
 			}
 			// pass 2: write to file -- clear save map; retain ID map
-			_ObjectStore.ClearEncountered();
 		}
-		internal protected void writeObject(Stream stream, object root, HashSet<string> propertiesToIgnore, ref int nextID)
+		internal protected void writeObject(Stream stream, object root, HashSet<string> propertiesToIgnore)
 		{
-			writeRootObject(stream, root, propertiesToIgnore, false, ref nextID);
+			writeRootObject(stream, root, propertiesToIgnore, false);
 		}
 		
 
@@ -674,10 +674,10 @@ namespace BuildingSmart.Serialization.Xml
 		{
 		}
 
-		private void writeRootObject(Stream stream, object root, HashSet<string> propertiesToIgnore, bool isIdPass, ref int nextID)
+		private void writeRootObject(Stream stream, object root, HashSet<string> propertiesToIgnore, bool isIdPass)
 		{
 			int indent = 0;
-			StreamWriter writer = new StreamWriter(stream);
+			StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
 
 			this.WriteHeader(writer);
 
@@ -705,7 +705,7 @@ namespace BuildingSmart.Serialization.Xml
 				this.WriteAttributeDelimiter(writer);
 			}
 			Queue<object> queue = new Queue<object>();
-			bool closeelem = this.WriteEntityAttributes(writer, ref indent, root, propertiesToIgnore, queue, isIdPass, ref nextID);
+			bool closeelem = this.WriteEntityAttributes(writer, ref indent, root, propertiesToIgnore, queue, isIdPass);
 			if (!closeelem)
 			{
 				if (queue.Count == 0)
@@ -724,16 +724,16 @@ namespace BuildingSmart.Serialization.Xml
 				this.WriteRootDelimeter(writer);
 
 				object ent = queue.Dequeue();
-				if (string.IsNullOrEmpty(_ObjectStore.EncounteredId(ent)))
+				if (!_ObjectStore.isSerialized(ent))
 				{
-					this.WriteEntity(writer, ref indent, ent, propertiesToIgnore, queue, isIdPass, ref nextID, "", "");
+					this.WriteEntity(writer, ref indent, ent, propertiesToIgnore, queue, isIdPass, "", "");
 				}
 			}
 			this.WriteEndElementEntity(writer, ref indent, typeName);
 			this.WriteFooter(writer);
 			writer.Flush();
 		}
-		private void WriteEntity(StreamWriter writer, ref int indent, object o, HashSet<string> propertiesToIgnore, Queue<object> queue, bool isIdPass, ref int nextID, string elementName, string elementTypeName)
+		private void WriteEntity(StreamWriter writer, ref int indent, object o, HashSet<string> propertiesToIgnore, Queue<object> queue, bool isIdPass, string elementName, string elementTypeName)
 		{
 			// sanity check
 			if (indent > 100)
@@ -765,7 +765,7 @@ namespace BuildingSmart.Serialization.Xml
 					}
 				}
 			}
-			bool close = this.WriteEntityAttributes(writer, ref indent, o, propertiesToIgnore, queue, isIdPass, ref nextID);
+			bool close = this.WriteEntityAttributes(writer, ref indent, o, propertiesToIgnore, queue, isIdPass);
 			if (close)
 			{
 				this.WriteEndElementEntity(writer, ref indent, name);
@@ -893,27 +893,30 @@ namespace BuildingSmart.Serialization.Xml
 		/// </summary>
 		/// <param name="o"></param>
 		/// <returns></returns>
-		private bool WriteEntityAttributes(StreamWriter writer, ref int indent, object o, HashSet<string> propertiesToIgnore, Queue<object> queue, bool isIdPass, ref int nextID)
+		private bool WriteEntityAttributes(StreamWriter writer, ref int indent, object o, HashSet<string> propertiesToIgnore, Queue<object> queue, bool isIdPass)
 		{
 			Type t = o.GetType(), stringType = typeof(String);
 
-			string id = _ObjectStore.EncounteredId(o);
-			if (!string.IsNullOrEmpty(id))
-			{
-				_ObjectStore.MarkReferenced(o, id);
-				this.WriteReference(writer, indent, id);
-				return false;
-			}
+
 			// give it an ID if needed (first pass)
 			// mark as saved
-			id = _ObjectStore.IdentifyId(o, isIdPass, ref nextID);
-
-			if (string.IsNullOrEmpty(id))
-				_ObjectStore.MarkEncountered(o, ref nextID);
+			if (isIdPass)
+			{
+				int count = _ObjectStore.LogObject(o);
+				if(count > 1)
+					return false;
+			}
 			else
 			{
-				this.WriteIdentifier(writer, indent, id);
-				_ObjectStore.MarkEncountered(o, id);
+				string id = _ObjectStore.SerializedId(o);
+				if (!string.IsNullOrEmpty(id))
+				{
+					this.WriteReference(writer, indent, id);
+					return false;
+				}
+				id = _ObjectStore.ReferenceId(o);
+				if (!string.IsNullOrEmpty(id))
+					this.WriteIdentifier(writer, indent, id);
 			}
 
 			bool previousattribute = false;
@@ -1128,7 +1131,7 @@ namespace BuildingSmart.Serialization.Xml
 									WriteOpenElement(writer);
 									open = true;
 								}
-								WriteEntity(writer, ref indent, value, propertiesToIgnore, queue, isIdPass, ref nextID, fieldName, fieldTypeName);
+								WriteEntity(writer, ref indent, value, propertiesToIgnore, queue, isIdPass, fieldName, fieldTypeName);
 								continue;
 
 							}
@@ -1156,7 +1159,7 @@ namespace BuildingSmart.Serialization.Xml
 								this.WriteAttributeDelimiter(writer);
 							}
 							previousattribute = true;
-							WriteAttribute(writer, ref indent, o, new HashSet<string>(), f, queue, isIdPass, ref nextID);
+							WriteAttribute(writer, ref indent, o, new HashSet<string>(), f, queue, isIdPass);
 						}
 					}
 					else if (dataMemberAttribute != null)
@@ -1177,7 +1180,7 @@ namespace BuildingSmart.Serialization.Xml
 											WriteOpenElement(writer);
 											open = true;
 										}
-										WriteEntity(writer, ref indent, value, propertiesToIgnore, queue, isIdPass, ref nextID, fieldName, fieldTypeName);
+										WriteEntity(writer, ref indent, value, propertiesToIgnore, queue, isIdPass, fieldName, fieldTypeName);
 										continue;
 									}
 
@@ -1208,7 +1211,7 @@ namespace BuildingSmart.Serialization.Xml
 									}
 									previousattribute = true;
 
-									WriteAttribute(writer, ref indent, o, new HashSet<string>(), f, queue, isIdPass, ref nextID);
+									WriteAttribute(writer, ref indent, o, new HashSet<string>(), f, queue, isIdPass);
 								}
 							}
 						}
@@ -1222,7 +1225,7 @@ namespace BuildingSmart.Serialization.Xml
 							IEnumerable invlist = (IEnumerable)value;
 							foreach (object invobj in invlist)
 							{
-								if (string.IsNullOrEmpty(_ObjectStore.EncounteredId(invobj)))
+								if (!_ObjectStore.isSerialized(invobj))
 									queue.Enqueue(invobj);
 							}
 						}
@@ -1238,7 +1241,7 @@ namespace BuildingSmart.Serialization.Xml
 					open = true;
 				}
 				foreach (object obj in enumerable)
-					WriteEntity(writer, ref indent, obj, propertiesToIgnore, queue, isIdPass, ref nextID, "", "");
+					WriteEntity(writer, ref indent, obj, propertiesToIgnore, queue, isIdPass, "", "");
 			}
 			if (!open)
 			{
@@ -1248,7 +1251,7 @@ namespace BuildingSmart.Serialization.Xml
 			return open;
 		}
 
-		private void WriteAttribute(StreamWriter writer, ref int indent, object o, HashSet<string> propertiesToIgnore, PropertyInfo f, Queue<object> queue, bool isIdPass, ref int nextID)
+		private void WriteAttribute(StreamWriter writer, ref int indent, object o, HashSet<string> propertiesToIgnore, PropertyInfo f, Queue<object> queue, bool isIdPass)
 		{
 			object v = f.GetValue(o);
 			if (v == null)
@@ -1258,7 +1261,7 @@ namespace BuildingSmart.Serialization.Xml
 			string typeName = TypeSerializeName(o.GetType());
 			if(string.Compare(memberName, typeName) == 0)
 			{
-				WriteEntity(writer, ref indent, v, propertiesToIgnore, queue, isIdPass, ref nextID, memberName, typeName);
+				WriteEntity(writer, ref indent, v, propertiesToIgnore, queue, isIdPass, memberName, typeName);
 				return;
 			}
 			this.WriteStartElementAttribute(writer, ref indent, memberName);
@@ -1401,7 +1404,7 @@ namespace BuildingSmart.Serialization.Xml
 							{
 								// only one item, e.g. StyledByItem\IfcStyledItem
 								this.WriteEntityStart(writer, ref indent);
-								bool closeelem = this.WriteEntityAttributes(writer, ref indent, e, propertiesToIgnore, queue, isIdPass, ref nextID);
+								bool closeelem = this.WriteEntityAttributes(writer, ref indent, e, propertiesToIgnore, queue, isIdPass);
 								if (!closeelem)
 								{
 									this.WriteCloseElementAttribute(writer, ref indent);
@@ -1415,7 +1418,7 @@ namespace BuildingSmart.Serialization.Xml
 							}
 							else
 							{
-								this.WriteEntity(writer, ref indent, e, propertiesToIgnore, queue, isIdPass, ref nextID, "", "");
+								this.WriteEntity(writer, ref indent, e, propertiesToIgnore, queue, isIdPass, "", "");
 							}
 
 							needdelim = true;
@@ -1473,7 +1476,7 @@ namespace BuildingSmart.Serialization.Xml
 					{
 						this.WriteType(writer, indent, vt.Name);
 					}
-					bool closeelem = this.WriteEntityAttributes(writer, ref indent, v, new HashSet<string>(), queue, isIdPass, ref nextID);
+					bool closeelem = this.WriteEntityAttributes(writer, ref indent, v, new HashSet<string>(), queue, isIdPass);
 
 					if (!closeelem)
 					{
@@ -1486,7 +1489,7 @@ namespace BuildingSmart.Serialization.Xml
 				else
 				{
 					// if rooted, then check if we need to use reference; otherwise embed
-					this.WriteEntity(writer, ref indent, v, new HashSet<string>(), queue, isIdPass, ref nextID, "", "");
+					this.WriteEntity(writer, ref indent, v, new HashSet<string>(), queue, isIdPass, "", "");
 				}
 			}
 
@@ -1643,105 +1646,205 @@ namespace BuildingSmart.Serialization.Xml
 
 		protected internal class ObjectStore
 		{
-			internal bool UseUniqueIdReferences { get; set; } = true;
-			private Dictionary<object, string> IdMap = new Dictionary<object, string>();
-			private Dictionary<object, string> EncounteredObjects = new Dictionary<object, string>();
-			private Dictionary<object, string> ReferencedObjects = new Dictionary<object, string>();
-			
-			private string validId(string str)
+			private class Item
 			{
-				string result = Regex.Replace(str.Trim(), @"\s+", "_");
-				result = Regex.Replace(result, @"[^0-9a-zA-Z_]+", string.Empty);
-				char c = result[0];
-				return ((char.IsDigit(c) || c == '$' || c == '-' || c == '.') ? "x" : "") + result;
-			}
-			internal string UniqueId(object o, ref int nextID)
-			{
-				if (UseUniqueIdReferences)
+				internal string Id = "";
+				internal int Count = 1;
+				internal bool Serialized = false;
+
+				internal Item(object obj, bool useUniqueIdReferences, long index)
 				{
-					Type ot = o.GetType();
-					PropertyInfo propertyInfo = ot.GetProperty("id", typeof(string));
-					
-					if (propertyInfo != null)
+					Id = UniqueId(obj, useUniqueIdReferences, index);
+				}
+				public override string ToString()
+				{
+					return Id + " " + Count + " " + Serialized;
+				}
+
+				private string validId(string str)
+				{
+					string result = Regex.Replace(str.Trim(), @"\s+", "_");
+					result = Regex.Replace(result, @"[^0-9a-zA-Z_]+", string.Empty);
+					char c = result[0];
+					return ((char.IsDigit(c) || c == '$' || c == '-' || c == '.') ? "x" : "") + result;
+				}
+
+				private string UniqueId(object o, bool useUniqueIdReferences, long index)
+				{
+					if (useUniqueIdReferences)
 					{
-						object obj = propertyInfo.GetValue(o);
-						if (obj != null)
+						Type ot = o.GetType();
+						PropertyInfo propertyInfo = ot.GetProperty("id", typeof(string));
+
+						if (propertyInfo != null)
 						{
-							string str = obj.ToString();
-							if(!string.IsNullOrEmpty(str))
+							object obj = propertyInfo.GetValue(o);
+							if (obj != null)
 							{
-								return validId(str);
+								string str = obj.ToString();
+								if (!string.IsNullOrEmpty(str))
+								{
+									return validId(str);
+								}
+							}
+						}
+
+						propertyInfo = ot.GetProperty("GlobalId");
+						if (propertyInfo != null)
+						{
+							object obj = propertyInfo.GetValue(o);
+							if (obj != null)
+							{
+								string globalId = obj.ToString();
+								if (!string.IsNullOrEmpty(globalId))
+								{
+									PropertyInfo propertyInfoName = ot.GetProperty("Name");
+									if (propertyInfoName != null)
+									{
+										obj = propertyInfoName.GetValue(o);
+										if (obj != null)
+										{
+											string name = obj.ToString();
+											if (!string.IsNullOrEmpty(name))
+												return validId(name + "_" + globalId);
+										}
+									}
+									return validId(globalId);
+								}
 							}
 						}
 					}
+					return "i" + index;
+				}
+			}
+			internal bool UseUniqueIdReferences { get; set; } = true;
+			private ObjectIDGenerator IdGenerator = new ObjectIDGenerator();
+			private Dictionary<long,Item> Items = new Dictionary<long, Item>() { };
 
-					propertyInfo = ot.GetProperty("GlobalId");
-					if(propertyInfo != null)
+			internal string SerializedId(object obj)
+			{
+				bool firstTime = true;
+				long index = IdGenerator.GetId(obj, out firstTime);
+				if (firstTime)
+					return "";
+
+				Item item = null;
+				if (Items.TryGetValue(index, out item))
+				{
+					if (item.Count > 1)
 					{
-						object obj = propertyInfo.GetValue(o);
-						if(obj != null)
-						{
-							string globalId = obj.ToString();
-							if(!string.IsNullOrEmpty(globalId))
-							{
-								PropertyInfo propertyInfoName = ot.GetProperty("Name");
-								if(propertyInfoName != null)
-								{
-									obj = propertyInfoName.GetValue(o);
-									if(obj != null)
-									{
-										string name = obj.ToString();
-										if (!string.IsNullOrEmpty(name))
-											return validId(name + "_" + globalId);
-									}
-								}
-								return validId(globalId);
-							}
-						}
+						if (item.Serialized)
+							return item.Id;
 					}
 				}
-				nextID++;
-				return "i" + nextID;
-			}
-			internal void MarkReferenced(Object obj, string id)
-			{
-				ReferencedObjects[obj] = id;
-			}
-			internal string MarkEncountered(Object obj, string id)
-			{
-				return EncounteredObjects[obj] = id;
-			}
-			internal string MarkEncountered(Object obj, ref int nextId)
-			{
-				return MarkEncountered(obj,UniqueId(obj, ref nextId));
-			}
-			internal string EncounteredId(object obj)
-			{
-				string id = "";
-				if (EncounteredObjects.TryGetValue(obj, out id))
-					return id;
 				return null;
 			}
-			internal string IdentifyId(object obj, bool isIdPass, ref int nextId)
+			internal string ReferenceId(object obj)
 			{
-				string id = "";
-				if (ReferencedObjects.TryGetValue(obj, out id))
-					return id;
-				if (isIdPass)
+				bool firstTime = true;
+				long index = IdGenerator.GetId(obj, out firstTime);
+				if (firstTime)
+					return "";
+
+				Item item = null;
+				if (Items.TryGetValue(index, out item))
 				{
-					if (IdMap.TryGetValue(obj, out id))
-						return id;
-					return IdMap[obj] = UniqueId(obj, ref nextId);
+					item.Serialized = true;
+					if (item.Count > 1)
+						return item.Id;
 				}
-				return "";
+				return null;
 			}
-			internal void RemoveEncountered(object obj)
+			internal int LogObject(object obj)
 			{
-				EncounteredObjects.Remove(obj);
+				bool firstTime = true;
+				long index = IdGenerator.GetId(obj, out firstTime);
+				if (firstTime)
+					Items[index] = new Item(obj, UseUniqueIdReferences, index);
+				else
+				{
+					Item item = null;
+					if (Items.TryGetValue(index, out item))
+					{
+						item.Count++;
+						return item.Count;
+					}
+					else
+						Items[index] = new Item(obj, UseUniqueIdReferences, index);
+				}
+				return 1;
 			}
-			internal void ClearEncountered()
+			internal bool isSerialized(object obj)
 			{
-				EncounteredObjects.Clear();
+				bool firstTime = true;
+				long index = IdGenerator.GetId(obj, out firstTime);
+				Item item = null;
+				if (Items.TryGetValue(index, out item))
+				{
+					return item.Serialized;
+				}
+				return false;
+			}
+
+			internal void MarkSerialized(object obj)
+			{
+				bool firstTime = true;
+				long index = IdGenerator.GetId(obj, out firstTime);
+				Item item = null;
+				if (Items.TryGetValue(index, out item))
+					item.Serialized = true;
+				else
+					Items[index] = new Item(obj, UseUniqueIdReferences, index) { Serialized = true, Count = 2 };
+			}
+			internal void UnMarkSerialized(object obj)
+			{
+				bool firstTime = true;
+				long index = IdGenerator.GetId(obj, out firstTime);
+				Item item = null;
+				if (Items.TryGetValue(index, out item))
+					item.Serialized = false;
+				else
+					Items[index] = new Item(obj, UseUniqueIdReferences, index) { Serialized = false, Count = 2 };
+			}
+		}
+
+
+		public List<object> ExtractObjects(object o, Type baseType)
+		{
+			ObjectIDGenerator idGenerator = new ObjectIDGenerator();
+			List<object> result = new List<object>();
+			extractObjects(o, idGenerator, baseType, result);
+			return result;
+		}
+
+		private void extractObjects(object o, ObjectIDGenerator idGenerator, Type baseType, List<object> objects)
+		{
+			bool firstTime = false;
+			idGenerator.GetId(o, out firstTime);
+			if (firstTime)
+			{
+				Type objectType = o.GetType();
+				if(objectType == baseType || objectType.IsSubclassOf(baseType))
+					objects.Add(o);
+				IList<PropertyInfo> fields = GetFieldsOrdered(o.GetType());
+				foreach(PropertyInfo field in fields)
+				{
+					if (field == null)
+						continue;
+					object val = field.GetValue(o);
+					if (val == null)
+						continue;
+
+					Type t = val.GetType();
+					if (typeof(IEnumerable).IsAssignableFrom(t) && t.IsGenericType)
+					{
+						IEnumerable enumerable = (IEnumerable) val;
+						foreach (object obj in enumerable)
+							extractObjects(obj, idGenerator, baseType, objects);
+					}
+					else if(!t.IsValueType)
+						extractObjects(val, idGenerator, baseType, objects);
+				}
 			}
 		}
 	}

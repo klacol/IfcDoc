@@ -779,25 +779,25 @@
     <value>&amp;Insert</value>
   </data>
   <data name="toolStripMenuItemContextIncludeProperty.Size" type="System.Drawing.Size, System.Drawing">
-    <value>202, 26</value>
+    <value>216, 26</value>
   </data>
   <data name="toolStripMenuItemContextIncludeProperty.Text" xml:space="preserve">
     <value>Property</value>
   </data>
   <data name="toolStripMenuItemContextIncludeConstant.Size" type="System.Drawing.Size, System.Drawing">
-    <value>202, 26</value>
+    <value>216, 26</value>
   </data>
   <data name="toolStripMenuItemContextIncludeConstant.Text" xml:space="preserve">
     <value>Constant</value>
   </data>
   <data name="toolStripMenuItemContextIncludePropertyConstant.Size" type="System.Drawing.Size, System.Drawing">
-    <value>202, 26</value>
+    <value>216, 26</value>
   </data>
   <data name="toolStripMenuItemContextIncludePropertyConstant.Text" xml:space="preserve">
     <value>Property Constant</value>
   </data>
   <data name="toolStripMenuItemContextIncludeQuantity.Size" type="System.Drawing.Size, System.Drawing">
-    <value>202, 26</value>
+    <value>216, 26</value>
   </data>
   <data name="toolStripMenuItemContextIncludeQuantity.Text" xml:space="preserve">
     <value>Quantity</value>
@@ -877,7 +877,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAACs
-        kAAAAk1TRnQBSQFMAgEBLwEAAWgBCAFoAQgBEAEAARABAAT/ARkBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        kAAAAk1TRnQBSQFMAgEBLwEAAXgBCAF4AQgBEAEAARABAAT/ARkBAAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABwAMAAQEBAAEYBgABkBsAA/4D/AP2A/EG7wPxA/YD/AP+EgAD/gP8A/YD8QbvA/ED9gP8A/4SAAP+
         A/wD9gPxBu8D8QP2A/wD/j8AA/4D9gPiA8UDqwakA6sDxQPiA/YD/gwAA/4D9gPiA8UDqwakA6sDxQPi
         A/YD/gwAA/4D9gPiA8UDqwakA6sDxQPiA/YD/jkAA/4D8wG2AcIBqwFqAaIBPgFQAa8BEAFQAa8BDwFQ
@@ -1910,7 +1910,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAABy
-        CwAAAk1TRnQBSQFMAgEBBAEAASwBBAEsAQQBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
+        CwAAAk1TRnQBSQFMAgEBBAEAATwBBAE8AQQBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
         AwABQAMAASADAAEBAQABCAYAAQgYAAGAAgABgAMAAoABAAGAAwABgAEAAYABAAKAAgADwAEAAcAB3AHA
         AQAB8AHKAaYBAAEzBQABMwEAATMBAAEzAQACMwIAAxYBAAMcAQADIgEAAykBAANVAQADTQEAA0IBAAM5
         AQABgAF8Af8BAAJQAf8BAAGTAQAB1gEAAf8B7AHMAQABxgHWAe8BAAHWAucBAAGQAakBrQIAAf8BMwMA
@@ -2888,7 +2888,7 @@
     <value>&amp;Bibliography Reference</value>
   </data>
   <data name="documentationToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>187, 26</value>
   </data>
   <data name="documentationToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Documentation</value>
@@ -3218,7 +3218,7 @@
     <value>Co&amp;mment...</value>
   </data>
   <data name="schemaDefinitionToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>187, 26</value>
   </data>
   <data name="schemaDefinitionToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Schema</value>
@@ -3358,7 +3358,7 @@
     <value>Quantity</value>
   </data>
   <data name="userDataDefinitionToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>187, 26</value>
   </data>
   <data name="userDataDefinitionToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Extension</value>
@@ -3676,13 +3676,13 @@
     <value>False</value>
   </data>
   <data name="modelViewDefinitionToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>187, 26</value>
   </data>
   <data name="modelViewDefinitionToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Model View</value>
   </data>
   <data name="toolStripMenuItem20.Size" type="System.Drawing.Size, System.Drawing">
-    <value>213, 6</value>
+    <value>184, 6</value>
   </data>
   <data name="toolStripMenuItemInsertPublication.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -3693,7 +3693,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemInsertPublication.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>187, 26</value>
   </data>
   <data name="toolStripMenuItemInsertPublication.Text" xml:space="preserve">
     <value>&amp;Publication</value>
@@ -3714,7 +3714,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemInsertChangeLog.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>187, 26</value>
   </data>
   <data name="toolStripMenuItemInsertChangeLog.Text" xml:space="preserve">
     <value>&amp;Change Log...</value>
@@ -3736,7 +3736,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemModeSelect.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemModeSelect.Text" xml:space="preserve">
     <value>&amp;Select Mode</value>
@@ -3749,7 +3749,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemModeMove.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemModeMove.Text" xml:space="preserve">
     <value>&amp;Place Mode</value>
@@ -3762,13 +3762,13 @@
 </value>
   </data>
   <data name="toolStripMenuItemModeLink.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemModeLink.Text" xml:space="preserve">
     <value>&amp;Link Mode</value>
   </data>
   <data name="toolStripMenuItem15.Size" type="System.Drawing.Size, System.Drawing">
-    <value>213, 6</value>
+    <value>211, 6</value>
   </data>
   <data name="toolStripMenuItemStyleExpressG.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -3779,7 +3779,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemStyleExpressG.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemStyleExpressG.Text" xml:space="preserve">
     <value>&amp;Express-G Format</value>
@@ -3793,13 +3793,13 @@
 </value>
   </data>
   <data name="toolStripMenuItemStyleUML.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemStyleUML.Text" xml:space="preserve">
     <value>&amp;UML Format</value>
   </data>
   <data name="toolStripMenuItem7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>213, 6</value>
+    <value>211, 6</value>
   </data>
   <data name="toolStripMenuItemDiagramFormatTree.Enabled" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -3813,7 +3813,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemDiagramFormatTree.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemDiagramFormatTree.Text" xml:space="preserve">
     <value>Use Link &amp;Tree</value>
@@ -3831,13 +3831,13 @@
 </value>
   </data>
   <data name="toolStripMenuItemDiagramFormatPageRef.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemDiagramFormatPageRef.Text" xml:space="preserve">
     <value>Use Page &amp;Reference</value>
   </data>
   <data name="toolStripMenuItem16.Size" type="System.Drawing.Size, System.Drawing">
-    <value>213, 6</value>
+    <value>211, 6</value>
   </data>
   <data name="toolStripMenuItemDiagramAlignLeft.Size" type="System.Drawing.Size, System.Drawing">
     <value>140, 26</value>
@@ -3882,7 +3882,7 @@
     <value>False</value>
   </data>
   <data name="toolStripMenuItemDiagramAlign.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemDiagramAlign.Text" xml:space="preserve">
     <value>&amp;Align</value>
@@ -3909,7 +3909,7 @@
     <value>False</value>
   </data>
   <data name="toolStripMenuItemDiagramSize.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemDiagramSize.Text" xml:space="preserve">
     <value>&amp;Make Same Size</value>
@@ -3942,7 +3942,7 @@
     <value>False</value>
   </data>
   <data name="toolStripMenuItemDiagramSpaceHorz.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemDiagramSpaceHorz.Text" xml:space="preserve">
     <value>&amp;Horizontal Spacing</value>
@@ -3975,7 +3975,7 @@
     <value>False</value>
   </data>
   <data name="toolStripMenuItemDiagramSpaceVert.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 26</value>
+    <value>214, 26</value>
   </data>
   <data name="toolStripMenuItemDiagramSpaceVert.Text" xml:space="preserve">
     <value>&amp;Vertical Spacing</value>
@@ -4843,7 +4843,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAABO
-        CwAAAk1TRnQBSQFMAgEBBQEAAcwBBgHMAQYBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
+        CwAAAk1TRnQBSQFMAgEBBQEAAdwBBgHcAQYBEAEAARABAAT/AQkBAAj/AUIBTQE2AQQGAAE2AQQCAAEo
         AwABQAMAASADAAEBAQABCAYAAQgYAAGAAgABgAMAAoABAAGAAwABgAEAAYABAAKAAgADwAEAAcAB3AHA
         AQAB8AHKAaYBAAEzBQABMwEAATMBAAEzAQACMwIAAxYBAAMcAQADIgEAAykBAANVAQADTQEAA0IBAAM5
         AQABgAF8Af8BAAJQAf8BAAGTAQAB1gEAAf8B7AHMAQABxgHWAe8BAAHWAucBAAGQAakBrQIAAf8BMwMA
@@ -5148,9 +5148,6 @@
         f///gAAAAAD///+AAAAAAf///4AAAAAD////gAAAAAf///+AAAAAD////4AAAAAf////gAAAAD////+A
         AAAAf////4AAAAD//////////////w==
 </value>
-  </data>
-  <data name="$this.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>IFC Documentation Generator</value>

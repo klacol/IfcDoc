@@ -27,7 +27,6 @@ namespace IfcDoc
 
 			this.textBoxPath.Text = Properties.Settings.Default.OutputPath;
 			this.textBoxImagesDocumentation.Text = Properties.Settings.Default.InputPathGeneral;
-			this.textBoxImagesExamples.Text = Properties.Settings.Default.InputPathExamples;
 			this.textBoxExternalConverter.Text = Properties.Settings.Default.ConverterPath;
 			this.checkBoxSkip.Checked = Properties.Settings.Default.SkipDiagrams;
 		}
@@ -38,7 +37,6 @@ namespace IfcDoc
 
 			Properties.Settings.Default.OutputPath = this.textBoxPath.Text;
 			Properties.Settings.Default.InputPathGeneral = this.textBoxImagesDocumentation.Text;
-			Properties.Settings.Default.InputPathExamples = this.textBoxImagesExamples.Text;
 			Properties.Settings.Default.SkipDiagrams = this.checkBoxSkip.Checked;
 			Properties.Settings.Default.Save();
 		}
@@ -134,16 +132,6 @@ namespace IfcDoc
 			if (res == DialogResult.OK)
 			{
 				this.textBoxImagesDocumentation.Text = this.folderBrowserDialog.SelectedPath;
-			}
-		}
-
-		private void buttonImagesExamples_Click(object sender, EventArgs e)
-		{
-			this.folderBrowserDialog.SelectedPath = this.textBoxImagesExamples.Text;
-			DialogResult res = this.folderBrowserDialog.ShowDialog();
-			if (res == DialogResult.OK)
-			{
-				this.textBoxImagesExamples.Text = this.folderBrowserDialog.SelectedPath;
 			}
 		}
 

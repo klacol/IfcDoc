@@ -20,9 +20,6 @@
     <Setting Name="InputPathGeneral" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\IFCDOC\figures</Value>
     </Setting>
-    <Setting Name="InputPathExamples" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\IFCDOC\examples</Value>
-    </Setting>
     <Setting Name="SkipDiagrams" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

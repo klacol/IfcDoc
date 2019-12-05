@@ -480,13 +480,14 @@ namespace IfcDoc
 		}
 	}
 
-	public class FormSelectPropertyFromSchema : FormSelectProperty
+	public class FormSelectGlobalProperty : FormSelectProperty
 	{
-		public FormSelectPropertyFromSchema(DocProject docProject, bool? multiselect) : base(null, docProject, multiselect) { }
+		public FormSelectGlobalProperty(DocProject docProject, bool? multiselect) : base(null, docProject, multiselect) { }
 
 		protected override void LoadPropertySets()
 		{
-			IEnumerable<IGrouping<char, DocProperty>> groups = m_project.Properties.GroupBy(x => char.ToLower(x.Name[0]));
+			this.treeViewProperty.Nodes.Clear();
+			List<IGrouping<char, DocProperty>> groups = m_project.Properties.GroupBy(x => char.ToLower(x.Name[0])).ToList();
 			foreach (IGrouping<char, DocProperty> group in groups)
 			{
 				TreeNode tnChar = new TreeNode();

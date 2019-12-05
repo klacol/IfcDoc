@@ -1444,12 +1444,14 @@ namespace IfcDoc.Format.CSC
 				sb.AppendLine("\t}");
 
 			}
-			bool stringPrimitive = (string.Compare(docDefined.DefinedType, "string", true) == 0);
-			DocPrimitive primitive = docDefined.Definition as DocPrimitive;
+			DocDefined definingPrimitive = docIndirect == null ? docDefined : docIndirect;
+			bool stringPrimitive = (string.Compare(definingPrimitive.DefinedType, "string", true) == 0);
+			DocPrimitive primitive = definingPrimitive.Definition as DocPrimitive;
+
 			if(primitive != null)
 			{
 				sb.AppendLine();
-				sb.AppendLine("\tpublic static implicit operator " + docDefined.Name + "(" + FormatIdentifier(docDefined.DefinedType) + " value)");
+				sb.AppendLine("\tpublic static implicit operator " + docDefined.Name + "(" + FormatIdentifier(definingPrimitive.DefinedType) + " value)");
 				sb.AppendLine("\t{");
 				if (stringPrimitive)
 				{
@@ -1461,7 +1463,7 @@ namespace IfcDoc.Format.CSC
 				sb.AppendLine("\t}");
 
 				sb.AppendLine();
-				sb.AppendLine("\tpublic static implicit operator " + FormatIdentifier(docDefined.DefinedType)  + "(" + docDefined.Name + " value)");
+				sb.AppendLine("\tpublic static implicit operator " + FormatIdentifier(definingPrimitive.DefinedType)  + "(" + docDefined.Name + " value)");
 				sb.AppendLine("\t{");
 				if (stringPrimitive)
 				{

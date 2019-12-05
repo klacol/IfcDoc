@@ -9,6 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+
+using HtmlAgilityPack;
 
 using IfcDoc.Schema.DOC;
 
@@ -1645,25 +1648,6 @@ namespace IfcDoc.Format.HTM
 			if (content == null)
 				return;
 
-			// strip off "<EPM-HTML>" and "</EPM-HTML>"
-			int iHead = content.IndexOf("<EPM-HTML>", StringComparison.OrdinalIgnoreCase);
-			int iTail = content.LastIndexOf("</EPM-HTML>", StringComparison.OrdinalIgnoreCase);
-			if (iHead >= 0 && iTail >= 0)
-			{
-				content = content.Substring(iHead + 10, iTail - iHead - 11);
-			}
-
-			// strip off "Definition from IAI"
-
-			content = content.Replace("<u>Definition from IAI</u>:", "");
-			content = content.Replace("<U>Definition from IAI</U>:", "");
-			content = content.Replace("<u>Definition from IAI:</u>", "");
-			content = content.Replace("<U>Definition from IAI:</U>", "");
-			content = content.Replace("<i>Definition from IAI</i>:", "");
-			content = content.Replace("<u><b>Definition from IAI</b></u>:", "");
-			content = content.Replace("<b><u>Definition from IAI</u></b>:", "");
-			content = content.Replace("Definition from IAI:", "");
-
 			// target="SOURCE" -> target="info" (for transition; need to update vex)
 			content = content.Replace("target=\"SOURCE\"", "target=\"info\"");
 
@@ -1875,6 +1859,10 @@ namespace IfcDoc.Format.HTM
 			}
 			else
 			{
+				string relativePath = "../../../";
+				if (current is DocPropertyEnumeration)
+					relativePath = "../";
+				content = Regex.Replace(content, "../(../)+figures", relativePath + "figures");
 				int i = content.Length - 1;
 				while (i > 0)
 				{
@@ -1891,7 +1879,7 @@ namespace IfcDoc.Format.HTM
 							string target = Properties.Settings.Default.OutputPath + "\\" + DocumentationISO.MakeLinkName(docPublication) + "\\html\\figures\\" + imgold;
 							if (current is DocExample)
 							{
-								source = Properties.Settings.Default.InputPathExamples + "\\" + imgold;
+								source = Properties.Settings.Default.InputPathGeneral + "\\examples\\" + imgold;
 								target = Properties.Settings.Default.OutputPath + "\\" + DocumentationISO.MakeLinkName(docPublication) + "\\html\\figures\\examples\\" + imgold;
 							}
 
@@ -3009,7 +2997,7 @@ namespace IfcDoc.Format.HTM
 		}
 		public void WriteLocalizationTable(DocObject entity, IList<string> locales, string path)
 		{
-			string defaultdesc = entity.Documentation;
+			string defaultdesc = entity.DocumentationHtmlNoParagraphs();
 			bool tableopen = false;
 			if (entity.Localization.Count > 0)
 			{
@@ -3017,13 +3005,13 @@ namespace IfcDoc.Format.HTM
 				foreach (DocLocalization doclocal in entity.Localization)
 				{
 					string localname = doclocal.Name;
-					string localdesc = doclocal.Documentation;
+					string localdesc = doclocal.DocumentationHtmlNoParagraphs();
 
 					string localid = doclocal.Locale.Substring(0, 2).ToLower();
 					if (localid.Equals("en", StringComparison.InvariantCultureIgnoreCase) && localdesc == null)
 					{
-						localdesc = entity.Documentation;
-						defaultdesc = entity.Documentation;
+						localdesc = entity.DocumentationHtmlNoParagraphs();
+						defaultdesc = entity.DocumentationHtmlNoParagraphs();
 					}
 
 					if (locales != null && locales.Contains(localid))
@@ -3256,7 +3244,7 @@ namespace IfcDoc.Format.HTM
 							this.m_writer.WriteLine("</td><td>");
 							if (this.m_included == null || this.m_included.ContainsKey(attr))
 							{
-								this.WriteDocumentationMarkup(attr.Documentation, entity, docPublication);
+								this.WriteDocumentationMarkup(attr.DocumentationHtmlNoParagraphs(), entity, docPublication);
 							}
 							else
 							{
@@ -3302,7 +3290,7 @@ namespace IfcDoc.Format.HTM
 							}
 
 							this.m_writer.Write("</td><td>");
-							this.WriteDocumentationMarkup(attr.Documentation, entity, docPublication);
+							this.WriteDocumentationMarkup(attr.DocumentationHtmlNoParagraphs(), entity, docPublication);
 							this.m_writer.Write("</td>");
 
 							this.WriteEntityAttributeViews(attr, views, viewmap);
@@ -3371,7 +3359,7 @@ namespace IfcDoc.Format.HTM
 						}
 
 						this.m_writer.Write("</td><td>");
-						this.WriteDocumentationMarkup(attr.Documentation, entity, docPublication);
+						this.WriteDocumentationMarkup(attr.DocumentationHtmlNoParagraphs(), entity, docPublication);
 						this.m_writer.WriteLine("</td>");
 
 						this.WriteEntityAttributeViews(attr, views, viewmap);
@@ -3404,7 +3392,7 @@ namespace IfcDoc.Format.HTM
 
 			this.WriteLine("<dt class=\"term\"><strong name=\"" + DocumentationISO.MakeLinkName(docRef) + "\" id=\"" + DocumentationISO.MakeLinkName(docRef) + "\">" +
 				sbIndex.ToString() + " " + docRef.Name + "</strong></dt>");
-			this.WriteLine("<dd class=\"term\">" + docRef.Documentation);
+			this.WriteLine("<dd class=\"term\">" + docRef.DocumentationHtml());
 
 			if (docRef.Terms.Count > 0)
 			{
@@ -3508,6 +3496,118 @@ namespace IfcDoc.Format.HTM
 			}
 
 
+		}
+
+		public static HtmlNode MarkdownToHtml(string markdown, bool removeParagraphs)
+		{
+			if (string.IsNullOrEmpty(markdown))
+				return null;
+			Markdig.MarkdownPipelineBuilder builder = new Markdig.MarkdownPipelineBuilder();
+			builder.Extensions.Add(new Markdig.Extensions.GenericAttributes.GenericAttributesExtension());
+			builder.Extensions.Add(new Markdig.Extensions.Tables.PipeTableExtension());
+			builder.Extensions.Add(new Markdig.Extensions.EmphasisExtras.EmphasisExtraExtension());
+			Markdig.MarkdownPipeline pipeline = builder.Build();
+			return MarkdownToHtml(markdown, removeParagraphs, pipeline);
+
+		}
+		private static HtmlNode MarkdownToHtml(string markdown, bool removeParagraphs, Markdig.MarkdownPipeline pipeline)
+		{ 
+			string html = Markdig.Markdown.ToHtml(markdown, pipeline);
+			HtmlDocument document = new HtmlDocument();
+			document.LoadHtml(html);
+			if(removeParagraphs)
+			{
+				List<HtmlNode> nodes = new List<HtmlNode>(document.DocumentNode.ChildNodes), processed = new List<HtmlNode>();
+				foreach(HtmlNode node in nodes)
+				{
+					processed.AddRange(RemoveParagraphs(node));
+				}
+				document.DocumentNode.ChildNodes.Clear();
+				foreach (HtmlNode n in processed)
+					document.DocumentNode.ChildNodes.Add(n);
+			}
+			AdjustFromMarkdown(document.DocumentNode, pipeline);
+			return document.DocumentNode;
+		}
+
+		private static void AdjustFromMarkdown(HtmlNode node, Markdig.MarkdownPipeline pipeline)
+		{
+			if(string.Compare(node.Name, "blockquote", true) == 0)
+			{
+				Dictionary<string, HtmlAttribute> attributes = new Dictionary<string, HtmlAttribute>();
+				foreach (HtmlAttribute att in node.Attributes)
+					attributes[att.Name] = att;
+				string innerText = node.InnerText.Trim();
+				if (innerText.StartsWith("EXAMPLE", StringComparison.CurrentCultureIgnoreCase))
+				{
+					if (!attributes.ContainsKey("class"))
+						node.SetAttributeValue("class", "example");
+				}
+				else if (innerText.StartsWith("NOTE",	StringComparison.CurrentCultureIgnoreCase))
+				{
+					if (!attributes.ContainsKey("class"))
+						node.SetAttributeValue("class", "note");
+				}
+				else if (innerText.StartsWith("HISTORY", StringComparison.CurrentCultureIgnoreCase))
+				{
+					if (!attributes.ContainsKey("class"))
+						node.SetAttributeValue("class", "history");
+				}
+			}
+			else if (string.Compare(node.Name, "img",true) == 0)
+			{
+				foreach (HtmlAttribute att in node.Attributes)
+				{
+					if (string.Compare(att.Name, "title", true) == 0)
+					{
+						string title = att.Value;
+						if (title.StartsWith("figure", StringComparison.CurrentCultureIgnoreCase))
+						{
+							HtmlNode table = node.OwnerDocument.CreateElement("table");
+							node.ParentNode.ReplaceChild(table, node);
+							HtmlNode tableRow = node.OwnerDocument.CreateElement("tr");
+							table.ChildNodes.Add(tableRow);
+							HtmlNode tableData = node.OwnerDocument.CreateElement("td");
+							tableRow.ChildNodes.Add(tableData);
+							tableData.Attributes.Add("style", "width: 600px");
+							tableData.ChildNodes.Add(node);
+							node.SetAttributeValue("title", title.Replace("_", ""));
+							tableRow = node.OwnerDocument.CreateElement("tr");
+							table.ChildNodes.Add(tableRow);
+							tableData = node.OwnerDocument.CreateElement("td");
+							tableRow.ChildNodes.Add(tableData);
+							HtmlNode paragraph = node.OwnerDocument.CreateElement("p");
+							tableData.ChildNodes.Add(paragraph);
+							HtmlNode text = node.OwnerDocument.CreateTextNode(MarkdownToHtml(title, true, pipeline).InnerHtml.Trim());
+							paragraph.ChildNodes.Add(text);
+							paragraph.SetAttributeValue("class", "figure");
+						}
+					}
+				}
+			}
+			List<HtmlNode> nodes = new List<HtmlNode>(node.ChildNodes);
+			foreach (HtmlNode n in nodes)
+				AdjustFromMarkdown(n, pipeline);
+		}
+
+		public static List<HtmlNode> RemoveParagraphs(HtmlNode node)
+		{
+			if (string.Compare(node.Name, "p", true) == 0)
+			{
+				List<HtmlNode> result = new List<HtmlNode>();
+				foreach (HtmlNode n in node.ChildNodes)
+					result.AddRange(RemoveParagraphs(n));
+				return result;
+			}
+			List<HtmlNode> nodes = new List<HtmlNode>();
+			foreach (HtmlNode n in node.ChildNodes)
+				nodes.AddRange(RemoveParagraphs(n));
+
+			node.ChildNodes.Clear();
+			foreach (HtmlNode n in nodes)
+				node.ChildNodes.Add(n);
+
+			return new List<HtmlNode>() { node };
 		}
 	}
 

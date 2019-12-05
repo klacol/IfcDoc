@@ -204,6 +204,13 @@ namespace BuildingSmart.Utilities.Conversion
 			public const int VersionByteShift = 4;
 		}
 
+
+		public static Guid HashGuid(string uniqueString)
+		{
+			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+			byte[] hash = md5.ComputeHash(Encoding.Default.GetBytes(uniqueString));
+			return new Guid(hash);
+		}
 	}
 
 

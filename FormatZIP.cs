@@ -50,7 +50,10 @@ namespace IfcDoc
 			Dictionary<string, DocPropertyEnumeration> mapPropEnum = new Dictionary<string, DocPropertyEnumeration>();
 			foreach (DocPropertyEnumeration docEnum in this.m_project.PropertyEnumerations)
 			{
-				mapPropEnum.Add(docEnum.Name, docEnum);
+				if (!mapPropEnum.ContainsKey(docEnum.Name))
+				{
+					mapPropEnum.Add(docEnum.Name, docEnum);
+				}
 			}
 
 			using (Package zip = ZipPackage.Open(this.m_stream, FileMode.Create))
