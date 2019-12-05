@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Collections;
 using Newtonsoft.Json;
+using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace Ifc2Json
 {
@@ -171,7 +173,25 @@ namespace Ifc2Json
                 BasicProperties.Add("楼层数目", buildingStoreys.Count);//楼层数目
                 BasicProperties.Add("房间数目", rooms.Count);
                 BasicProperties.Add("构件数目", products.Count);
+                GetInformation(root, BasicProperties);
                 project.properties = BasicProperties;
+            }
+        }
+        //获取作者信息和单位信息
+        public void GetInformation(object root, Dictionary<string, object> BasicProperties)
+        {
+            PropertyInfo f = root.GetType().GetProperty("OwnerHistory");
+            object o = f.GetValue(root);
+            //将时间戳转换为日期
+            string timeStamp = GetDirectPropertyValueByName(o, "CreationDate");
+            if (timeStamp != "")
+            {
+                DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+                long lTime = long.Parse(timeStamp + "0000000");
+                TimeSpan toNow = new TimeSpan(lTime);
+                DateTime targetDt = dtStart.Add(toNow);
+                dtStart.Add(toNow);
+                BasicProperties.Add("CreationDate", targetDt.ToString());
             }
         }
         public void WriteObject(StreamWriter writer,string key,object e)
