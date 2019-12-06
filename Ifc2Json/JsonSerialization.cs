@@ -5,6 +5,7 @@ using System.Collections;
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Ifc2Json
 {
@@ -83,6 +84,12 @@ namespace Ifc2Json
                     HashSet<object> TypePropertyEntities = new HashSet<object>();//该构件的类型属性信息
                     GetpropertyEntities(e, RelPropertyEntities, TypePropertyEntities);//获取与属性集相关的实体
                     GetDirectFieldsValue(e, BasicProperties);
+                    object name;
+                    if (BasicProperties.TryGetValue("Name", out name))
+                    {
+                        name = Regex.Replace(name.ToString(), @"[^0-9]+", "");
+                        BasicProperties["Tag"] = name;
+                    }
                     string type = e.GetType().Name;
                     p.Guid = GetEntityId(e);
                     p.Type = type;
