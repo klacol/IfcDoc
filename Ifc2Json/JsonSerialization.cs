@@ -44,8 +44,8 @@ namespace Ifc2Json
             WriteObject(writer, "buildings", buildings);
             WriteObject(writer, "buildingStoreys", buildingStoreys);
             WriteObject(writer, "rooms", rooms);
-            WriteObject(writer, "products", products);            
-            writer.Write("\"productsType\":");
+            WriteObject(writer, "elements", products);            
+            writer.Write("\"elementsType\":");
             string json = JsonConvert.SerializeObject(productsType, Newtonsoft.Json.Formatting.Indented);
             writer.WriteLine(json);
             this.WriteFooter(writer);
