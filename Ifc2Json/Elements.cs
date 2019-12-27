@@ -156,7 +156,7 @@ namespace Ifc2Json
             object stoery = GetStoreyEntity(e);
             if (stoery == null)
             {
-                Console.Write("所处楼层信息出错");
+                return "";                
             }
             return GetEntityId(stoery);
         }
@@ -207,9 +207,14 @@ namespace Ifc2Json
                         Console.WriteLine(o.GetType().Name + "该构件的空间位置还会用其他实体表示");
                     }                   
                 }
-                if (RelatingStructure.GetType().Name == "IfcBuildingStorey")
+                string name = RelatingStructure.GetType().Name;
+                if (name == "IfcBuildingStorey")
                 {
                     return RelatingStructure;
+                }
+                else if (name == "IfcBuilding" || name == "IfcSite" || name == "IfcProject")
+                {
+                    return null;
                 }
                 else
                 {
