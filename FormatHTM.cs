@@ -3366,7 +3366,7 @@ namespace IfcDoc.Format.HTM
                 sbIndex.ToString() + " " + docRef.Name + "</strong></dt>");
             this.WriteLine("<dd class=\"term\">" + docRef.Documentation);
 
-            if (docRef.Terms.Count > 0)
+            if (docRef.Terms?.Count > 0)
             {
                 int[] subindexpath = new int[indexpath.Length + 1];
                 for (int i = 0; i < indexpath.Length; i++ )
