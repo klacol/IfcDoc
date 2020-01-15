@@ -2179,7 +2179,7 @@
     <value>Magenta</value>
   </data>
   <data name="toolStripMenuItemFileNew.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+N</value>
+    <value>Strg+N</value>
   </data>
   <data name="toolStripMenuItemFileNew.Size" type="System.Drawing.Size, System.Drawing">
     <value>179, 22</value>
@@ -2207,7 +2207,7 @@
     <value>Magenta</value>
   </data>
   <data name="toolStripMenuItemFileOpen.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+O</value>
+    <value>Strg+O</value>
   </data>
   <data name="toolStripMenuItemFileOpen.Size" type="System.Drawing.Size, System.Drawing">
     <value>179, 22</value>
@@ -2244,7 +2244,7 @@
     <value>Magenta</value>
   </data>
   <data name="toolStripMenuItemFileSave.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+S</value>
+    <value>Strg+S</value>
   </data>
   <data name="toolStripMenuItemFileSave.Size" type="System.Drawing.Size, System.Drawing">
     <value>179, 22</value>
@@ -2393,7 +2393,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemDownload.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+D</value>
+    <value>Strg+D</value>
   </data>
   <data name="toolStripMenuItemDownload.Size" type="System.Drawing.Size, System.Drawing">
     <value>179, 22</value>
@@ -2422,7 +2422,7 @@
 </value>
   </data>
   <data name="toolStripMenuItemPublish.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+U</value>
+    <value>Strg+U</value>
   </data>
   <data name="toolStripMenuItemPublish.Size" type="System.Drawing.Size, System.Drawing">
     <value>179, 22</value>
