@@ -23,6 +23,16 @@ namespace BuildingSmart.IFC.IfcMeasureResource
 		{
 			this.Value = value;
 		}
+
+		public static implicit operator string(IfcText value)
+		{
+			return value.Value;
+		}
+
+		public override string ToString()
+		{
+			return Value.ToString();
+		}
 	}
 	
 }

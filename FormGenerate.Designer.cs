@@ -1,33 +1,33 @@
 ﻿namespace IfcDoc
 {
-    partial class FormGenerate
-    {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+	partial class FormGenerate
+	{
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormGenerate));
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxPath = new System.Windows.Forms.TextBox();
@@ -41,9 +41,6 @@
             this.buttonImagesDocumentation = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.textBoxImagesDocumentation = new System.Windows.Forms.TextBox();
-            this.buttonImagesExamples = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBoxImagesExamples = new System.Windows.Forms.TextBox();
             this.buttonExternalConverter = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.textBoxExternalConverter = new System.Windows.Forms.TextBox();
@@ -121,24 +118,6 @@
             this.textBoxImagesDocumentation.Name = "textBoxImagesDocumentation";
             this.textBoxImagesDocumentation.ReadOnly = true;
             // 
-            // buttonImagesExamples
-            // 
-            resources.ApplyResources(this.buttonImagesExamples, "buttonImagesExamples");
-            this.buttonImagesExamples.Name = "buttonImagesExamples";
-            this.buttonImagesExamples.UseVisualStyleBackColor = true;
-            this.buttonImagesExamples.Click += new System.EventHandler(this.buttonImagesExamples_Click);
-            // 
-            // label4
-            // 
-            resources.ApplyResources(this.label4, "label4");
-            this.label4.Name = "label4";
-            // 
-            // textBoxImagesExamples
-            // 
-            resources.ApplyResources(this.textBoxImagesExamples, "textBoxImagesExamples");
-            this.textBoxImagesExamples.Name = "textBoxImagesExamples";
-            this.textBoxImagesExamples.ReadOnly = true;
-            // 
             // buttonExternalConverter
             // 
             resources.ApplyResources(this.buttonExternalConverter, "buttonExternalConverter");
@@ -179,9 +158,6 @@
             this.Controls.Add(this.buttonExternalConverter);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBoxExternalConverter);
-            this.Controls.Add(this.buttonImagesExamples);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.textBoxImagesExamples);
             this.Controls.Add(this.buttonImagesDocumentation);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBoxImagesDocumentation);
@@ -200,29 +176,26 @@
             this.ResumeLayout(false);
             this.PerformLayout();
 
-        }
+		}
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBoxPath;
-        private System.Windows.Forms.Button buttonPath;
-        private System.Windows.Forms.Button buttonOK;
-        private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
-        private System.Windows.Forms.CheckedListBox checkedListBoxViews;
-        private System.Windows.Forms.CheckBox checkBoxSkip;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button buttonImagesDocumentation;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBoxImagesDocumentation;
-        private System.Windows.Forms.Button buttonImagesExamples;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBoxImagesExamples;
-        private System.Windows.Forms.Button buttonExternalConverter;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBoxExternalConverter;
-        private System.Windows.Forms.OpenFileDialog openFileDialogConverter;
-        private System.Windows.Forms.Button buttonExternalConverterClear;
-    }
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TextBox textBoxPath;
+		private System.Windows.Forms.Button buttonPath;
+		private System.Windows.Forms.Button buttonOK;
+		private System.Windows.Forms.Button buttonCancel;
+		private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+		private System.Windows.Forms.CheckedListBox checkedListBoxViews;
+		private System.Windows.Forms.CheckBox checkBoxSkip;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Button buttonImagesDocumentation;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox textBoxImagesDocumentation;
+		private System.Windows.Forms.Button buttonExternalConverter;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.TextBox textBoxExternalConverter;
+		private System.Windows.Forms.OpenFileDialog openFileDialogConverter;
+		private System.Windows.Forms.Button buttonExternalConverterClear;
+	}
 }

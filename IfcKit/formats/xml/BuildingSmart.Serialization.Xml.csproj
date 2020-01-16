@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SchemaIsoXml.cs" />
+    <Compile Include="XmlFolderSerializer.cs" />
     <Compile Include="XmlSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

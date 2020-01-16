@@ -17,54 +17,54 @@ using IfcDoc.Schema.DOC;
 
 namespace IfcDoc
 {
-    public partial class FormSelectSchema : Form
-    {
-        DocProject m_project;
+	public partial class FormSelectSchema : Form
+	{
+		DocProject m_project;
 
-        public FormSelectSchema()
-        {
-            InitializeComponent();
-        }
+		public FormSelectSchema()
+		{
+			InitializeComponent();
+		}
 
-        public FormSelectSchema(DocProject project) : this()
-        {
-            this.m_project = project;
+		public FormSelectSchema(DocProject project) : this()
+		{
+			this.m_project = project;
 
-            foreach (DocSection docSection in project.Sections)
-            {
-                if (docSection.Schemas.Count > 0)
-                {
-                    TreeNode tnSection = new TreeNode();
-                    tnSection.Tag = docSection;
-                    tnSection.Text = docSection.Name;
-                    tnSection.ImageIndex = 1;
-                    this.treeView.Nodes.Add(tnSection);
+			foreach (DocSection docSection in project.Sections)
+			{
+				if (docSection.Schemas.Count > 0)
+				{
+					TreeNode tnSection = new TreeNode();
+					tnSection.Tag = docSection;
+					tnSection.Text = docSection.Name;
+					tnSection.ImageIndex = 1;
+					this.treeView.Nodes.Add(tnSection);
 
-                    foreach (DocSchema docSchema in docSection.Schemas)
-                    {
-                        TreeNode tnSchema = new TreeNode();
-                        tnSchema.Tag = docSchema;
-                        tnSchema.Text = docSchema.Name;
-                        tnSchema.ImageIndex = 0;
-                        tnSection.Nodes.Add(tnSchema);
-                    }
+					foreach (DocSchema docSchema in docSection.Schemas)
+					{
+						TreeNode tnSchema = new TreeNode();
+						tnSchema.Tag = docSchema;
+						tnSchema.Text = docSchema.Name;
+						tnSchema.ImageIndex = 0;
+						tnSection.Nodes.Add(tnSchema);
+					}
 
-                    tnSection.Expand();
-                }
-            }
-        }
+					tnSection.Expand();
+				}
+			}
+		}
 
-        public DocSchema Selection
-        {
-            get
-            {
-                if (this.treeView.SelectedNode != null && this.treeView.SelectedNode.Tag is DocSchema)
-                {
-                    return (DocSchema)this.treeView.SelectedNode.Tag;
-                }
+		public DocSchema Selection
+		{
+			get
+			{
+				if (this.treeView.SelectedNode != null && this.treeView.SelectedNode.Tag is DocSchema)
+				{
+					return (DocSchema)this.treeView.SelectedNode.Tag;
+				}
 
-                return null;
-            }
-        }
-    }
+				return null;
+			}
+		}
+	}
 }

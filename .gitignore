@@ -1,6 +1,8 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
+﻿[Bb]in/
+[Oo]bj/
+*.suo
+*.user
+/.vs
 
 /obj/x86/Debug
 /IfcKit/schemas/IFC4X1/obj/Debug
@@ -10,7 +12,5 @@
 /IfcKit/formats/spf/obj/Debug
 /IfcKit/formats/BuildingSmart.Serialization/obj/Debug
 /bin/x64/Debug
-/.vs/IfcDoc/v15/sqlite3
 /IfcKit
-/.vs/IfcDoc/v15/Server/sqlite3
-/.vs/IfcDoc/v16
+/.vs

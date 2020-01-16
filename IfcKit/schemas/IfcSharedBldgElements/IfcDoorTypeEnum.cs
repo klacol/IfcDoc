@@ -27,10 +27,10 @@ namespace BuildingSmart.IFC.IfcSharedBldgElements
 	    "cellar or attic.")]
 		TRAPDOOR = 3,
 	
-		[Description("User-defined linear beam element.")]
+		[Description("User-defined door element.")]
 		USERDEFINED = -1,
 	
-		[Description("Undefined linear beam element.")]
+		[Description("Undefined door element.")]
 		NOTDEFINED = 0,
 	
 	}

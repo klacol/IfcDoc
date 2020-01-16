@@ -1,36 +1,37 @@
 ﻿namespace IfcDoc
 {
-    partial class FormEdit
-    {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+	partial class FormEdit
+	{
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormEdit));
             this.splitContainerRoot = new System.Windows.Forms.SplitContainer();
+            this.treeView = new IfcDoc.ThemedTreeView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItemContextInsert = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertModelView = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,6 +50,7 @@
             this.toolStripMenuItemContextInsertEnumeration = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertConstant = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertSelect = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextInsertSelectItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertEntity = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertAttribute = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertPset = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,7 +62,13 @@
             this.toolStripMenuItemContextInsertExample = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertBibliography = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextInsertPublication = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextInclude = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextIncludeProperty = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextIncludeConstant = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextIncludePropertyConstant = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextIncludeQuantity = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemEnableDisable = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemContextRemove = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemContextSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListIcon = new System.Windows.Forms.ImageList(this.components);
@@ -68,7 +76,12 @@
             this.panelWorkspace = new System.Windows.Forms.Panel();
             this.panelDiagram = new System.Windows.Forms.Panel();
             this.splitContainerWorkspace = new System.Windows.Forms.SplitContainer();
+            this.ctlConcept = new IfcDoc.CtlConcept();
+            this.ctlExpressG = new IfcDoc.CtlExpressG();
+            this.ctlInheritance = new IfcDoc.CtlInheritance();
+            this.ctlProperties = new IfcDoc.CtlProperties();
             this.textBoxHTML = new System.Windows.Forms.TextBox();
+            this.ctlCheckGrid = new IfcDoc.CtlCheckGrid();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
             this.splitContainerInstances = new System.Windows.Forms.SplitContainer();
             this.listViewValidate = new System.Windows.Forms.ListView();
@@ -96,6 +109,7 @@
             this.toolStripMenuItemImportDatabase = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemFileUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemFileExport = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemCSharp = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemDownload = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemPublish = new System.Windows.Forms.ToolStripMenuItem();
@@ -276,12 +290,6 @@
             this.saveFileDialogModule = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialogExpress = new System.Windows.Forms.OpenFileDialog();
             this.openFileDialogExamples = new System.Windows.Forms.OpenFileDialog();
-            this.treeView = new IfcDoc.ThemedTreeView();
-            this.ctlConcept = new IfcDoc.CtlConcept();
-            this.ctlExpressG = new IfcDoc.CtlExpressG();
-            this.ctlInheritance = new IfcDoc.CtlInheritance();
-            this.ctlProperties = new IfcDoc.CtlProperties();
-            this.ctlCheckGrid = new IfcDoc.CtlCheckGrid();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerRoot)).BeginInit();
             this.splitContainerRoot.Panel1.SuspendLayout();
             this.splitContainerRoot.Panel2.SuspendLayout();
@@ -319,11 +327,28 @@
             // 
             this.splitContainerRoot.Panel2.Controls.Add(this.splitContainerEdit);
             // 
+            // treeView
+            // 
+            this.treeView.ContextMenuStrip = this.contextMenuStrip;
+            resources.ApplyResources(this.treeView, "treeView");
+            this.treeView.HideSelection = false;
+            this.treeView.ImageList = this.imageListIcon;
+            this.treeView.LabelEdit = true;
+            this.treeView.Name = "treeView";
+            this.treeView.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.treeView_BeforeLabelEdit);
+            this.treeView.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.treeView_AfterLabelEdit);
+            this.treeView.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeView_ItemDrag);
+            this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeView_AfterSelect);
+            this.treeView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.treeView_MouseUp);
+            // 
             // contextMenuStrip
             // 
+            this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemContextInsert,
+            this.toolStripMenuItemContextInclude,
             this.toolStripMenuItemEnableDisable,
+            this.toolStripMenuItemContextRemove,
             this.toolStripMenuItemContextSeparator,
             this.deleteToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip1";
@@ -348,6 +373,7 @@
             this.toolStripMenuItemContextInsertEnumeration,
             this.toolStripMenuItemContextInsertConstant,
             this.toolStripMenuItemContextInsertSelect,
+            this.toolStripMenuItemContextInsertSelectItem,
             this.toolStripMenuItemContextInsertEntity,
             this.toolStripMenuItemContextInsertAttribute,
             this.toolStripMenuItemContextInsertPset,
@@ -458,6 +484,12 @@
             this.toolStripMenuItemContextInsertSelect.Name = "toolStripMenuItemContextInsertSelect";
             this.toolStripMenuItemContextInsertSelect.Click += new System.EventHandler(this.toolStripMenuItemInsertSelect_Click);
             // 
+            // toolStripMenuItemContextInsertSelectItem
+            // 
+            this.toolStripMenuItemContextInsertSelectItem.Name = "toolStripMenuItemContextInsertSelectItem";
+            resources.ApplyResources(this.toolStripMenuItemContextInsertSelectItem, "toolStripMenuItemContextInsertSelectItem");
+            this.toolStripMenuItemContextInsertSelectItem.Click += new System.EventHandler(this.toolStripMenuItemContextInsertSelectItem_Click);
+            // 
             // toolStripMenuItemContextInsertEntity
             // 
             resources.ApplyResources(this.toolStripMenuItemContextInsertEntity, "toolStripMenuItemContextInsertEntity");
@@ -480,7 +512,7 @@
             // 
             resources.ApplyResources(this.toolStripMenuItemContextInsertProperty, "toolStripMenuItemContextInsertProperty");
             this.toolStripMenuItemContextInsertProperty.Name = "toolStripMenuItemContextInsertProperty";
-            this.toolStripMenuItemContextInsertProperty.Click += new System.EventHandler(this.toolStripMenuItemInsertProperty_Click);
+            this.toolStripMenuItemContextInsertProperty.Click += new System.EventHandler(this.ToolStripMenuItemInsertProperty_Click);
             // 
             // toolStripMenuItemContextInsertPropertyEnum
             // 
@@ -524,11 +556,56 @@
             this.toolStripMenuItemContextInsertPublication.Name = "toolStripMenuItemContextInsertPublication";
             this.toolStripMenuItemContextInsertPublication.Click += new System.EventHandler(this.toolStripMenuItemInsertPublication_Click);
             // 
+            // toolStripMenuItemContextInclude
+            // 
+            this.toolStripMenuItemContextInclude.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemContextIncludeProperty,
+            this.toolStripMenuItemContextIncludeConstant,
+            this.toolStripMenuItemContextIncludePropertyConstant,
+            this.toolStripMenuItemContextIncludeQuantity});
+            this.toolStripMenuItemContextInclude.Image = global::IfcDoc.Properties.Resources.toolStripMenuItemContextInsert;
+            this.toolStripMenuItemContextInclude.Name = "toolStripMenuItemContextInclude";
+            resources.ApplyResources(this.toolStripMenuItemContextInclude, "toolStripMenuItemContextInclude");
+            // 
+            // toolStripMenuItemContextIncludeProperty
+            // 
+            this.toolStripMenuItemContextIncludeProperty.Image = global::IfcDoc.Properties.Resources.toolStripMenuItemInsertProperty;
+            this.toolStripMenuItemContextIncludeProperty.Name = "toolStripMenuItemContextIncludeProperty";
+            resources.ApplyResources(this.toolStripMenuItemContextIncludeProperty, "toolStripMenuItemContextIncludeProperty");
+            this.toolStripMenuItemContextIncludeProperty.Click += new System.EventHandler(this.toolStripMenuItemIncludeProperty_Click);
+            // 
+            // toolStripMenuItemContextIncludeConstant
+            // 
+            this.toolStripMenuItemContextIncludeConstant.Image = global::IfcDoc.Properties.Resources.toolStripMenuItemInsertConstant;
+            this.toolStripMenuItemContextIncludeConstant.Name = "toolStripMenuItemContextIncludeConstant";
+            resources.ApplyResources(this.toolStripMenuItemContextIncludeConstant, "toolStripMenuItemContextIncludeConstant");
+            this.toolStripMenuItemContextIncludeConstant.Click += new System.EventHandler(this.toolStripMenuItemContextIncludeConstant_Click);
+            // 
+            // toolStripMenuItemContextIncludePropertyConstant
+            // 
+            this.toolStripMenuItemContextIncludePropertyConstant.Image = global::IfcDoc.Properties.Resources.toolStripMenuItemInsertPropertyConstant;
+            this.toolStripMenuItemContextIncludePropertyConstant.Name = "toolStripMenuItemContextIncludePropertyConstant";
+            resources.ApplyResources(this.toolStripMenuItemContextIncludePropertyConstant, "toolStripMenuItemContextIncludePropertyConstant");
+            this.toolStripMenuItemContextIncludePropertyConstant.Click += new System.EventHandler(this.toolStripMenuItemContextIncludePropertyConstant_Click);
+            // 
+            // toolStripMenuItemContextIncludeQuantity
+            // 
+            this.toolStripMenuItemContextIncludeQuantity.Image = global::IfcDoc.Properties.Resources.toolStripMenuItemInsertQuantity;
+            this.toolStripMenuItemContextIncludeQuantity.Name = "toolStripMenuItemContextIncludeQuantity";
+            resources.ApplyResources(this.toolStripMenuItemContextIncludeQuantity, "toolStripMenuItemContextIncludeQuantity");
+            this.toolStripMenuItemContextIncludeQuantity.Click += new System.EventHandler(this.toolStripMenuItemContextIncludeQuantity_Click);
+            // 
             // toolStripMenuItemEnableDisable
             // 
             resources.ApplyResources(this.toolStripMenuItemEnableDisable, "toolStripMenuItemEnableDisable");
             this.toolStripMenuItemEnableDisable.Name = "toolStripMenuItemEnableDisable";
             this.toolStripMenuItemEnableDisable.Click += new System.EventHandler(this.toolStripMenuItemEnableDisable_Click);
+            // 
+            // toolStripMenuItemContextRemove
+            // 
+            this.toolStripMenuItemContextRemove.Name = "toolStripMenuItemContextRemove";
+            resources.ApplyResources(this.toolStripMenuItemContextRemove, "toolStripMenuItemContextRemove");
+            this.toolStripMenuItemContextRemove.Click += new System.EventHandler(this.toolStripMenuItemContextRemove_Click);
             // 
             // toolStripMenuItemContextSeparator
             // 
@@ -639,12 +716,72 @@
             // 
             this.splitContainerWorkspace.Panel2.Controls.Add(this.ctlProperties);
             // 
+            // ctlConcept
+            // 
+            resources.ApplyResources(this.ctlConcept, "ctlConcept");
+            this.ctlConcept.ConceptRoot = null;
+            this.ctlConcept.CurrentInstance = null;
+            this.ctlConcept.Name = "ctlConcept";
+            this.ctlConcept.Project = null;
+            this.ctlConcept.Selection = null;
+            this.ctlConcept.Template = null;
+            this.ctlConcept.SelectionChanged += new System.EventHandler(this.ctlConcept_SelectionChanged);
+            this.ctlConcept.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ctlConcept_MouseDoubleClick);
+            // 
+            // ctlExpressG
+            // 
+            this.ctlExpressG.AllowDrop = true;
+            resources.ApplyResources(this.ctlExpressG, "ctlExpressG");
+            this.ctlExpressG.Format = IfcDoc.Schema.DOC.DiagramFormat.ExpressG;
+            this.ctlExpressG.Marker = new System.Drawing.Point(0, 0);
+            this.ctlExpressG.Mode = IfcDoc.ToolMode.Select;
+            this.ctlExpressG.Name = "ctlExpressG";
+            this.ctlExpressG.Project = null;
+            this.ctlExpressG.Schema = null;
+            this.ctlExpressG.ScrollToSelection = true;
+            this.ctlExpressG.Selection = null;
+            this.ctlExpressG.SelectionChanged += new System.EventHandler(this.ctlExpressG_SelectionChanged);
+            this.ctlExpressG.LinkOperation += new System.EventHandler(this.ctlExpressG_LinkOperation);
+            this.ctlExpressG.ExpandOperation += new System.EventHandler(this.ctlExpressG_ExpandOperation);
+            // 
+            // ctlInheritance
+            // 
+            resources.ApplyResources(this.ctlInheritance, "ctlInheritance");
+            this.ctlInheritance.Entity = null;
+            this.ctlInheritance.Mode = IfcDoc.ToolMode.Select;
+            this.ctlInheritance.ModelView = null;
+            this.ctlInheritance.Name = "ctlInheritance";
+            this.ctlInheritance.Project = null;
+            this.ctlInheritance.SelectionChanged += new System.EventHandler(this.ctlInheritance_SelectionChanged);
+            // 
+            // ctlProperties
+            // 
+            this.ctlProperties.CurrentInstance = null;
+            this.ctlProperties.CurrentPopulation = null;
+            resources.ApplyResources(this.ctlProperties, "ctlProperties");
+            this.ctlProperties.Name = "ctlProperties";
+            this.ctlProperties.SelectedAttribute = null;
+            this.ctlProperties.SelectedRule = null;
+            this.ctlProperties.Navigate += new System.EventHandler(this.ctlProperties_Navigate);
+            this.ctlProperties.RuleSelectionChanged += new System.EventHandler(this.ctlProperties_RuleSelectionChanged);
+            this.ctlProperties.RuleContentChanged += new System.EventHandler(this.ctlProperties_RuleContentChanged);
+            this.ctlProperties.SchemaChanged += new System.EventHandler(this.ctlProperties_SchemaChanged);
+            // 
             // textBoxHTML
             // 
             this.textBoxHTML.BorderStyle = System.Windows.Forms.BorderStyle.None;
             resources.ApplyResources(this.textBoxHTML, "textBoxHTML");
             this.textBoxHTML.Name = "textBoxHTML";
             this.textBoxHTML.Validated += new System.EventHandler(this.TextBoxHTML_Validated);
+            // 
+            // ctlCheckGrid
+            // 
+            resources.ApplyResources(this.ctlCheckGrid, "ctlCheckGrid");
+            this.ctlCheckGrid.CheckGridSource = null;
+            this.ctlCheckGrid.Mode = IfcDoc.ToolMode.Select;
+            this.ctlCheckGrid.Name = "ctlCheckGrid";
+            this.ctlCheckGrid.Selection = null;
+            this.ctlCheckGrid.SelectionChanged += new System.EventHandler(this.ctlCheckGrid_SelectionChanged);
             // 
             // webBrowser
             // 
@@ -712,6 +849,7 @@
             // toolStrip1
             // 
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabelValidateFile,
             this.toolStripButtonValidateClose});
@@ -733,6 +871,7 @@
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemFile,
             this.toolStripMenuItemEdit,
@@ -761,6 +900,7 @@
             this.toolStripMenuItemImportDatabase,
             this.toolStripMenuItemFileUpdate,
             this.toolStripMenuItemFileExport,
+            this.toolStripMenuItemCSharp,
             this.toolStripMenuItem5,
             this.toolStripMenuItemDownload,
             this.toolStripMenuItemPublish,
@@ -849,6 +989,12 @@
             resources.ApplyResources(this.toolStripMenuItemFileExport, "toolStripMenuItemFileExport");
             this.toolStripMenuItemFileExport.Name = "toolStripMenuItemFileExport";
             this.toolStripMenuItemFileExport.Click += new System.EventHandler(this.toolStripMenuItemFileExport_Click);
+            // 
+            // toolStripMenuItemCSharp
+            // 
+            this.toolStripMenuItemCSharp.Name = "toolStripMenuItemCSharp";
+            resources.ApplyResources(this.toolStripMenuItemCSharp, "toolStripMenuItemCSharp");
+            this.toolStripMenuItemCSharp.Click += new System.EventHandler(this.toolStripMenuItemCSharp_Click);
             // 
             // toolStripMenuItem5
             // 
@@ -1299,7 +1445,7 @@
             // 
             resources.ApplyResources(this.toolStripMenuItemInsertProperty, "toolStripMenuItemInsertProperty");
             this.toolStripMenuItemInsertProperty.Name = "toolStripMenuItemInsertProperty";
-            this.toolStripMenuItemInsertProperty.Click += new System.EventHandler(this.toolStripMenuItemInsertProperty_Click);
+            this.toolStripMenuItemInsertProperty.Click += new System.EventHandler(this.ToolStripMenuItemInsertProperty_Click);
             // 
             // toolStripMenuItemInsertPropertyEnumeration
             // 
@@ -1758,6 +1904,7 @@
             // toolStripMain
             // 
             this.toolStripMain.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStripMain.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonFileNew,
             this.toolStripButtonFileOpen,
@@ -2088,80 +2235,6 @@
             resources.ApplyResources(this.openFileDialogExamples, "openFileDialogExamples");
             this.openFileDialogExamples.Multiselect = true;
             // 
-            // treeView
-            // 
-            this.treeView.ContextMenuStrip = this.contextMenuStrip;
-            resources.ApplyResources(this.treeView, "treeView");
-            this.treeView.HideSelection = false;
-            this.treeView.ImageList = this.imageListIcon;
-            this.treeView.LabelEdit = true;
-            this.treeView.Name = "treeView";
-            this.treeView.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.treeView_BeforeLabelEdit);
-            this.treeView.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.treeView_AfterLabelEdit);
-            this.treeView.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeView_ItemDrag);
-            this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TreeView_AfterSelect);
-            this.treeView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.treeView_MouseUp);
-            // 
-            // ctlConcept
-            // 
-            resources.ApplyResources(this.ctlConcept, "ctlConcept");
-            this.ctlConcept.ConceptRoot = null;
-            this.ctlConcept.CurrentInstance = null;
-            this.ctlConcept.Name = "ctlConcept";
-            this.ctlConcept.Project = null;
-            this.ctlConcept.Selection = null;
-            this.ctlConcept.Template = null;
-            this.ctlConcept.SelectionChanged += new System.EventHandler(this.ctlConcept_SelectionChanged);
-            this.ctlConcept.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ctlConcept_MouseDoubleClick);
-            // 
-            // ctlExpressG
-            // 
-            this.ctlExpressG.AllowDrop = true;
-            resources.ApplyResources(this.ctlExpressG, "ctlExpressG");
-            this.ctlExpressG.Format = IfcDoc.Format.PNG.DiagramFormat.ExpressG;
-            this.ctlExpressG.Marker = new System.Drawing.Point(0, 0);
-            this.ctlExpressG.Mode = IfcDoc.ToolMode.Select;
-            this.ctlExpressG.Name = "ctlExpressG";
-            this.ctlExpressG.Project = null;
-            this.ctlExpressG.Schema = null;
-            this.ctlExpressG.ScrollToSelection = true;
-            this.ctlExpressG.Selection = null;
-            this.ctlExpressG.SelectionChanged += new System.EventHandler(this.ctlExpressG_SelectionChanged);
-            this.ctlExpressG.LinkOperation += new System.EventHandler(this.ctlExpressG_LinkOperation);
-            this.ctlExpressG.ExpandOperation += new System.EventHandler(this.ctlExpressG_ExpandOperation);
-            // 
-            // ctlInheritance
-            // 
-            resources.ApplyResources(this.ctlInheritance, "ctlInheritance");
-            this.ctlInheritance.Entity = null;
-            this.ctlInheritance.Mode = IfcDoc.ToolMode.Select;
-            this.ctlInheritance.ModelView = null;
-            this.ctlInheritance.Name = "ctlInheritance";
-            this.ctlInheritance.Project = null;
-            this.ctlInheritance.SelectionChanged += new System.EventHandler(this.ctlInheritance_SelectionChanged);
-            // 
-            // ctlProperties
-            // 
-            this.ctlProperties.CurrentInstance = null;
-            this.ctlProperties.CurrentPopulation = null;
-            resources.ApplyResources(this.ctlProperties, "ctlProperties");
-            this.ctlProperties.Name = "ctlProperties";
-            this.ctlProperties.SelectedAttribute = null;
-            this.ctlProperties.SelectedRule = null;
-            this.ctlProperties.Navigate += new System.EventHandler(this.ctlProperties_Navigate);
-            this.ctlProperties.RuleSelectionChanged += new System.EventHandler(this.ctlProperties_RuleSelectionChanged);
-            this.ctlProperties.RuleContentChanged += new System.EventHandler(this.ctlProperties_RuleContentChanged);
-            this.ctlProperties.SchemaChanged += new System.EventHandler(this.ctlProperties_SchemaChanged);
-            // 
-            // ctlCheckGrid
-            // 
-            resources.ApplyResources(this.ctlCheckGrid, "ctlCheckGrid");
-            this.ctlCheckGrid.CheckGridSource = null;
-            this.ctlCheckGrid.Mode = IfcDoc.ToolMode.Select;
-            this.ctlCheckGrid.Name = "ctlCheckGrid";
-            this.ctlCheckGrid.Selection = null;
-            this.ctlCheckGrid.SelectionChanged += new System.EventHandler(this.ctlCheckGrid_SelectionChanged);
-            // 
             // FormEdit
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -2201,261 +2274,269 @@
             this.ResumeLayout(false);
             this.PerformLayout();
 
-        }
+		}
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.SplitContainer splitContainerRoot;
-        private ThemedTreeView treeView;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdit;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditDelete;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemTools;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsISO;
-        private System.Windows.Forms.WebBrowser webBrowser;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFile;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileNew;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileOpen;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorFile1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileSave;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileSaveAs;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorFile2;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileImport;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileExport;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorFile3;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileExit;
-        private System.Windows.Forms.OpenFileDialog openFileDialogLoad;
-        private System.Windows.Forms.SaveFileDialog saveFileDialogSave;
-        private System.Windows.Forms.OpenFileDialog openFileDialogImport;
-        private System.Windows.Forms.SaveFileDialog saveFileDialogExport;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorEdit2;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparatorEdit1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsert;
-        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItemContextSeparator;
-        private System.Windows.Forms.TextBox textBoxHTML;
-        private System.Windows.Forms.OpenFileDialog openFileDialogUpdate;
-        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemHelpAbout;
-        private System.Windows.Forms.ImageList imageListIcon;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileUpdate;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsert;
-        private System.Windows.Forms.ToolStrip toolStripMain;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFileNew;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFileOpen;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFileSave;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
-        private System.Windows.Forms.ToolStripButton toolStripButtonHelp;
-        private System.Windows.Forms.ToolStripButton toolStripButtonEditDelete;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.ToolStripButton toolStripButtonToolsGenerate;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertTemplate;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertModelView;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertExchange;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertLeaf;
-        private System.Windows.Forms.OpenFileDialog openFileDialogChanges;
-        private System.Windows.Forms.SaveFileDialog saveFileDialogChanges;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
-        private System.Windows.Forms.ToolStripButton toolStripButtonMoveUp;
-        private System.Windows.Forms.ToolStripButton toolStripButtonMoveDown;
-        private System.Windows.Forms.ToolStripButton ToolStripButtonEditCut;
-        private System.Windows.Forms.ToolStripButton ToolStripButtonEditCopy;
-        private System.Windows.Forms.ToolStripButton ToolStripButtonEditPaste;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemEditCut;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditCopy;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditPaste;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveUp;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveDown;
-        private System.ComponentModel.BackgroundWorker backgroundWorkerGenerate;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertRoot;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertProperty;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertQset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertQuantity;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertExample;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveOut;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveIn;
-        private System.Windows.Forms.ToolStripButton toolStripButtonMoveOut;
-        private System.Windows.Forms.ToolStripButton toolStripButtonMoveIn;
-        private System.Windows.Forms.ToolStripMenuItem mergeToolStripMenuItem;
-        private System.Windows.Forms.OpenFileDialog openFileDialogMerge;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDownload;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemPublish;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsValidate;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
-        private System.ComponentModel.BackgroundWorker backgroundWorkerValidate;
-        private CtlCheckGrid ctlCheckGrid;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertNormative;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertTerm;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertAbbreviatedTerm;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertBibliography;
-        private System.Windows.Forms.ToolStripMenuItem documentationToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBibliography;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertNormative;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemInsertTerm;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemInsertAbbreviatedTerm;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertExample;
-        private System.Windows.Forms.ToolStripMenuItem schemaDefinitionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertEntity;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertAttribute;
-        private System.Windows.Forms.ToolStripMenuItem userDataDefinitionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPropertyset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProperty;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertQuantityset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertQuantity;
-        private System.Windows.Forms.ToolStripMenuItem modelViewDefinitionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertTemplate;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertViewDefinition;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertExchange;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptRoot;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptLeaf;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertSchema;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertEnumeration;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertSelect;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertDefined;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertWhere;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertUnique;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem9;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem10;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertFunction;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertGlobalRule;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPropertyEnumeration;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPropertyConstant;
-        private CtlExpressG ctlExpressG;
-        private CtlConcept ctlConcept;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditRename;
-        private System.Windows.Forms.ToolStripButton toolStripButtonEditRename;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertEnumerationConstant;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem13;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertComment;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPrimitive;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPrimitiveBoolean;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPrimitiveLogical;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanInteger;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanReal;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanNumber;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanBinary;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanString;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem14;
-        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewWeb;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewText;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewDiagram;
-        private System.Windows.Forms.ToolStripButton toolStripButtonViewWeb;
-        private System.Windows.Forms.ToolStripButton toolStripButtonViewText;
-        private System.Windows.Forms.ToolStripButton toolStripButtonViewDiagram;
-        private System.Windows.Forms.Panel panelWorkspace;
-        private System.Windows.Forms.Panel panelDiagram;
-        private System.Windows.Forms.ToolStripMenuItem diagramToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeSelect;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeMove;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeLink;
-        private System.Windows.Forms.ToolStripButton toolStripButtonModeSelect;
-        private System.Windows.Forms.ToolStripButton toolStripButtonModeMove;
-        private System.Windows.Forms.ToolStripButton toolStripButtonModeLink;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem15;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramFormatTree;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramFormatPageRef;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem16;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlign;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignLeft;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignCenter;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignRight;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem17;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignTop;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignMiddle;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignBottom;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSize;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSizeWidth;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSizeHeight;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSizeBoth;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorz;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzEqual;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzIncrease;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzDecrease;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzRemove;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVert;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertEqual;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertIncrease;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertDecrease;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertRemove;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem18;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertReference;
-        private System.Windows.Forms.SplitContainer splitContainerWorkspace;
-        private System.Windows.Forms.ImageList imageListRules;
-        private CtlInheritance ctlInheritance;
-        private System.Windows.Forms.SaveFileDialog saveFileDialogModule;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEnableDisable;
-        private System.Windows.Forms.SplitContainer splitContainerEdit;
-        private System.Windows.Forms.ListView listViewValidate;
-        private System.Windows.Forms.ColumnHeader columnHeaderInstanceID;
-        private System.Windows.Forms.ColumnHeader columnHeaderInstanceType;
-        private System.Windows.Forms.ColumnHeader columnHeaderInstanceName;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripLabel toolStripLabelValidateFile;
-        private System.Windows.Forms.ToolStripButton toolStripButtonValidateClose;
-        private System.Windows.Forms.ImageList imageListValidate;
-        private System.Windows.Forms.ToolStripMenuItem modelViewDefinitionToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem buildFromSubschemaToolStripMenuItem;
-        private System.Windows.Forms.OpenFileDialog openFileDialogExpress;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConstant;
-        private System.Windows.Forms.SplitContainer splitContainerInstances;
-        private System.Windows.Forms.TreeView treeViewInstance;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPropertyEnum;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPropertyConstant;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFindNext;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFindPrev;
-        private System.Windows.Forms.ToolStripTextBox toolStripTextBoxFind;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButtonFind;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFindItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFindText;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFindPage;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem20;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPublication;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemStyleExpressG;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemStyleUML;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsConvert;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptPset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptQset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertSchema;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertEntity;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPublication;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertAttribute;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertDefined;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertEnumeration;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertSelect;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewRequirement;
-        private System.Windows.Forms.ToolStripButton toolStripButtonViewRequirement;
-        private System.Windows.Forms.OpenFileDialog openFileDialogExamples;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertChangeLog;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptMapping;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConceptPset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConceptQset;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConceptMapping;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProcessOutput;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProcessDefinition;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProcessInput;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsMigrateExamples;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemImportDatabase;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileOpenFolder;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileSaveFolder;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMergeProperties;
-        private System.Windows.Forms.ToolStripMenuItem upgradeModelViewToolStripMenuItem;
-        private CtlProperties ctlProperties;
-    }
+		private System.Windows.Forms.SplitContainer splitContainerRoot;
+		private ThemedTreeView treeView;
+		private System.Windows.Forms.MenuStrip menuStrip1;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdit;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditDelete;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemTools;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsISO;
+		private System.Windows.Forms.WebBrowser webBrowser;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFile;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileNew;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileOpen;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorFile1;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileSave;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileSaveAs;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorFile2;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileImport;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileExport;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorFile3;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileExit;
+		private System.Windows.Forms.OpenFileDialog openFileDialogLoad;
+		private System.Windows.Forms.SaveFileDialog saveFileDialogSave;
+		private System.Windows.Forms.OpenFileDialog openFileDialogImport;
+		private System.Windows.Forms.SaveFileDialog saveFileDialogExport;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorEdit2;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparatorEdit1;
+		private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsert;
+		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItemContextSeparator;
+		private System.Windows.Forms.TextBox textBoxHTML;
+		private System.Windows.Forms.OpenFileDialog openFileDialogUpdate;
+		private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemHelpAbout;
+		private System.Windows.Forms.ImageList imageListIcon;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileUpdate;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsert;
+		private System.Windows.Forms.ToolStrip toolStripMain;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFileNew;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFileOpen;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFileSave;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
+		private System.Windows.Forms.ToolStripButton toolStripButtonHelp;
+		private System.Windows.Forms.ToolStripButton toolStripButtonEditDelete;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+		private System.Windows.Forms.ToolStripButton toolStripButtonToolsGenerate;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertTemplate;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertModelView;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertExchange;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertLeaf;
+		private System.Windows.Forms.OpenFileDialog openFileDialogChanges;
+		private System.Windows.Forms.SaveFileDialog saveFileDialogChanges;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+		private System.Windows.Forms.ToolStripButton toolStripButtonMoveUp;
+		private System.Windows.Forms.ToolStripButton toolStripButtonMoveDown;
+		private System.Windows.Forms.ToolStripButton ToolStripButtonEditCut;
+		private System.Windows.Forms.ToolStripButton ToolStripButtonEditCopy;
+		private System.Windows.Forms.ToolStripButton ToolStripButtonEditPaste;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+		private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemEditCut;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditCopy;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditPaste;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveUp;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveDown;
+		private System.ComponentModel.BackgroundWorker backgroundWorkerGenerate;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertRoot;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertProperty;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertQset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertQuantity;
+		private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertExample;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveOut;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditMoveIn;
+		private System.Windows.Forms.ToolStripButton toolStripButtonMoveOut;
+		private System.Windows.Forms.ToolStripButton toolStripButtonMoveIn;
+		private System.Windows.Forms.ToolStripMenuItem mergeToolStripMenuItem;
+		private System.Windows.Forms.OpenFileDialog openFileDialogMerge;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDownload;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemPublish;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsValidate;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
+		private System.ComponentModel.BackgroundWorker backgroundWorkerValidate;
+		private CtlCheckGrid ctlCheckGrid;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertNormative;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertTerm;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertAbbreviatedTerm;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertBibliography;
+		private System.Windows.Forms.ToolStripMenuItem documentationToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBibliography;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertNormative;
+		private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemInsertTerm;
+		private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemInsertAbbreviatedTerm;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertExample;
+		private System.Windows.Forms.ToolStripMenuItem schemaDefinitionToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertEntity;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertAttribute;
+		private System.Windows.Forms.ToolStripMenuItem userDataDefinitionToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPropertyset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProperty;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertQuantityset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertQuantity;
+		private System.Windows.Forms.ToolStripMenuItem modelViewDefinitionToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertTemplate;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertViewDefinition;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertExchange;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptRoot;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptLeaf;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertSchema;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertEnumeration;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertSelect;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertDefined;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertWhere;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertUnique;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem9;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem10;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertFunction;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertGlobalRule;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPropertyEnumeration;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPropertyConstant;
+		private CtlExpressG ctlExpressG;
+		private CtlConcept ctlConcept;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEditRename;
+		private System.Windows.Forms.ToolStripButton toolStripButtonEditRename;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertEnumerationConstant;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem13;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertComment;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPrimitive;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPrimitiveBoolean;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPrimitiveLogical;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanInteger;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanReal;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanNumber;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanBinary;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertBooleanString;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem14;
+		private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewWeb;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewText;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewDiagram;
+		private System.Windows.Forms.ToolStripButton toolStripButtonViewWeb;
+		private System.Windows.Forms.ToolStripButton toolStripButtonViewText;
+		private System.Windows.Forms.ToolStripButton toolStripButtonViewDiagram;
+		private System.Windows.Forms.Panel panelWorkspace;
+		private System.Windows.Forms.Panel panelDiagram;
+		private System.Windows.Forms.ToolStripMenuItem diagramToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeSelect;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeMove;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeLink;
+		private System.Windows.Forms.ToolStripButton toolStripButtonModeSelect;
+		private System.Windows.Forms.ToolStripButton toolStripButtonModeMove;
+		private System.Windows.Forms.ToolStripButton toolStripButtonModeLink;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem15;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramFormatTree;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramFormatPageRef;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem16;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlign;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignLeft;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignCenter;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignRight;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem17;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignTop;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignMiddle;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramAlignBottom;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSize;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSizeWidth;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSizeHeight;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSizeBoth;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorz;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzEqual;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzIncrease;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzDecrease;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceHorzRemove;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVert;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertEqual;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertIncrease;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertDecrease;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDiagramSpaceVertRemove;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem18;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertReference;
+		private System.Windows.Forms.SplitContainer splitContainerWorkspace;
+		private System.Windows.Forms.ImageList imageListRules;
+		private CtlInheritance ctlInheritance;
+		private System.Windows.Forms.SaveFileDialog saveFileDialogModule;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEnableDisable;
+		private System.Windows.Forms.SplitContainer splitContainerEdit;
+		private System.Windows.Forms.ListView listViewValidate;
+		private System.Windows.Forms.ColumnHeader columnHeaderInstanceID;
+		private System.Windows.Forms.ColumnHeader columnHeaderInstanceType;
+		private System.Windows.Forms.ColumnHeader columnHeaderInstanceName;
+		private System.Windows.Forms.ToolStrip toolStrip1;
+		private System.Windows.Forms.ToolStripLabel toolStripLabelValidateFile;
+		private System.Windows.Forms.ToolStripButton toolStripButtonValidateClose;
+		private System.Windows.Forms.ImageList imageListValidate;
+		private System.Windows.Forms.ToolStripMenuItem modelViewDefinitionToolStripMenuItem1;
+		private System.Windows.Forms.ToolStripMenuItem buildFromSubschemaToolStripMenuItem;
+		private System.Windows.Forms.OpenFileDialog openFileDialogExpress;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConstant;
+		private System.Windows.Forms.SplitContainer splitContainerInstances;
+		private System.Windows.Forms.TreeView treeViewInstance;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPropertyEnum;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPropertyConstant;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFindNext;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFindPrev;
+		private System.Windows.Forms.ToolStripTextBox toolStripTextBoxFind;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+		private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButtonFind;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFindItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFindText;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFindPage;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem20;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertPublication;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemStyleExpressG;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemStyleUML;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsConvert;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptPset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptQset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertSchema;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertEntity;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertPublication;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertAttribute;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertDefined;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertEnumeration;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertSelect;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemViewRequirement;
+		private System.Windows.Forms.ToolStripButton toolStripButtonViewRequirement;
+		private System.Windows.Forms.OpenFileDialog openFileDialogExamples;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertChangeLog;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertConceptMapping;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConceptPset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConceptQset;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertConceptMapping;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProcessOutput;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProcessDefinition;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemInsertProcessInput;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemToolsMigrateExamples;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemImportDatabase;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileOpenFolder;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemFileSaveFolder;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMergeProperties;
+		private System.Windows.Forms.ToolStripMenuItem upgradeModelViewToolStripMenuItem;
+		private CtlProperties ctlProperties;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInclude;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextIncludeProperty;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextRemove;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextIncludeConstant;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextIncludePropertyConstant;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextIncludeQuantity;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCSharp;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemContextInsertSelectItem;
+	}
 }

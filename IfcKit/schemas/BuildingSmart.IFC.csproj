@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -1239,6 +1239,14 @@
     <Compile Include="IfcUtilityResource\IfcTable.cs" />
     <Compile Include="IfcUtilityResource\IfcTableColumn.cs" />
     <Compile Include="IfcUtilityResource\IfcTableRow.cs" />
+    <Compile Include="XmlElementIfc.cs" />
+    <Compile Include="XmlHeader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\utilities\BuildingSmart.Utilities.Conversion\BuildingSmart.Utilities.Conversion.csproj">
+      <Project>{048106c1-7d68-4b3c-b7b1-eb437f2c15b0}</Project>
+      <Name>BuildingSmart.Utilities.Conversion</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

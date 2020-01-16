@@ -15,51 +15,51 @@ using System.Windows.Forms;
 
 namespace IfcDoc
 {
-    public partial class FormCode : Form
-    {
-        public FormCode()
-        {
-            InitializeComponent();
-        }
+	public partial class FormCode : Form
+	{
+		public FormCode()
+		{
+			InitializeComponent();
+		}
 
-        private void buttonPath_Click(object sender, EventArgs e)
-        {
-            DialogResult res = this.folderBrowserDialog.ShowDialog();
-            if (res == DialogResult.OK)
-            {
-                this.textBoxPath.Text = this.folderBrowserDialog.SelectedPath;
-            }
-        }
+		private void buttonPath_Click(object sender, EventArgs e)
+		{
+			DialogResult res = this.folderBrowserDialog.ShowDialog();
+			if (res == DialogResult.OK)
+			{
+				this.textBoxPath.Text = this.folderBrowserDialog.SelectedPath;
+			}
+		}
 
-        private void FormCode_Load(object sender, EventArgs e)
-        {
-            this.comboBoxLanguage.SelectedIndex = 0;
-        }
+		private void FormCode_Load(object sender, EventArgs e)
+		{
+			this.comboBoxLanguage.SelectedIndex = 0;
+		}
 
-        public string Path
-        {
-            get
-            {
-                return this.textBoxPath.Text;
-            }
-            set
-            {
-                this.textBoxPath.Text = value;
-            }
-        }
+		public string Path
+		{
+			get
+			{
+				return this.textBoxPath.Text;
+			}
+			set
+			{
+				this.textBoxPath.Text = value;
+			}
+		}
 
-        public string Language
-        {
-            get
-            {
-                return this.comboBoxLanguage.Text;
-            }
-            set
-            {
-                this.comboBoxLanguage.SelectedValue = value;
-            }
-        }
+		public string Language
+		{
+			get
+			{
+				return this.comboBoxLanguage.Text;
+			}
+			set
+			{
+				this.comboBoxLanguage.SelectedValue = value;
+			}
+		}
 
 
-    }
+	}
 }

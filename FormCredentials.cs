@@ -10,49 +10,49 @@ using System.Windows.Forms;
 
 namespace IfcDoc
 {
-    public partial class FormCredentials : Form
-    {
-        public FormCredentials()
-        {
-            InitializeComponent();
+	public partial class FormCredentials : Form
+	{
+		public FormCredentials()
+		{
+			InitializeComponent();
 
-            this.checkBoxRemember.Checked = !String.IsNullOrEmpty(Properties.Settings.Default.Username);
-            this.textBoxUsername.Text = Properties.Settings.Default.Username;
-            this.textBoxPassword.Text = Properties.Settings.Default.Password;
-        }
+			this.checkBoxRemember.Checked = !String.IsNullOrEmpty(Properties.Settings.Default.Username);
+			this.textBoxUsername.Text = Properties.Settings.Default.Username;
+			this.textBoxPassword.Text = Properties.Settings.Default.Password;
+		}
 
-        public string Username
-        {
-            get
-            {
-                return this.textBoxUsername.Text;
-            }
-        }
+		public string Username
+		{
+			get
+			{
+				return this.textBoxUsername.Text;
+			}
+		}
 
-        // no sense in using SecureString as it will be sent in the clear anyways
-        public string Password
-        {
-            get
-            {
-                return this.textBoxPassword.Text;
-            }
-        }
+		// no sense in using SecureString as it will be sent in the clear anyways
+		public string Password
+		{
+			get
+			{
+				return this.textBoxPassword.Text;
+			}
+		}
 
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
+		protected override void OnClosed(EventArgs e)
+		{
+			base.OnClosed(e);
 
-            if (this.checkBoxRemember.Checked)
-            {
-                Properties.Settings.Default.Username = this.textBoxUsername.Text;
-                Properties.Settings.Default.Password = this.textBoxPassword.Text;
-            }
-            else
-            {
-                Properties.Settings.Default.Username = String.Empty;
-                Properties.Settings.Default.Password = String.Empty;
-            }
-            Properties.Settings.Default.Save();
-        }
-    }
+			if (this.checkBoxRemember.Checked)
+			{
+				Properties.Settings.Default.Username = this.textBoxUsername.Text;
+				Properties.Settings.Default.Password = this.textBoxPassword.Text;
+			}
+			else
+			{
+				Properties.Settings.Default.Username = String.Empty;
+				Properties.Settings.Default.Password = String.Empty;
+			}
+			Properties.Settings.Default.Save();
+		}
+	}
 }

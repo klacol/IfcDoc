@@ -10,16 +10,16 @@ using System.Windows.Forms;
 
 namespace IfcDoc
 {
-    public partial class FormTests : Form
-    {
-        public FormTests()
-        {
-            InitializeComponent();
+	public partial class FormTests : Form
+	{
+		public FormTests()
+		{
+			InitializeComponent();
 
-            for (int i = 0; i < 10; i++)
-            {
-                label1.Text += i.ToString() + "\n";
-            }
-        }
-    }
+			for (int i = 0; i < 10; i++)
+			{
+				label1.Text += i.ToString() + "\n";
+			}
+		}
+	}
 }

@@ -14,54 +14,54 @@ using System.Windows.Forms;
 
 namespace IfcDoc
 {
-    public partial class FormProgress : Form
-    {
-        int m_progressmax = 100;
+	public partial class FormProgress : Form
+	{
+		int m_progressmax = 100;
 
-        public FormProgress()
-        {
-            InitializeComponent();
-        }
+		public FormProgress()
+		{
+			InitializeComponent();
+		}
 
-        public string Description
-        {
-            get
-            {
-                return this.label1.Text;
-            }
-            set
-            {
-                this.label1.Text = value;
-            }
-        }
+		public string Description
+		{
+			get
+			{
+				return this.label1.Text;
+			}
+			set
+			{
+				this.label1.Text = value;
+			}
+		}
 
-        public void SetProgressTotal(int total)
-        {
-            this.m_progressmax = total;
-        }
+		public void SetProgressTotal(int total)
+		{
+			this.m_progressmax = total;
+		}
 
-        public void ReportProgress(int step, object state)
-        {
-            if (step >= 0)
-            {
-                this.progressBar.Maximum = this.m_progressmax;
-                if (step <= this.progressBar.Maximum)
-                {
-                    this.progressBar.Value = step;
-                }
-            }
-            else
-            {
-                this.Text += " - Error";
-                this.buttonCancel.Text = "Close";
-            }
+		public void ReportProgress(int step, object state)
+		{
+			if (step >= 0)
+			{
+				this.progressBar.Maximum = this.m_progressmax;
+				if (step <= this.progressBar.Maximum)
+				{
+					this.progressBar.Value = step;
+				}
+			}
+			else
+			{
+				this.Text += " - Error";
+				this.buttonCancel.Text = "Close";
+			}
 
-            if (state != null)
-            {
-                this.textBoxStatus.Text = this.textBoxStatus.Text + "\r\n" + state.ToString();
-                this.textBoxStatus.Select(this.textBoxStatus.Text.Length, 0);
-                this.textBoxStatus.ScrollToCaret();
-            }
-        }
-    }
+			if (state != null)
+			{
+				this.textBoxStatus.Text = this.textBoxStatus.Text + "\r\n" + state.ToString();
+				this.textBoxStatus.Select(this.textBoxStatus.Text.Length, 0);
+				this.textBoxStatus.ScrollToCaret();
+			}
+		}
+	}
 }

@@ -1,33 +1,33 @@
 ﻿namespace IfcDoc
 {
-    partial class CtlParameters
-    {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+	partial class CtlParameters
+	{
+		/// <summary> 
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+		/// <summary> 
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
 
-        #region Component Designer generated code
+		#region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
+		/// <summary> 
+		/// Required method for Designer support - do not modify 
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CtlParameters));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -46,12 +46,12 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonShowFailures = new System.Windows.Forms.ToolStripButton();
             this.toolStripComboBoxOperator = new System.Windows.Forms.ToolStripComboBox();
+            this.toolStripButtonConceptEntity = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewConceptRules = new System.Windows.Forms.DataGridView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeaderInstance = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolStripButtonConceptEntity = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewConceptRules)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -214,6 +214,17 @@
             this.toolStripComboBoxOperator.Size = new System.Drawing.Size(121, 25);
             this.toolStripComboBoxOperator.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBoxOperator_SelectedIndexChanged);
             // 
+            // toolStripButtonConceptEntity
+            // 
+            this.toolStripButtonConceptEntity.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButtonConceptEntity.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonConceptEntity.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonConceptEntity.Image")));
+            this.toolStripButtonConceptEntity.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonConceptEntity.Name = "toolStripButtonConceptEntity";
+            this.toolStripButtonConceptEntity.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButtonConceptEntity.Text = "Change Entity";
+            this.toolStripButtonConceptEntity.Click += new System.EventHandler(this.toolStripButtonConceptEntity_Click);
+            // 
             // dataGridViewConceptRules
             // 
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -235,7 +246,6 @@
             this.dataGridViewConceptRules.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewConceptRules.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewConceptRules.Location = new System.Drawing.Point(0, 0);
-            this.dataGridViewConceptRules.MultiSelect = false;
             this.dataGridViewConceptRules.Name = "dataGridViewConceptRules";
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
@@ -298,17 +308,6 @@
             this.columnHeaderName.Text = "Name";
             this.columnHeaderName.Width = 200;
             // 
-            // toolStripButtonConceptEntity
-            // 
-            this.toolStripButtonConceptEntity.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripButtonConceptEntity.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButtonConceptEntity.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonConceptEntity.Image")));
-            this.toolStripButtonConceptEntity.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonConceptEntity.Name = "toolStripButtonConceptEntity";
-            this.toolStripButtonConceptEntity.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButtonConceptEntity.Text = "Change Entity";
-            this.toolStripButtonConceptEntity.Click += new System.EventHandler(this.toolStripButtonConceptEntity_Click);
-            // 
             // CtlParameters
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -327,29 +326,29 @@
             this.ResumeLayout(false);
             this.PerformLayout();
 
-        }
+		}
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton toolStripButtonTemplateInsert;
-        private System.Windows.Forms.ToolStripButton toolStripButtonTemplateRemove;
-        private System.Windows.Forms.DataGridView dataGridViewConceptRules;
-        private System.Windows.Forms.ToolStripButton toolStripButtonMoveUp;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButtonMoveDown;
-        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButtonInheritance;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeInherit;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeOverride;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeSuppress;
-        private System.Windows.Forms.ToolStripButton toolStripButtonConceptTemplate;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton toolStripButtonShowFailures;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.ColumnHeader columnHeaderInstance;
-        private System.Windows.Forms.ColumnHeader columnHeaderName;
-        private System.Windows.Forms.ToolStripComboBox toolStripComboBoxOperator;
-        private System.Windows.Forms.ToolStripButton toolStripButtonConceptEntity;
-    }
+		private System.Windows.Forms.ToolStrip toolStrip1;
+		private System.Windows.Forms.ToolStripButton toolStripButtonTemplateInsert;
+		private System.Windows.Forms.ToolStripButton toolStripButtonTemplateRemove;
+		private System.Windows.Forms.DataGridView dataGridViewConceptRules;
+		private System.Windows.Forms.ToolStripButton toolStripButtonMoveUp;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private System.Windows.Forms.ToolStripButton toolStripButtonMoveDown;
+		private System.Windows.Forms.ToolStripSplitButton toolStripSplitButtonInheritance;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeInherit;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeOverride;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeSuppress;
+		private System.Windows.Forms.ToolStripButton toolStripButtonConceptTemplate;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+		private System.Windows.Forms.ToolStripButton toolStripButtonShowFailures;
+		private System.Windows.Forms.SplitContainer splitContainer1;
+		private System.Windows.Forms.ListView listView1;
+		private System.Windows.Forms.ColumnHeader columnHeaderInstance;
+		private System.Windows.Forms.ColumnHeader columnHeaderName;
+		private System.Windows.Forms.ToolStripComboBox toolStripComboBoxOperator;
+		private System.Windows.Forms.ToolStripButton toolStripButtonConceptEntity;
+	}
 }

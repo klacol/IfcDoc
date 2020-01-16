@@ -18,128 +18,173 @@ using IfcDoc.Schema.SVG;
 
 namespace IfcDoc.Format.CSC
 {
-    internal class FormatCSC : IDisposable,
-        IFormatExtension
-    {
-        string m_filename;
-        DocProject m_project;
-        DocSchema m_schema;
-        DocDefinition m_definition;
-        Dictionary<string, DocObject> m_map;
+	internal class FormatCSC : IDisposable,
+		IFormatExtension
+	{
+		string m_filename;
+		DocProject m_project;
+		DocSchema m_schema;
+		DocDefinition m_definition;
+		Dictionary<string, DocObject> m_map;
 
-        private static void WriteResource(System.IO.StreamWriter writer, string resourcename)
-        {
-            using (System.IO.Stream stm = System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(resourcename))
-            {
-                using (System.IO.StreamReader reader = new System.IO.StreamReader(stm))
-                {
-                    string block = reader.ReadToEnd();
-                    writer.Write(block);
-                }
-            }
-        }
+		private static void WriteResource(System.IO.StreamWriter writer, string resourcename)
+		{
+			using (System.IO.Stream stm = System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(resourcename))
+			{
+				using (System.IO.StreamReader reader = new System.IO.StreamReader(stm))
+				{
+					string block = reader.ReadToEnd();
+					writer.Write(block);
+				}
+			}
+		}
 
-        /// <summary>
-        /// Returns the native .NET type to use for a given EXPRESS type.
-        /// </summary>
-        /// <param name="expresstype"></param>
-        /// <returns></returns>
-        private static Type GetNativeType(string expresstype)
-        {
-            switch(expresstype)
-            {
-                case "STRING":
-                    return typeof(string);
+		/// <summary>
+		/// Given a .NET type, resolves to EXPRESS primitive if applicable, or else named type
+		/// </summary>
+		/// <param name="typeField"></param>
+		/// <returns></returns>
+		public static string GetExpressType(Type typeField)
+		{
+			if (typeField == typeof(string))
+			{
+				return "STRING";
+			}
+			else if (typeField == typeof(long) ||
+				typeField == typeof(int))
+			{
+				return "INTEGER";
+			}
+			else if (typeField == typeof(double) ||
+				typeField == typeof(float))
+			{
+				return "REAL";
+			}
+			else if (typeField == typeof(decimal))
+			{
+				return "NUMBER";
+			}
+			else if (typeField == typeof(bool))
+			{
+				return "BOOLEAN";
+			}
+			else if (typeField == typeof(bool?))
+			{
+				return "LOGICAL";
+			}
+			else if (typeField == typeof(byte[]))
+			{
+				return "BINARY";
+			}
+			else
+			{
+				return typeField.Name;
+			}
+		}
 
-                case "INTEGER":
-                    return typeof(long);
+		/// <summary>
+		/// Returns the native .NET type to use for a given EXPRESS type.
+		/// </summary>
+		/// <param name="expresstype"></param>
+		/// <returns></returns>
+		public static Type GetNativeType(string expresstype)
+		{
+			switch (expresstype)
+			{
+				case "STRING":
+					return typeof(string);
 
-                case "REAL":
-                    return typeof(double);
+				case "INTEGER":
+					return typeof(long);
 
-                case "NUMBER":
-                    return typeof(decimal);
+				case "REAL":
+					return typeof(double);
 
-                case "LOGICAL":
-                    return typeof(bool?);
+				case "NUMBER":
+					return typeof(decimal);
 
-                case "BOOLEAN":
-                    return typeof(bool);
+				case "LOGICAL":
+					return typeof(bool?);
 
-                case "BINARY":
-                    return typeof(byte[]);
-            }
+				case "BOOLEAN":
+					return typeof(bool);
 
-            return null;
-        }
+				case "BINARY":
+				case "BINARY (32)":
+					return typeof(byte[]);
 
-        /// <summary>
-        /// Converts any native types into .NET types
-        /// </summary>
-        /// <param name="identifier"></param>
-        /// <returns></returns>
-        private static string FormatIdentifier(string identifier)
-        {
-            Type typeNative = GetNativeType(identifier);
-            if (typeNative != null)
-            {
-                if (typeNative.IsGenericType && typeNative.GetGenericTypeDefinition() == typeof(Nullable<>)) 
-                {
-                    return typeNative.GetGenericArguments()[0].Name + "?";
-                }
-                
-                return typeNative.Name;
-            }
+			}
 
-            return identifier;
-        }
+			return null;
+		}
 
-        /// <summary>
-        /// Generates folder of definitions
-        /// </summary>
-        /// <param name="path"></param>
-        public static void GenerateCode(DocProject project, string path, Dictionary<string, DocObject> map, DocCodeEnum options)
-        {
-            string schemaid = project.GetSchemaIdentifier();
+		/// <summary>
+		/// Converts any native types into .NET types
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <returns></returns>
+		private static string FormatIdentifier(string identifier)
+		{
+			Type typeNative = GetNativeType(identifier);
+			if (typeNative != null)
+			{
+				if (typeNative.IsGenericType && typeNative.GetGenericTypeDefinition() == typeof(Nullable<>))
+				{
+					return typeNative.GetGenericArguments()[0].Name + "?";
+				}
 
-            // write assembly version info
-            using (StreamWriter writerAssm = new StreamWriter(path + @"\AssemblyInfo.cs", false))
-            {
-                WriteResource(writerAssm, "IfcDoc.assemblyinfo.txt");
+				return typeNative.Name;
+			}
 
-                writerAssm.WriteLine("[assembly: AssemblyTitle(\"BuildingSmart." + schemaid.ToUpper() + "\")]");
+			return identifier;
+		}
 
-                string version = project.GetSchemaVersion();
-                if (!String.IsNullOrEmpty(version))
-                {
-                    writerAssm.WriteLine("[assembly: AssemblyVersion(\"" + version + "\")]");
-                    writerAssm.WriteLine("[assembly: AssemblyFileVersion(\"" + version + "\")]");
-                }
-            }
+		/// <summary>
+		/// Generates folder of definitions
+		/// </summary>
+		/// <param name="path"></param>
+		public static void GenerateCode(DocProject project, string path, Dictionary<string, DocObject> map, DocCodeEnum options)
+		{
+			string schemaid = project.GetSchemaIdentifier();
 
-            using (StreamWriter writerProj = new StreamWriter(path + @"\BuildingSmart." + schemaid.ToUpper() + ".csproj", false))
-            {
-                WriteResource(writerProj, "IfcDoc.csproj1.txt");
-                writerProj.WriteLine("    <Compile Include=\"AssemblyInfo.cs\" />");
+			// write assembly version info
+			using (StreamWriter writerAssm = new StreamWriter(path + @"\AssemblyInfo.cs", false))
+			{
+				WriteResource(writerAssm, "IfcDoc.assemblyinfo.txt");
 
-                foreach (DocSection docSection in project.Sections)
-                {
-                    foreach (DocSchema docSchema in docSection.Schemas)
-                    {
-                        string pathSchema = path + @"\" + docSchema.Name;
-                        if (!Directory.Exists(pathSchema))
-                        {
-                            Directory.CreateDirectory(pathSchema);
-                        }
+				writerAssm.WriteLine("[assembly: AssemblyTitle(\"buildingSMART." + schemaid.ToUpper() + "\")]");
 
-                        string pathSchemaValidation = pathSchema + @"\validation";
-                        if (!Directory.Exists(pathSchemaValidation))
-                        {
-                            Directory.CreateDirectory(pathSchemaValidation);
-                        }
+				string version = project.GetSchemaVersion();
+				if (!String.IsNullOrEmpty(version))
+				{
+					writerAssm.WriteLine("[assembly: AssemblyVersion(\"" + version + "\")]");
+					writerAssm.WriteLine("[assembly: AssemblyFileVersion(\"" + version + "\")]");
+				}
+			}
+
+			using (StreamWriter writerProj = new StreamWriter(path + @"\buildingSMART." + schemaid.ToUpper() + ".csproj", false))
+			{
+				WriteResource(writerProj, "IfcDoc.csproj1.txt");
+				writerProj.WriteLine("    <Compile Include=\"AssemblyInfo.cs\" />");
+
+				foreach (DocSection docSection in project.Sections)
+				{
+					foreach (DocSchema docSchema in docSection.Schemas)
+					{
+						string pathSchema = path + @"\" + docSchema.Name;
+						if (!Directory.Exists(pathSchema))
+						{
+							Directory.CreateDirectory(pathSchema);
+						}
+
+						string pathSchemaValidation = pathSchema + @"\validation";
+						if (!Directory.Exists(pathSchemaValidation))
+						{
+							Directory.CreateDirectory(pathSchemaValidation);
+						}
 
 
-                        // future: static functions and global rules for schema
+						// future: static functions and global rules for schema
 #if false
                         using (FormatCSC format = new FormatCSC(pathSchema + @"\schema.cs"))
                         {
@@ -173,181 +218,181 @@ namespace IfcDoc.Format.CSC
                         }
 #endif
 
-                        // html for schema
-                        if ((options & DocCodeEnum.Documentation) != 0)
-                        {
-                            string filehtml = docSchema.Name + @"\schema.htm";
-                            using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                            {
-                                writerHtml.Write(docSchema.Documentation);
-                            }
-                        }
+						// html for schema
+						if ((options & DocCodeEnum.Documentation) != 0)
+						{
+							string filehtml = docSchema.Name + @"\schema.htm";
+							using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+							{
+								writerHtml.Write(docSchema.Documentation);
+							}
+						}
 
-                        // diagram for schema
-                        if ((options & DocCodeEnum.Diagrams) != 0)
-                        {
-                            // use SVG format
-                            string filesvg = docSchema.Name + @"\schema.svg";
-                            using (SchemaSVG formatSVG = new SchemaSVG(path + @"\" + filesvg, docSchema, project))
-                            {
-                                formatSVG.Save();
-                            }
-                        }
+						// diagram for schema
+						if ((options & DocCodeEnum.Diagrams) != 0)
+						{
+							// use SVG format
+							string filesvg = docSchema.Name + @"\schema.svg";
+							using (SchemaSVG formatSVG = new SchemaSVG(path + @"\" + filesvg, docSchema, project, DiagramFormat.UML))
+							{
+								formatSVG.Save();
+							}
+						}
 
-                        foreach (DocType docType in docSchema.Types)
-                        {
-                            string file = docSchema.Name + @"\" + docType.Name + ".cs";
-                            using (FormatCSC format = new FormatCSC(path + @"\" + file))
-                            {
-                                format.Instance = project;
-                                format.Schema = docSchema;
-                                format.Definition = docType;
-                                format.Map = map;
-                                format.Save();
-                            }
+						foreach (DocType docType in docSchema.Types)
+						{
+							string file = docSchema.Name + @"\" + docType.Name + ".cs";
+							using (FormatCSC format = new FormatCSC(path + @"\" + file))
+							{
+								format.Instance = project;
+								format.Schema = docSchema;
+								format.Definition = docType;
+								format.Map = map;
+								format.Save();
+							}
 
-                            if ((options & DocCodeEnum.Documentation) != 0)
-                            {
-                                string filehtml = docSchema.Name + @"\" + docType.Name + ".htm";
-                                using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                                {
-                                    List<DocumentationISO.ContentRef> listFig = new List<DocumentationISO.ContentRef>();
-                                    List<DocumentationISO.ContentRef> listTab = new List<DocumentationISO.ContentRef>();
-                                    string doc = DocumentationISO.UpdateNumbering(docType.Documentation, listFig, listTab, docType);
-                                    writerHtml.Write(doc);
-                                }
-                            }
+							if ((options & DocCodeEnum.Documentation) != 0)
+							{
+								string filehtml = docSchema.Name + @"\" + docType.Name + ".htm";
+								using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+								{
+									List<DocumentationISO.ContentRef> listFig = new List<DocumentationISO.ContentRef>();
+									List<DocumentationISO.ContentRef> listTab = new List<DocumentationISO.ContentRef>();
+									string doc = DocumentationISO.UpdateNumbering(docType.Documentation, listFig, listTab, docType);
+									writerHtml.Write(doc);
+								}
+							}
 
-                            if ((options & DocCodeEnum.Functions) != 0)
-                            {
-                                if (docType is DocDefined)
-                                {
-                                    DocDefined docDef = (DocDefined)docType;
-                                    foreach (DocWhereRule docWhere in docDef.WhereRules)
-                                    {
-                                        string filehtml = docSchema.Name + @"\" + docType.Name + @"-" + docWhere.Name + ".htm";
-                                        string fileexpr = docSchema.Name + @"\" + docType.Name + @"-" + docWhere.Name + ".exp";
-                                        using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                                        {
-                                            writerHtml.Write(docWhere.Documentation);
-                                        }
-                                        using (StreamWriter writerHtml = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
-                                        {
-                                            writerHtml.Write(docWhere.Expression);
-                                        }
-                                    }
-                                }
-                            }
+							if ((options & DocCodeEnum.Functions) != 0)
+							{
+								if (docType is DocDefined)
+								{
+									DocDefined docDef = (DocDefined)docType;
+									foreach (DocWhereRule docWhere in docDef.WhereRules)
+									{
+										string filehtml = docSchema.Name + @"\" + docType.Name + @"-" + docWhere.Name + ".htm";
+										string fileexpr = docSchema.Name + @"\" + docType.Name + @"-" + docWhere.Name + ".exp";
+										using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+										{
+											writerHtml.Write(docWhere.Documentation);
+										}
+										using (StreamWriter writerHtml = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
+										{
+											writerHtml.Write(docWhere.Expression);
+										}
+									}
+								}
+							}
 
-                            writerProj.WriteLine("    <Compile Include=\"" + file + "\" />");
-                        }
+							writerProj.WriteLine("    <Compile Include=\"" + file + "\" />");
+						}
 
-                        foreach (DocEntity docType in docSchema.Entities)
-                        {
-                            string file = docSchema.Name + @"\" + docType.Name + ".cs";
-                            using (FormatCSC format = new FormatCSC(path + @"\" + file))
-                            {
-                                format.Instance = project;
-                                format.Schema = docSchema;
-                                format.Definition = docType;
-                                format.Map = map;
-                                format.Save();
+						foreach (DocEntity docType in docSchema.Entities)
+						{
+							string file = docSchema.Name + @"\" + docType.Name + ".cs";
+							using (FormatCSC format = new FormatCSC(path + @"\" + file))
+							{
+								format.Instance = project;
+								format.Schema = docSchema;
+								format.Definition = docType;
+								format.Map = map;
+								format.Save();
 
-                                if ((options & DocCodeEnum.Documentation) != 0)
-                                {
-                                    string filehtml = docSchema.Name + @"\" + docType.Name + ".htm";
-                                    using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                                    {
-                                        List<DocumentationISO.ContentRef> listFig = new List<DocumentationISO.ContentRef>();
-                                        List<DocumentationISO.ContentRef> listTab = new List<DocumentationISO.ContentRef>();
-                                        string doc = DocumentationISO.UpdateNumbering(docType.Documentation, listFig, listTab, docType);
-                                        writerHtml.Write(doc);
-                                    }
-                                }
-                            }
+								if ((options & DocCodeEnum.Documentation) != 0)
+								{
+									string filehtml = docSchema.Name + @"\" + docType.Name + ".htm";
+									using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+									{
+										List<DocumentationISO.ContentRef> listFig = new List<DocumentationISO.ContentRef>();
+										List<DocumentationISO.ContentRef> listTab = new List<DocumentationISO.ContentRef>();
+										string doc = DocumentationISO.UpdateNumbering(docType.Documentation, listFig, listTab, docType);
+										writerHtml.Write(doc);
+									}
+								}
+							}
 
-                            if ((options & DocCodeEnum.Functions) != 0)
-                            {
-                                foreach (DocWhereRule docWhere in docType.WhereRules)
-                                {
-                                    string filehtml = docSchema.Name + @"\validation\" + docType.Name + @"-" + docWhere.Name + ".htm";
-                                    string fileexpr = docSchema.Name + @"\validation\" + docType.Name + @"-" + docWhere.Name + ".exp";
-                                    using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                                    {
-                                        writerHtml.Write(docWhere.Documentation);
-                                    }
-                                    using (StreamWriter writerHtml = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
-                                    {
-                                        writerHtml.Write(docWhere.Expression);
-                                    }
-                                }
-                            }
+							if ((options & DocCodeEnum.Functions) != 0)
+							{
+								foreach (DocWhereRule docWhere in docType.WhereRules)
+								{
+									string filehtml = docSchema.Name + @"\validation\" + docType.Name + @"-" + docWhere.Name + ".htm";
+									string fileexpr = docSchema.Name + @"\validation\" + docType.Name + @"-" + docWhere.Name + ".exp";
+									using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+									{
+										writerHtml.Write(docWhere.Documentation);
+									}
+									using (StreamWriter writerHtml = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
+									{
+										writerHtml.Write(docWhere.Expression);
+									}
+								}
+							}
 
-                            writerProj.WriteLine("    <Compile Include=\"" + file + "\" />");
-                        }
+							writerProj.WriteLine("    <Compile Include=\"" + file + "\" />");
+						}
 
-                        if ((options & DocCodeEnum.Functions) != 0)
-                        {
-                            foreach (DocFunction docFunction in docSchema.Functions)
-                            {
-                                string filehtml = docSchema.Name + @"\validation\" + docFunction.Name + ".htm";
-                                string fileexpr = docSchema.Name + @"\validation\" + docFunction.Name + ".exp";
-                                using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                                {
-                                    writerHtml.Write(docFunction.Documentation);
-                                }
-                                using (StreamWriter writer = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
-                                {
-                                    writer.Write("FUNCTION ");
-                                    writer.WriteLine(docFunction.Name);
-                                    writer.WriteLine(docFunction.Expression);
-                                    writer.WriteLine("END_FUNCTION;");
-                                }
-                            }                           
-                        }
+						if ((options & DocCodeEnum.Functions) != 0)
+						{
+							foreach (DocFunction docFunction in docSchema.Functions)
+							{
+								string filehtml = docSchema.Name + @"\validation\" + docFunction.Name + ".htm";
+								string fileexpr = docSchema.Name + @"\validation\" + docFunction.Name + ".exp";
+								using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+								{
+									writerHtml.Write(docFunction.Documentation);
+								}
+								using (StreamWriter writer = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
+								{
+									writer.Write("FUNCTION ");
+									writer.WriteLine(docFunction.Name);
+									writer.WriteLine(docFunction.Expression);
+									writer.WriteLine("END_FUNCTION;");
+								}
+							}
+						}
 
-                        // global rules???....
-                        if ((options & DocCodeEnum.Rules) != 0)
-                        {
-                            foreach (DocGlobalRule docRule in docSchema.GlobalRules)
-                            {
-                                string filehtml = docSchema.Name + @"\validation\" + docRule.Name + ".htm";
-                                string fileexpr = docSchema.Name + @"\validation\" + docRule.Name + ".exp";
-                                using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
-                                {
-                                    writerHtml.Write(docRule.Documentation);
-                                }
-                                using (StreamWriter writer = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
-                                {
-                                    writer.Write("RULE ");
-                                    writer.Write(docRule.Name);
-                                    writer.WriteLine(" FOR");
-                                    writer.Write("\t(");
-                                    writer.Write(docRule.ApplicableEntity);
-                                    writer.WriteLine(");");
+						// global rules???....
+						if ((options & DocCodeEnum.Rules) != 0)
+						{
+							foreach (DocGlobalRule docRule in docSchema.GlobalRules)
+							{
+								string filehtml = docSchema.Name + @"\validation\" + docRule.Name + ".htm";
+								string fileexpr = docSchema.Name + @"\validation\" + docRule.Name + ".exp";
+								using (StreamWriter writerHtml = new StreamWriter(path + @"\" + filehtml, false, Encoding.UTF8))
+								{
+									writerHtml.Write(docRule.Documentation);
+								}
+								using (StreamWriter writer = new StreamWriter(path + @"\" + fileexpr, false, Encoding.UTF8))
+								{
+									writer.Write("RULE ");
+									writer.Write(docRule.Name);
+									writer.WriteLine(" FOR");
+									writer.Write("\t(");
+									writer.Write(docRule.ApplicableEntity);
+									writer.WriteLine(");");
 
-                                    writer.WriteLine(docRule.Expression);
+									writer.WriteLine(docRule.Expression);
 
-                                    // where
-                                    writer.WriteLine("    WHERE");
-                                    foreach (DocWhereRule docWhere in docRule.WhereRules)
-                                    {
-                                        writer.Write("      ");
-                                        writer.Write(docWhere.Name);
-                                        writer.Write(" : ");
-                                        writer.Write(docWhere.Expression);
-                                        writer.WriteLine(";");
-                                    }
+									// where
+									writer.WriteLine("    WHERE");
+									foreach (DocWhereRule docWhere in docRule.WhereRules)
+									{
+										writer.Write("      ");
+										writer.Write(docWhere.Name);
+										writer.Write(" : ");
+										writer.Write(docWhere.Expression);
+										writer.WriteLine(";");
+									}
 
-                                    writer.WriteLine("END_RULE;");
-                                    writer.WriteLine();
-                                }
-                            }
-                        }
-                    }
-                }
+									writer.WriteLine("END_RULE;");
+									writer.WriteLine();
+								}
+							}
+						}
+					}
+				}
 
-                // save properties
+				// save properties
 #if false
                 using (FormatCSC format = new FormatCSC(path + @"\pset.cs"))
                 {
@@ -356,184 +401,184 @@ namespace IfcDoc.Format.CSC
                     format.Save();
                 }
 #endif
-                WriteResource(writerProj, "IfcDoc.csproj2.txt");
-            }
-        }
+				WriteResource(writerProj, "IfcDoc.csproj2.txt");
+			}
+		}
 
-        public FormatCSC()
-        {
-            this.m_filename = null;
-        }
+		public FormatCSC()
+		{
+			this.m_filename = null;
+		}
 
-        public FormatCSC(string filename)
-        {
-            this.m_filename = filename;
-        }
+		public FormatCSC(string filename)
+		{
+			this.m_filename = filename;
+		}
 
-        public DocProject Instance
-        {
-            get
-            {
-                return this.m_project;
-            }
-            set
-            {
-                this.m_project = value;
-            }
-        }
+		public DocProject Instance
+		{
+			get
+			{
+				return this.m_project;
+			}
+			set
+			{
+				this.m_project = value;
+			}
+		}
 
-        public DocSchema Schema
-        {
-            get
-            {
-                return this.m_schema;
-            }
-            set
-            {
-                this.m_schema = value;
-            }
-        }
+		public DocSchema Schema
+		{
+			get
+			{
+				return this.m_schema;
+			}
+			set
+			{
+				this.m_schema = value;
+			}
+		}
 
-        /// <summary>
-        /// Optional definition to save, or null for all definitions in project.
-        /// </summary>
-        public DocDefinition Definition
-        {
-            get
-            {
-                return this.m_definition;
-            }
-            set
-            {
-                this.m_definition = value;
-            }
-        }
+		/// <summary>
+		/// Optional definition to save, or null for all definitions in project.
+		/// </summary>
+		public DocDefinition Definition
+		{
+			get
+			{
+				return this.m_definition;
+			}
+			set
+			{
+				this.m_definition = value;
+			}
+		}
 
-        public Dictionary<string, DocObject> Map
-        {
-            get
-            {
-                return this.m_map;
-            }
-            set
-            {
-                this.m_map = value;
-            }
-        }
+		public Dictionary<string, DocObject> Map
+		{
+			get
+			{
+				return this.m_map;
+			}
+			set
+			{
+				this.m_map = value;
+			}
+		}
 
-        private void WriteHeader(StreamWriter writer)
-        {
-            writer.WriteLine("// This file may be edited manually or auto-generated using IfcKit at www.buildingsmart-tech.org.");
-            writer.WriteLine("// IFC content is copyright (C) 1996-2018 BuildingSMART International Ltd.");
-            writer.WriteLine();
+		private void WriteHeader(StreamWriter writer)
+		{
+			writer.WriteLine("// This file may be edited manually or auto-generated using IfcKit at www.buildingsmart-tech.org.");
+			writer.WriteLine("// IFC content is copyright (C) 1996-2018 BuildingSMART International Ltd.");
+			writer.WriteLine();
 
-            writer.WriteLine("using System;");
-            writer.WriteLine("using System.Collections.Generic;");
-            writer.WriteLine("using System.ComponentModel;");
-            writer.WriteLine("using System.ComponentModel.DataAnnotations;");
-            writer.WriteLine("using System.ComponentModel.DataAnnotations.Schema;");
-            writer.WriteLine("using System.Runtime.InteropServices;"); // GuidAttribute
-            writer.WriteLine("using System.Runtime.Serialization;");
-            writer.WriteLine("using System.Xml.Serialization;"); // directives for attributes, elements, value types, etc.
-            writer.WriteLine();
+			writer.WriteLine("using System;");
+			writer.WriteLine("using System.Collections.Generic;");
+			writer.WriteLine("using System.ComponentModel;");
+			writer.WriteLine("using System.ComponentModel.DataAnnotations;");
+			writer.WriteLine("using System.ComponentModel.DataAnnotations.Schema;");
+			writer.WriteLine("using System.Runtime.InteropServices;"); // GuidAttribute
+			writer.WriteLine("using System.Runtime.Serialization;");
+			writer.WriteLine("using System.Xml.Serialization;"); // directives for attributes, elements, value types, etc.
+			writer.WriteLine();
 
-            WriteIncludes(writer);
-        }
+			WriteIncludes(writer);
+		}
 
-        private void WriteIncludes(StreamWriter writer)
-        {
-            // new implementation: track dependencies 
-            SortedList<string, DocSchema> listSchema = new SortedList<string, DocSchema>();
-            if (this.m_definition is DocEntity)
-            {
-                DocEntity docEnt = (DocEntity)this.m_definition;
-                while (docEnt != null)
-                {
-                    if (docEnt.BaseDefinition != null)
-                    {
-                        DocDefinition docTarget = this.m_project.GetDefinition(docEnt.BaseDefinition);
-                        if (docTarget != null)
-                        {
-                            DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docTarget);
-                            if (!listSchema.ContainsValue(docSchema))
-                            {
-                                listSchema.Add(docSchema.Name, docSchema);
-                            }
-                        }
-                    }
+		private void WriteIncludes(StreamWriter writer)
+		{
+			// new implementation: track dependencies 
+			SortedList<string, DocSchema> listSchema = new SortedList<string, DocSchema>();
+			if (this.m_definition is DocEntity)
+			{
+				DocEntity docEnt = (DocEntity)this.m_definition;
+				while (docEnt != null)
+				{
+					if (docEnt.BaseDefinition != null)
+					{
+						DocDefinition docTarget = this.m_project.GetDefinition(docEnt.BaseDefinition);
+						if (docTarget != null)
+						{
+							DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docTarget);
+							if (!listSchema.ContainsValue(docSchema))
+							{
+								listSchema.Add(docSchema.Name, docSchema);
+							}
+						}
+					}
 
-                    // selects
-                    foreach (DocObject obj in this.m_map.Values)
-                    {
-                        if (obj is DocSelect)
-                        {
-                            DocSelect docSelect = (DocSelect)obj;
-                            foreach (DocSelectItem docItem in docSelect.Selects)
-                            {
-                                if (docItem.Name != null && docItem.Name.Equals(docEnt.Name))
-                                {
-                                    DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docSelect);
-                                    if (!listSchema.ContainsValue(docSchema))
-                                    {
-                                        listSchema.Add(docSchema.Name, docSchema);
-                                    }
-                                }
-                            }
-                        }
-                    }
+					// selects
+					foreach (DocObject obj in this.m_map.Values)
+					{
+						if (obj is DocSelect)
+						{
+							DocSelect docSelect = (DocSelect)obj;
+							foreach (DocSelectItem docItem in docSelect.Selects)
+							{
+								if (docItem.Name != null && docItem.Name.Equals(docEnt.Name))
+								{
+									DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docSelect);
+									if (!listSchema.ContainsValue(docSchema))
+									{
+										listSchema.Add(docSchema.Name, docSchema);
+									}
+								}
+							}
+						}
+					}
 
-                    foreach (DocAttribute docAttr in docEnt.Attributes)
-                    {
-                        DocObject docRef = null;
-                        if (this.m_map.TryGetValue(docAttr.DefinedType, out docRef))
-                        {
-                            DocSchema docSchema = this.m_project.GetSchemaOfDefinition((DocDefinition)docRef);
-                            if (!listSchema.ContainsValue(docSchema))
-                            {
-                                listSchema.Add(docSchema.Name, docSchema);
-                            }
-                        }
-                    }
+					foreach (DocAttribute docAttr in docEnt.Attributes)
+					{
+						DocObject docRef = null;
+						if (this.m_map.TryGetValue(docAttr.DefinedType, out docRef))
+						{
+							DocSchema docSchema = this.m_project.GetSchemaOfDefinition((DocDefinition)docRef);
+							if (!listSchema.ContainsValue(docSchema))
+							{
+								listSchema.Add(docSchema.Name, docSchema);
+							}
+						}
+					}
 
-                    // recurse
-                    if (docEnt.BaseDefinition != null)
-                    {
-                        docEnt = this.m_project.GetDefinition(docEnt.BaseDefinition) as DocEntity;
-                    }
-                    else
-                    {
-                        docEnt = null;
-                    }
-                }
-            }
-            else if(this.m_definition is DocDefined)
-            {
-                DocDefined docDef = (DocDefined)this.m_definition;
-                if(docDef.DefinedType != null)
-                {
-                    DocDefinition docTarget = this.m_project.GetDefinition(docDef.DefinedType);
-                    if(docTarget != null)
-                    {
-                        DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docTarget);
-                        if (!listSchema.ContainsValue(docSchema))
-                        {
-                            listSchema.Add(docSchema.Name, docSchema);
-                        }
-                    }
-                }
-            }
+					// recurse
+					if (docEnt.BaseDefinition != null)
+					{
+						docEnt = this.m_project.GetDefinition(docEnt.BaseDefinition) as DocEntity;
+					}
+					else
+					{
+						docEnt = null;
+					}
+				}
+			}
+			else if (this.m_definition is DocDefined)
+			{
+				DocDefined docDef = (DocDefined)this.m_definition;
+				if (docDef.DefinedType != null)
+				{
+					DocDefinition docTarget = this.m_project.GetDefinition(docDef.DefinedType);
+					if (docTarget != null)
+					{
+						DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docTarget);
+						if (!listSchema.ContainsValue(docSchema))
+						{
+							listSchema.Add(docSchema.Name, docSchema);
+						}
+					}
+				}
+			}
 
-            // don't include our own schema
-            if (listSchema.ContainsKey(this.m_schema.Name))
-            {
-                listSchema.Remove(this.m_schema.Name);
-            }
+			// don't include our own schema
+			if (this.m_schema != null && listSchema.ContainsKey(this.m_schema.Name))
+			{
+				listSchema.Remove(this.m_schema.Name);
+			}
 
-            foreach (DocSchema docSchemaRef in listSchema.Values)
-            {
-                writer.WriteLine("using BuildingSmart.IFC." + docSchemaRef.Name + ";");
-            }
-            writer.WriteLine();
+			foreach (DocSchema docSchemaRef in listSchema.Values)
+			{
+				writer.WriteLine("using BuildingSmart.IFC." + docSchemaRef.Name + ";");
+			}
+			writer.WriteLine();
 
 #if false
             // schema references
@@ -558,541 +603,548 @@ namespace IfcDoc.Format.CSC
                 writer.WriteLine();
             }
 #endif
-        }
-
-        public void Save()
-        {
-            string dirpath = System.IO.Path.GetDirectoryName(this.m_filename);
-            if (!System.IO.Directory.Exists(dirpath))
-            {
-                System.IO.Directory.CreateDirectory(dirpath);
-            }
-
-            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(this.m_filename))
-            {
-                this.WriteHeader(writer);
-
-                if (this.m_definition != null)
-                {
-                    writer.Write("namespace BuildingSmart.IFC");
-                    if (this.m_schema != null)
-                    {
-                        writer.Write("." + this.m_schema.Name);
-                    }
-                    writer.WriteLine();
-                    writer.WriteLine("{");
-
-                    if (this.m_definition is DocDefined)
-                    {
-                        DocDefined docDefined = (DocDefined)this.m_definition;
-                        string text = this.Indent(this.FormatDefined(docDefined, this.m_map, null), 1);
-                        writer.WriteLine(text);
-                    }
-                    else if (this.m_definition is DocSelect)
-                    {
-                        DocSelect docSelect = (DocSelect)this.m_definition;
-                        string text = this.Indent(this.FormatSelect(docSelect, this.m_map, null), 1);
-                        writer.WriteLine(text);
-                    }
-                    else if (this.m_definition is DocEnumeration)
-                    {
-                        DocEnumeration docEnumeration = (DocEnumeration)this.m_definition;
-                        string text = this.Indent(this.FormatEnumeration(docEnumeration, this.m_map, null), 1);
-                        writer.WriteLine(text);
-                    }
-                    else if (this.m_definition is DocEntity)
-                    {
-                        DocEntity docEntity = (DocEntity)this.m_definition;
-                        string text = this.Indent(this.FormatEntity(docEntity, this.m_map, null), 1);
-                        writer.WriteLine(text);
-                    }
-
-                    writer.WriteLine("}");
-                }
-                else
-                {
-
-                    writer.WriteLine("namespace BuildingSmart.IFC.Properties");
-                    writer.WriteLine("{");
-                    writer.WriteLine();
-
-                    foreach (DocSection docSection in this.m_project.Sections)
-                    {
-                        foreach (DocSchema docSchema in docSection.Schemas)
-                        {
-                            foreach (DocPropertySet docPset in docSchema.PropertySets)
-                            {
-                                writer.WriteLine("    /// <summary>");
-                                if (docPset.Documentation != null)
-                                {
-                                    writer.WriteLine("    /// " + docPset.Documentation.Replace('\r', ' ').Replace('\n', ' '));
-                                }
-                                writer.WriteLine("    /// </summary>");
-
-                                writer.WriteLine("    public class " + docPset.Name + " : Pset");
-                                writer.WriteLine("    {");
-
-                                foreach (DocProperty docProperty in docPset.Properties)
-                                {
-                                    writer.WriteLine("        /// <summary>");
-                                    if (docProperty.Documentation != null)
-                                    {
-                                        writer.WriteLine("        /// " + docProperty.Documentation.Replace('\r', ' ').Replace('\n', ' '));
-                                    }
-                                    writer.WriteLine("        /// </summary>");
-
-                                    switch (docProperty.PropertyType)
-                                    {
-                                        case DocPropertyTemplateTypeEnum.P_SINGLEVALUE:
-                                            writer.WriteLine("        public " + docProperty.PrimaryDataType + " " + docProperty.Name + " { get { return this.GetValue<" + docProperty.PrimaryDataType + ">(\"" + docProperty.Name + "\"); } set { this.SetValue<" + docProperty.PrimaryDataType + ">(\"" + docProperty.Name + "\", value); } }");
-                                            break;
-
-                                        case DocPropertyTemplateTypeEnum.P_ENUMERATEDVALUE:
-                                            {
-                                                string typename = docProperty.SecondaryDataType;
-                                                if (typename == null)
-                                                {
-                                                    typename = docProperty.PrimaryDataType; // older version
-                                                }
-                                                int colon = typename.IndexOf(':');
-                                                if(colon > 0)
-                                                {
-                                                    // backwards compatibility
-                                                    typename = typename.Substring(0, colon);
-                                                }
-                                                writer.WriteLine("        public " + typename + " " + docProperty.Name + " { get { return this.GetValue<" + typename + ">(\"" + docProperty.Name + "\"); } set { this.SetValue<" + typename + ">(\"" + docProperty.Name + "\", value); } }");
-                                            }
-                                            break;
-
-                                        case DocPropertyTemplateTypeEnum.P_BOUNDEDVALUE:
-                                            writer.WriteLine("        public PBound<" + docProperty.PrimaryDataType + "> " + docProperty.Name + " { get { return this.GetBound<" + docProperty.PrimaryDataType + ">(\"" + docProperty.Name + "\"); } }");
-                                            break;
-
-                                        case DocPropertyTemplateTypeEnum.P_LISTVALUE:
-                                            break;
-
-                                        case DocPropertyTemplateTypeEnum.P_TABLEVALUE:
-                                            writer.WriteLine("        public PTable<" + docProperty.PrimaryDataType + ", " + docProperty.SecondaryDataType + "> " + docProperty.Name + " { get { return this.GetTable<" + docProperty.PrimaryDataType + ", " + docProperty.SecondaryDataType + ">(\"" + docProperty.Name + "\"); } }");
-                                            break;
-
-                                        case DocPropertyTemplateTypeEnum.P_REFERENCEVALUE:
-                                            if (docProperty.PrimaryDataType.Equals("IfcTimeSeries"))
-                                            {
-                                                string datatype = docProperty.SecondaryDataType;
-                                                if (String.IsNullOrEmpty(datatype))
-                                                {
-                                                    datatype = "IfcReal";
-                                                }
-                                                writer.WriteLine("        public PTimeSeries<" + datatype + "> " + docProperty.Name + " { get { return this.GetTimeSeries<" + datatype + ">(\"" + docProperty.Name + "\"); } }");
-                                            }
-                                            // ... TBD
-                                            break;
-
-                                        case DocPropertyTemplateTypeEnum.COMPLEX:
-                                            //... TBD
-                                            break;
-                                    }
-                                }
-
-                                writer.WriteLine("    }");
-                                writer.WriteLine();
-                            }
-
-                            foreach (DocPropertyEnumeration docEnum in docSchema.PropertyEnums)
-                            {
-                                writer.WriteLine("    /// <summary>");
-                                writer.WriteLine("    /// </summary>");
-                                writer.WriteLine("    public enum " + docEnum.Name);
-                                writer.WriteLine("    {");
-
-                                int counter = 0;
-                                foreach (DocPropertyConstant docConst in docEnum.Constants)
-                                {
-                                    int num = 0;
-                                    string id = docConst.Name.ToUpper().Trim('.').Replace('-', '_');
-                                    switch (id)
-                                    {
-                                        case "OTHER":
-                                            num = -1;
-                                            break;
-
-                                        case "NOTKNOWN":
-                                            num = -2;
-                                            break;
-
-                                        case "UNSET":
-                                            num = 0;
-                                            break;
-
-                                        default:
-                                            counter++;
-                                            num = counter;
-                                            break;
-                                    }
-
-                                    if (id[0] >= '0' && id[0] <= '9')
-                                    {
-                                        id = "_" + id; // avoid numbers
-                                    }
-
-                                    writer.WriteLine("        /// <summary></summary>");
-                                    writer.WriteLine("        " + docConst.Name + " = " + num + ",");
-                                }
-
-                                writer.WriteLine("    }");
-                                writer.WriteLine();
-                            }
-                        }
-                    }
-                }
-
-                writer.Flush();
-            }
-        }
-
-        #region IDisposable Members
-
-        public void Dispose()
-        {            
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Inserts tabs for each line
-        /// </summary>
-        /// <param name="text"></param>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        private string Indent(string text, int level)
-        {
-            for(int i = 0; i < level; i++)
-            {
-                text = "\t" + text;
-                text = text.Replace("\r\n", "\r\n\t");
-            }
-
-            return text;
-        }
-
-        /// <summary>
-        /// Builds syntax for referencing select
-        /// </summary>
-        /// <param name="sb"></param>
-        /// <param name="docEntity"></param>
-        /// <param name="map"></param>
-        /// <param name="included"></param>
-        /// <param name="hasentry">Whether entries already listed; if not, then colon is added</param>
-        private void BuildSelectEntries(StringBuilder sb, DocDefinition docEntity, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included, bool hasentry)
-        {
-            SortedList<string, DocSelect> listSelects = new SortedList<string, DocSelect>();
-            foreach (DocObject obj in map.Values)
-            {
-                if (obj is DocSelect)
-                {
-                    DocSelect docSelect = (DocSelect)obj;
-                    foreach (DocSelectItem docItem in docSelect.Selects)
-                    {
-                        if (docItem.Name != null && docItem.Name.Equals(docEntity.Name) && !listSelects.ContainsKey(docSelect.Name))
-                        {
-                            // found it; add it
-                            listSelects.Add(docSelect.Name, docSelect);
-                        }
-                    }
-                }
-            }
-
-            foreach (DocSelect docSelect in listSelects.Values)
-            {
-                if (docSelect == listSelects.Values[0] && !hasentry)
-                {
-                    sb.AppendLine(" :");
-                }
-                else
-                {
-                    sb.AppendLine(",");
-                }
-
-                // fully qualify reference inline (rather than in usings) to differentiate C# select implementation from explicit schema references in data model
-                DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docSelect);
-                sb.Append("\tBuildingSmart.IFC.");
-                sb.Append(docSchema.Name);
-                sb.Append(".");
-                sb.Append(docSelect.Name);
-            }
-        }
-
-        private static void BuildAttributeList(DocEntity docEntity, Dictionary<string, DocObject> map, List<DocAttribute> listAttr)
-        {
-            // recurse upwards -- base first
-            DocObject docBase = null;
-            if (docEntity.BaseDefinition != null && map.TryGetValue(docEntity.BaseDefinition, out docBase) && docBase is DocEntity)
-            {
-                DocEntity docBaseEntity = (DocEntity)docBase;
-                BuildAttributeList(docBaseEntity, map, listAttr);
-            }
-
-            foreach (DocAttribute docAttr in docEntity.Attributes)
-            {
-                if (docAttr.Inverse == null && docAttr.Derived == null)
-                {
-                    listAttr.Add(docAttr);
-                }
-            }
-        }
-
-        public string FormatEntity(DocEntity docEntity, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            using (CSharpCodeProvider prov = new CSharpCodeProvider())
-            {
-                // no  guidssb.AppendLine("[Guid(\"" + docEntity.Uuid.ToString() + "\")]");
-
-                sb.Append("public ");
-                if (docEntity.IsAbstract())
-                {
-                    sb.Append("abstract ");
-                }
-                sb.Append("partial class " + docEntity.Name);
-
-                bool hasentry = false;
-                if (!String.IsNullOrEmpty(docEntity.BaseDefinition))
-                {
-                    sb.Append(" : ");
-                    sb.Append(docEntity.BaseDefinition);
-                    hasentry = true;
-                }
-
-                // implement any selects
-                BuildSelectEntries(sb, docEntity, map, included, hasentry);
-
-                sb.AppendLine();
-                sb.AppendLine("{");
-
-                // fields
-                int order = 0;
-                StringBuilder sbFields = new StringBuilder();
-                StringBuilder sbProperties = new StringBuilder();
-                StringBuilder sbConstructor = new StringBuilder(); // constructor parameters
-                StringBuilder sbAssignment = new StringBuilder(); // constructor assignment of fields
-                StringBuilder sbElemConstructor = new StringBuilder(); // default constructor
-                foreach (DocAttribute docAttribute in docEntity.Attributes)
-                {
-                    string type = FormatIdentifier(docAttribute.DefinedType);
-
-                    DocObject docRef = null;
-                    if (docAttribute.DefinedType != null)
-                    {
-                        map.TryGetValue(docAttribute.DefinedType, out docRef);
-                    }
-
-                    if (docAttribute.Derived != null)
-                    {
-                        // export as "new" property that hides base
-                        switch (docAttribute.GetAggregation())
-                        {
-                            case DocAggregationEnum.SET:
-                                sbProperties.AppendLine("\tpublic new ISet<" + type + "> " + docAttribute.Name + " { get { return null; } }");
-                                break;
-
-                            case DocAggregationEnum.LIST:
-                                sbProperties.AppendLine("\tpublic new IList<" + type + "> " + docAttribute.Name + " { get { return null; } }");
-                                break;
-
-                            default:
-                                if (docRef is DocDefined)
-                                {
-                                    sbProperties.AppendLine("\tpublic new " + type + " " + docAttribute.Name + " { get { return new " + type + "(); } }");
-                                }
-                                else
-                                {
-                                    sbProperties.AppendLine("\tpublic new " + type + " " + docAttribute.Name + " { get { return null; } }");
-                                }
-                                break;
-                        }
-                        sbProperties.AppendLine();
-                        // future: generate C# code for EXPRESS
-                    }
-                    else
-                    {
-                        bool inscope = false;
-
-                        if (included != null)
-                        {
-                            included.TryGetValue(docAttribute, out inscope);
-                        }
-                        else
-                        {
-                            inscope = true;
-                        }
-
-
-                        if (docAttribute.Inverse == null)
-                        {
-                            // System.Runtime.Serialization -- used by Windows Communication Foundation formatters to indicate data serialization inclusion and order
-                            sbFields.AppendLine("\t[DataMember(Order = " + order + ")] ");
-                            order++;
-                        }
-                        else if (inscope)
-                        {
-                            // System.ComponentModel.DataAnnotations for capturing inverse properties -- EntityFramework navigation properties
-                            sbFields.AppendLine("\t[InverseProperty(\"" + docAttribute.Inverse + "\")] ");
-                        }
-
-                        // xml configuration
-                        if (docAttribute.AggregationAttribute == null && (docRef is DocDefined || docRef is DocEnumeration))
-                        {
-                            sbFields.AppendLine("\t[XmlAttribute]");
-                        }
-                        else
-                        {
-                            switch (docAttribute.XsdFormat)
-                            {
-                                case DocXsdFormatEnum.Attribute: // e.g. IfcRoot.OwnerHistory -- only attribute has tag; element data type does not
-                                    sbFields.AppendLine("\t[XmlElement]");
-                                    break;
-
-                                case DocXsdFormatEnum.Element: // attribute has tag and referenced object instance(s) have tags
-                                    sbFields.AppendLine("\t[XmlElement(\"" + docAttribute.DefinedType + "\")]"); // same as .Element, but skip attribute name (NOT XmlAttribute)
-                                    break;
-
-                                case DocXsdFormatEnum.Hidden:
-                                    sbFields.AppendLine("\t[XmlIgnore]");
-                                    break;
-                            }
-                        }
-
-                        if (docAttribute.Inverse == null || inscope)
-                        {
-                            // documentation
-                            if (!String.IsNullOrEmpty(docAttribute.Documentation))
-                            {
-                                sbFields.Append("\t[Description(\""); // keep descriptions on one line
-                                string encodedoc = docAttribute.Documentation.Replace("\\", "\\\\"); // backslashes used for notes that relate to EXPRESS syntax
-                                encodedoc = encodedoc.Replace("\"", "\\\""); // escape any quotes
-                                encodedoc = encodedoc.Replace("\r", " "); // remove any return characters
-                                encodedoc = encodedoc.Replace("\n", " "); // remove any return characters
-                                sbFields.Append(encodedoc);
-                                
-                                //prov.GenerateCodeFromExpression(new CodePrimitiveExpression(docAttribute.Documentation), new StringWriter(sbFields), null); //... do this directly to avoid line splitting...
-                                sbFields.AppendLine("\")]");
-                            }
-
-                            if (docAttribute.Inverse == null && !docAttribute.IsOptional)
-                            {
-                                sbFields.AppendLine("\t[Required()]");
-                            }
-
-                            if (docAttribute.IsUnique)
-                            {
-                                sbFields.AppendLine("\t[CustomValidation(typeof(" + docEntity.Name + "), \"Unique\")]"); // extent via partial class for implementation
-                                // MS Entity Framework 6.1 supports IndexAttribute for this purpose, however above is used for now to avoid additional dependency
-                            }
-
-                            string optional = "";
-                            if (docAttribute.IsOptional && (docRef == null || docRef is DocDefined || docRef is DocEnumeration))
-                            {
-                                optional = "?";
-                            }
-
-                            int lower = 0;
-                            if (docAttribute.AggregationLower != null && Int32.TryParse(docAttribute.AggregationLower, out lower) && lower != 0)
-                            {
-                                sbFields.AppendLine("\t[MinLength(" + lower + ")]");                                
-                            }
-
-                            int upper = 0;
-                            if (docAttribute.AggregationUpper != null && Int32.TryParse(docAttribute.AggregationUpper, out upper) && upper != 0)
-                            {
-                                sbFields.AppendLine("\t[MaxLength(" + upper + ")]");
-                            }
-
-                            switch (docAttribute.GetAggregation())
-                            {
-                                case DocAggregationEnum.SET:
-                                    if (docAttribute.Inverse == null)
-                                    {
-                                        sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new HashSet<" + type + ">(__" + docAttribute.Name + ");");
-                                    }
-                                    else
-                                    {
-                                        sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new HashSet<" + type + ">();");
-                                    }
-                                    sbFields.AppendLine("\tpublic ISet<" + type + "> " + docAttribute.Name + " { get; protected set; }");
-                                    //sbProperties.AppendLine("\tpublic ISet<" + type + "> " + docAttribute.Name + " { get { return this." + docAttribute.Name + "; } }");
-                                    break;
-
-                                case DocAggregationEnum.LIST:
-                                    if (docAttribute.Inverse == null)
-                                    {
-                                        sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new List<" + type + ">(__" + docAttribute.Name + ");");
-                                    }
-                                    else
-                                    {
-                                        sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new List<" + type + ">();");
-                                    }
-                                    sbFields.AppendLine("\tpublic IList<" + type + "> " + docAttribute.Name + " { get; protected set; }");
-                                    //sbProperties.AppendLine("\tpublic IList<" + type + "> " + docAttribute.Name + " { get { return this." + docAttribute.Name + "; } }");
-                                    break;
-
-                                case DocAggregationEnum.ARRAY:
-                                    if (docAttribute.Inverse == null)
-                                    {
-                                        sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = __" + docAttribute.Name + ";");
-                                    }
-                                    sbFields.AppendLine("\tpublic " + type + "[] " + docAttribute.Name + " { get; set; }");
-                                    //sbProperties.AppendLine("\tpublic " + type + "[] " + docAttribute.Name + " { get { return this." + docAttribute.Name + "; } }");
-                                    break;
-
-                                default:
-                                    if (docAttribute.Inverse == null)
-                                    {
-                                        sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = __" + docAttribute.Name + ";");
-                                    }
-                                    sbFields.AppendLine("\tpublic " + type + optional + " " + docAttribute.Name + " { get; set; }");
-                                    //sbProperties.AppendLine("\tpublic " + type + optional + " " + docAttribute.Name + " { get { return this._" + docAttribute.Name + "; } set { this._" + docAttribute.Name + " = value;} }");
-                                    break;
-                            }
-
-                            // helper constructors for x/y, x/y/z
-                            if (docAttribute.Inverse == null && docAttribute.GetAggregation() == DocAggregationEnum.LIST && upper == 3 && docRef is DocDefined)
-                            {
-                                DocDefined docDefined = (DocDefined)docRef;
-                                Type typePrim = GetNativeType(docDefined.DefinedType);
-                                if (typePrim != null)
-                                {
-                                    string primtype = typePrim.Name;
-
-                                    if (lower >= 1 && lower < upper)
-                                    {
-                                        sbElemConstructor.AppendLine("\tpublic " + docEntity.Name + "(" + primtype + " x, " + primtype + " y) : this(new " + type + "[]{ new " + type + "(x), new " + type + "(y)})");
-                                        sbElemConstructor.AppendLine("\t{");
-                                        sbElemConstructor.AppendLine("\t}");
-                                        sbElemConstructor.AppendLine();
-                                    }
-
-                                    if (upper == 3)
-                                    {
-                                        sbElemConstructor.AppendLine("\tpublic " + docEntity.Name + "(" + primtype + " x, " + primtype + " y, " + primtype + " z) : this(new " + type + "[]{ new " + type + "(x), new " + type + "(y), new " + type + "(z)})");
-                                        sbElemConstructor.AppendLine("\t{");
-                                        sbElemConstructor.AppendLine("\t}");
-                                        sbElemConstructor.AppendLine();
-                                    }
-                                }
-                            }
-
-                            // todo: support special collections and properties that keep inverse properties in sync...
-                            sbFields.AppendLine();
-                            //sbProperties.AppendLine();
-                        }
-                    }
-                }
-
-                sb.Append(sbFields.ToString());
-                sb.AppendLine();
-
-                // constructors
+		}
+
+		public void Save()
+		{
+			string dirpath = System.IO.Path.GetDirectoryName(this.m_filename);
+			if (!System.IO.Directory.Exists(dirpath))
+			{
+				System.IO.Directory.CreateDirectory(dirpath);
+			}
+
+			using (System.IO.StreamWriter writer = new System.IO.StreamWriter(this.m_filename))
+			{
+				this.WriteHeader(writer);
+
+				if (this.m_definition != null)
+				{
+					writer.Write("namespace BuildingSmart.IFC");
+					if (this.m_schema != null)
+					{
+						writer.Write("." + this.m_schema.Name);
+					}
+					writer.WriteLine();
+					writer.WriteLine("{");
+
+					if (this.m_definition is DocDefined)
+					{
+						DocDefined docDefined = (DocDefined)this.m_definition;
+						string text = this.Indent(this.FormatDefined(docDefined, this.m_map, null), 1);
+						writer.WriteLine(text);
+					}
+					else if (this.m_definition is DocSelect)
+					{
+						DocSelect docSelect = (DocSelect)this.m_definition;
+						string text = this.Indent(this.FormatSelect(docSelect, this.m_map, null), 1);
+						writer.WriteLine(text);
+					}
+					else if (this.m_definition is DocEnumeration)
+					{
+						DocEnumeration docEnumeration = (DocEnumeration)this.m_definition;
+						string text = this.Indent(this.FormatEnumeration(docEnumeration, this.m_map, null), 1);
+						writer.WriteLine(text);
+					}
+					else if (this.m_definition is DocEntity)
+					{
+						DocEntity docEntity = (DocEntity)this.m_definition;
+						string text = this.Indent(this.FormatEntity(docEntity, this.m_map, null), 1);
+						writer.WriteLine(text);
+					}
+
+					writer.WriteLine("}");
+				}
+				else
+				{
+
+					writer.WriteLine("namespace BuildingSmart.IFC.Properties");
+					writer.WriteLine("{");
+					writer.WriteLine();
+
+					foreach (DocPropertyEnumeration docEnum in this.m_project.PropertyEnumerations)
+					{
+						writer.WriteLine("    /// <summary>");
+						writer.WriteLine("    /// </summary>");
+						writer.WriteLine("    public enum " + docEnum.Name);
+						writer.WriteLine("    {");
+
+						int counter = 0;
+						foreach (DocPropertyConstant docConst in docEnum.Constants)
+						{
+							int num = 0;
+							string id = docConst.Name.ToUpper().Trim('.').Replace('-', '_');
+							switch (id)
+							{
+								case "OTHER":
+									num = -1;
+									break;
+
+								case "NOTKNOWN":
+									num = -2;
+									break;
+
+								case "UNSET":
+									num = 0;
+									break;
+
+								default:
+									counter++;
+									num = counter;
+									break;
+							}
+
+							if (id[0] >= '0' && id[0] <= '9')
+							{
+								id = "_" + id; // avoid numbers
+							}
+
+							writer.WriteLine("        /// <summary></summary>");
+							writer.WriteLine("        " + docConst.Name + " = " + num + ",");
+						}
+
+						writer.WriteLine("    }");
+						writer.WriteLine();
+					}
+
+					foreach (DocSection docSection in this.m_project.Sections)
+					{
+						foreach (DocSchema docSchema in docSection.Schemas)
+						{
+							foreach (DocPropertySet docPset in docSchema.PropertySets)
+							{
+								writer.WriteLine("    /// <summary>");
+								if (docPset.Documentation != null)
+								{
+									writer.WriteLine("    /// " + docPset.Documentation.Replace('\r', ' ').Replace('\n', ' '));
+								}
+								writer.WriteLine("    /// </summary>");
+
+								writer.WriteLine("    public class " + docPset.Name + " : Pset");
+								writer.WriteLine("    {");
+
+								foreach (DocProperty docProperty in docPset.Properties)
+								{
+									writer.WriteLine("        /// <summary>");
+									if (docProperty.Documentation != null)
+									{
+										writer.WriteLine("        /// " + docProperty.Documentation.Replace('\r', ' ').Replace('\n', ' '));
+									}
+									writer.WriteLine("        /// </summary>");
+
+									switch (docProperty.PropertyType)
+									{
+										case DocPropertyTemplateTypeEnum.P_SINGLEVALUE:
+											writer.WriteLine("        public " + docProperty.PrimaryDataType + " " + docProperty.Name + " { get { return this.GetValue<" + docProperty.PrimaryDataType + ">(\"" + docProperty.Name + "\"); } set { this.SetValue<" + docProperty.PrimaryDataType + ">(\"" + docProperty.Name + "\", value); } }");
+											break;
+
+										case DocPropertyTemplateTypeEnum.P_ENUMERATEDVALUE:
+											{
+												string typename = docProperty.Enumeration.Name;
+												writer.WriteLine("        public " + typename + " " + docProperty.Name + " { get { return this.GetValue<" + typename + ">(\"" + docProperty.Name + "\"); } set { this.SetValue<" + typename + ">(\"" + docProperty.Name + "\", value); } }");
+											}
+											break;
+
+										case DocPropertyTemplateTypeEnum.P_BOUNDEDVALUE:
+											writer.WriteLine("        public PBound<" + docProperty.PrimaryDataType + "> " + docProperty.Name + " { get { return this.GetBound<" + docProperty.PrimaryDataType + ">(\"" + docProperty.Name + "\"); } }");
+											break;
+
+										case DocPropertyTemplateTypeEnum.P_LISTVALUE:
+											break;
+
+										case DocPropertyTemplateTypeEnum.P_TABLEVALUE:
+											writer.WriteLine("        public PTable<" + docProperty.PrimaryDataType + ", " + docProperty.SecondaryDataType + "> " + docProperty.Name + " { get { return this.GetTable<" + docProperty.PrimaryDataType + ", " + docProperty.SecondaryDataType + ">(\"" + docProperty.Name + "\"); } }");
+											break;
+
+										case DocPropertyTemplateTypeEnum.P_REFERENCEVALUE:
+											if (docProperty.PrimaryDataType.Equals("IfcTimeSeries"))
+											{
+												string datatype = docProperty.SecondaryDataType;
+												if (String.IsNullOrEmpty(datatype))
+												{
+													datatype = "IfcReal";
+												}
+												writer.WriteLine("        public PTimeSeries<" + datatype + "> " + docProperty.Name + " { get { return this.GetTimeSeries<" + datatype + ">(\"" + docProperty.Name + "\"); } }");
+											}
+											// ... TBD
+											break;
+
+										case DocPropertyTemplateTypeEnum.COMPLEX:
+											//... TBD
+											break;
+									}
+								}
+
+								writer.WriteLine("    }");
+								writer.WriteLine();
+							}
+
+							
+						}
+					}
+				}
+
+				writer.Flush();
+			}
+		}
+
+		#region IDisposable Members
+
+		public void Dispose()
+		{
+		}
+
+		#endregion
+
+		/// <summary>
+		/// Inserts tabs for each line
+		/// </summary>
+		/// <param name="text"></param>
+		/// <param name="level"></param>
+		/// <returns></returns>
+		private string Indent(string text, int level)
+		{
+			for (int i = 0; i < level; i++)
+			{
+				text = "\t" + text;
+				text = text.Replace("\r\n", "\r\n\t");
+			}
+
+			return text;
+		}
+
+		/// <summary>
+		/// Builds syntax for referencing select
+		/// </summary>
+		/// <param name="sb"></param>
+		/// <param name="docEntity"></param>
+		/// <param name="map"></param>
+		/// <param name="included"></param>
+		/// <param name="hasentry">Whether entries already listed; if not, then colon is added</param>
+		private void BuildSelectEntries(StringBuilder sb, DocDefinition docEntity, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included, bool hasentry)
+		{
+			SortedList<string, DocSelect> listSelects = new SortedList<string, DocSelect>();
+			foreach (DocObject obj in map.Values)
+			{
+				if (obj is DocSelect)
+				{
+					DocSelect docSelect = (DocSelect)obj;
+					foreach (DocSelectItem docItem in docSelect.Selects)
+					{
+						if (docItem.Name != null && docItem.Name.Equals(docEntity.Name) && !listSelects.ContainsKey(docSelect.Name))
+						{
+							// found it; add it
+							listSelects.Add(docSelect.Name, docSelect);
+						}
+					}
+				}
+			}
+			DocSchema entitySchema = m_project.GetSchemaOfDefinition(docEntity);
+
+			foreach (DocSelect docSelect in listSelects.Values)
+			{
+				if (docSelect == listSelects.Values[0] && !hasentry)
+				{
+					sb.AppendLine(" :");
+				}
+				else
+				{
+					sb.AppendLine(",");
+				}
+
+				// fully qualify reference inline (rather than in usings) to differentiate C# select implementation from explicit schema references in data model
+				DocSchema docSchema = this.m_project.GetSchemaOfDefinition(docSelect);
+				if (docSchema == entitySchema)
+					sb.Append("\t");
+				else
+				{
+					sb.Append("\tBuildingSmart.IFC.");
+					sb.Append(docSchema.Name);
+					sb.Append(".");
+				}
+				sb.Append(docSelect.Name);
+			}
+		}
+
+		private static void BuildAttributeList(DocEntity docEntity, Dictionary<string, DocObject> map, List<DocAttribute> listAttr)
+		{
+			// recurse upwards -- base first
+			DocObject docBase = null;
+			if (docEntity.BaseDefinition != null && map.TryGetValue(docEntity.BaseDefinition, out docBase) && docBase is DocEntity)
+			{
+				DocEntity docBaseEntity = (DocEntity)docBase;
+				BuildAttributeList(docBaseEntity, map, listAttr);
+			}
+
+			foreach (DocAttribute docAttr in docEntity.Attributes)
+			{
+				if (docAttr.Inverse == null && docAttr.Derived == null && !docAttr.IsOptional)
+				{
+					listAttr.Add(docAttr);
+				}
+			}
+		}
+		private string formatAttributeName(DocAttribute docAttribute)
+		{
+			if(string.Compare(docAttribute.Name, "Operator", true) == 0)
+				return "_operator";
+			return Char.ToLowerInvariant(docAttribute.Name[0]) + docAttribute.Name.Substring(1);
+		}
+		public string FormatEntity(DocEntity docEntity, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
+		{
+			StringBuilder sb = new StringBuilder();
+
+			using (CSharpCodeProvider prov = new CSharpCodeProvider())
+			{
+				sb.AppendLine("[Guid(\"" + docEntity.Uuid.ToString() + "\")]");
+
+				sb.Append("public ");
+				if (docEntity.IsAbstract)
+				{
+					sb.Append("abstract ");
+				}
+				sb.Append("partial class " + docEntity.Name);
+
+				bool hasentry = false;
+				if (!String.IsNullOrEmpty(docEntity.BaseDefinition))
+				{
+					sb.Append(" : ");
+					sb.Append(docEntity.BaseDefinition);
+					hasentry = true;
+				}
+
+				// implement any selects
+				BuildSelectEntries(sb, docEntity, map, included, hasentry);
+
+				sb.AppendLine();
+				sb.AppendLine("{");
+
+				// fields
+				int order = 0;
+				StringBuilder sbFields = new StringBuilder();
+				StringBuilder sbProperties = new StringBuilder();
+				StringBuilder sbConstructor = new StringBuilder(); // constructor parameters
+				StringBuilder sbAssignment = new StringBuilder(); // constructor assignment of fields
+				StringBuilder sbElemConstructor = new StringBuilder(); // default constructor
+				foreach (DocAttribute docAttribute in docEntity.Attributes)
+				{
+					string type = FormatIdentifier(docAttribute.DefinedType);
+
+					DocObject docRef = null;
+					if (docAttribute.DefinedType != null)
+					{
+						map.TryGetValue(docAttribute.DefinedType, out docRef);
+					}
+
+					if (docAttribute.Derived != null)
+					{
+						// export as "new" property that hides base
+						switch (docAttribute.GetAggregation())
+						{
+							case DocAggregationEnum.SET:
+								sbProperties.AppendLine("\tpublic new ISet<" + type + "> " + docAttribute.Name + " { get { return null; } }");
+								break;
+
+							case DocAggregationEnum.LIST:
+								sbProperties.AppendLine("\tpublic new IList<" + type + "> " + docAttribute.Name + " { get { return null; } }");
+								break;
+
+							default:
+								if (docRef is DocDefined)
+								{
+									sbProperties.AppendLine("\tpublic new " + type + " " + docAttribute.Name + " { get { return new " + type + "(); } }");
+								}
+								else
+								{
+									if (string.Compare(type, "Int64") == 0 || string.Compare(type, "Double") == 0)
+										sbProperties.AppendLine("\tpublic new " + type + " " + docAttribute.Name + " { get { return 0; } }");
+									else
+										sbProperties.AppendLine("\tpublic new " + type + " " + docAttribute.Name + " { get { return null; } }");
+								}
+								break;
+						}
+						sbProperties.AppendLine();
+						// future: generate C# code for EXPRESS
+					}
+					else
+					{
+						bool inscope = false;
+
+						if (included != null)
+						{
+							included.TryGetValue(docAttribute, out inscope);
+						}
+						else
+						{
+							inscope = true;
+						}
+
+
+						if (docAttribute.Inverse == null)
+						{
+							// System.Runtime.Serialization -- used by Windows Communication Foundation formatters to indicate data serialization inclusion and order
+							sbFields.AppendLine("\t[DataMember(Order = " + order + ")] ");
+							order++;
+						}
+						else if (inscope)
+						{
+							// System.ComponentModel.DataAnnotations for capturing inverse properties -- EntityFramework navigation properties
+							sbFields.AppendLine("\t[InverseProperty(\"" + docAttribute.Inverse + "\")] ");
+						}
+
+						// xml configuration
+						if (docAttribute.AggregationAttribute == null && (docRef is DocDefined || docRef is DocEnumeration))
+						{
+							sbFields.AppendLine("\t[XmlAttribute]");
+						}
+						else
+						{
+							switch (docAttribute.XsdFormat)
+							{
+								case DocXsdFormatEnum.Attribute: // e.g. IfcRoot.OwnerHistory -- only attribute has tag; element data type does not
+									sbFields.AppendLine("\t[XmlElement]");
+									break;
+
+								case DocXsdFormatEnum.Element: // attribute has tag and referenced object instance(s) have tags
+									sbFields.AppendLine("\t[XmlElement(\"" + docAttribute.DefinedType + "\")]"); // same as .Element, but skip attribute name (NOT XmlAttribute)
+									break;
+
+								case DocXsdFormatEnum.Hidden:
+									sbFields.AppendLine("\t[XmlIgnore]");
+									break;
+							}
+						}
+
+						if (docAttribute.Inverse == null || inscope)
+						{
+							// documentation
+							if (!String.IsNullOrEmpty(docAttribute.Documentation))
+							{
+								sbFields.Append("\t[Description(\""); // keep descriptions on one line
+								string encodedoc = docAttribute.Documentation.Replace("\\", "\\\\"); // backslashes used for notes that relate to EXPRESS syntax
+								encodedoc = encodedoc.Replace("\"", "\\\""); // escape any quotes
+								encodedoc = encodedoc.Replace("\r", " "); // remove any return characters
+								encodedoc = encodedoc.Replace("\n", " "); // remove any return characters
+								sbFields.Append(encodedoc);
+
+								//prov.GenerateCodeFromExpression(new CodePrimitiveExpression(docAttribute.Documentation), new StringWriter(sbFields), null); //... do this directly to avoid line splitting...
+								sbFields.AppendLine("\")]");
+							}
+
+							if (docAttribute.Inverse == null && !docAttribute.IsOptional)
+							{
+								sbFields.AppendLine("\t[Required()]");
+							}
+
+							if (docAttribute.IsUnique)
+							{
+								sbFields.AppendLine("\t[CustomValidation(typeof(" + docEntity.Name + "), \"Unique\")]"); // extent via partial class for implementation
+																														 // MS Entity Framework 6.1 supports IndexAttribute for this purpose, however above is used for now to avoid additional dependency
+							}
+
+							string optional = "";
+							if (docAttribute.IsOptional && (docRef == null || docRef is DocDefined || docRef is DocEnumeration))
+							{
+								optional = "?";
+							}
+
+							int lower = 0;
+							if (docAttribute.AggregationLower != null && Int32.TryParse(docAttribute.AggregationLower, out lower) && lower != 0)
+							{
+								sbFields.AppendLine("\t[MinLength(" + lower + ")]");
+							}
+
+							int upper = 0;
+							if (docAttribute.AggregationUpper != null && Int32.TryParse(docAttribute.AggregationUpper, out upper) && upper != 0)
+							{
+								sbFields.AppendLine("\t[MaxLength(" + upper + ")]");
+							}
+
+							//sb.AppendLine("[Guid(\"" + docAttribute.Uuid.ToString() + "\")]");
+							switch (docAttribute.GetAggregation())
+							{
+								case DocAggregationEnum.SET:
+									if (docAttribute.Inverse == null && !docAttribute.IsOptional)
+									{
+										sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new HashSet<" + type + ">(" + formatAttributeName(docAttribute) + ");");
+									}
+									else
+									{
+										sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new HashSet<" + type + ">();");
+									}
+									sbFields.AppendLine("\tpublic ISet<" + type + "> " + docAttribute.Name + " { get; protected set; }");
+									//sbProperties.AppendLine("\tpublic ISet<" + type + "> " + docAttribute.Name + " { get { return this." + docAttribute.Name + "; } }");
+									break;
+
+								case DocAggregationEnum.LIST:
+									if (docAttribute.Inverse == null && !docAttribute.IsOptional)
+									{
+										sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new List<" + type + ">(" + formatAttributeName(docAttribute) + ");");
+									}
+									else
+									{
+										sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = new List<" + type + ">();");
+									}
+									sbFields.AppendLine("\tpublic IList<" + type + "> " + docAttribute.Name + " { get; protected set; }");
+									//sbProperties.AppendLine("\tpublic IList<" + type + "> " + docAttribute.Name + " { get { return this." + docAttribute.Name + "; } }");
+									break;
+
+								case DocAggregationEnum.ARRAY:
+									if (docAttribute.Inverse == null && !docAttribute.IsOptional)
+									{
+										sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = " + formatAttributeName(docAttribute) + ";");
+									}
+									sbFields.AppendLine("\tpublic " + type + "[] " + docAttribute.Name + " { get; set; }");
+									//sbProperties.AppendLine("\tpublic " + type + "[] " + docAttribute.Name + " { get { return this." + docAttribute.Name + "; } }");
+									break;
+
+								default:
+									if (docAttribute.Inverse == null && !docAttribute.IsOptional)
+									{
+										sbAssignment.AppendLine("\t\tthis." + docAttribute.Name + " = " + formatAttributeName(docAttribute) + ";");
+									}
+									sbFields.AppendLine("\tpublic " + type + optional + " " + docAttribute.Name + " { get; set; }");
+									//sbProperties.AppendLine("\tpublic " + type + optional + " " + docAttribute.Name + " { get { return this._" + docAttribute.Name + "; } set { this._" + docAttribute.Name + " = value;} }");
+									break;
+							}
+
+							// helper constructors for x/y, x/y/z
+							if (docAttribute.Inverse == null && docAttribute.GetAggregation() == DocAggregationEnum.LIST && upper == 3 && docRef is DocDefined)
+							{
+								DocDefined docDefined = (DocDefined)docRef;
+								Type typePrim = GetNativeType(docDefined.DefinedType);
+								if (typePrim != null)
+								{
+									string primtype = typePrim.Name;
+
+									if (lower >= 1 && lower < upper)
+									{
+										sbElemConstructor.AppendLine("\tpublic " + docEntity.Name + "(" + primtype + " x, " + primtype + " y) : this(new " + type + "[]{ new " + type + "(x), new " + type + "(y)})");
+										sbElemConstructor.AppendLine("\t{");
+										sbElemConstructor.AppendLine("\t}");
+										sbElemConstructor.AppendLine();
+									}
+
+									if (upper == 3)
+									{
+										sbElemConstructor.AppendLine("\tpublic " + docEntity.Name + "(" + primtype + " x, " + primtype + " y, " + primtype + " z) : this(new " + type + "[]{ new " + type + "(x), new " + type + "(y), new " + type + "(z)})");
+										sbElemConstructor.AppendLine("\t{");
+										sbElemConstructor.AppendLine("\t}");
+										sbElemConstructor.AppendLine();
+									}
+								}
+							}
+
+							// todo: support special collections and properties that keep inverse properties in sync...
+							sbFields.AppendLine();
+							//sbProperties.AppendLine();
+						}
+					}
+				}
+
+				sb.Append(sbFields.ToString());
+				sb.AppendLine();
+
+				// constructors
 
 #if false // no default constructors anymore
                 // default constructor
@@ -1102,89 +1154,88 @@ namespace IfcDoc.Format.CSC
                 sb.AppendLine();
 #endif
 
-                // parameters for base constructor
-                List<DocAttribute> listAttr = new List<DocAttribute>();
-                BuildAttributeList(docEntity, map, listAttr);
+				// parameters for base constructor
+				List<DocAttribute> listAttr = new List<DocAttribute>();
+				BuildAttributeList(docEntity, map, listAttr);
 
-                List<DocAttribute> listBase = new List<DocAttribute>();
-                if(docEntity.BaseDefinition != null)
-                {
-                    DocEntity docBase = (DocEntity)map[docEntity.BaseDefinition];
-                    BuildAttributeList(docBase, map, listBase);
-                }
+				List<DocAttribute> listBase = new List<DocAttribute>();
+				if (docEntity.BaseDefinition != null)
+				{
+					DocEntity docBase = (DocEntity)map[docEntity.BaseDefinition];
+					BuildAttributeList(docBase, map, listBase);
+				}
 
-                string constructorvisibility = "public";
-                if(docEntity.IsAbstract())
-                {
-                    constructorvisibility = "protected";
-                }
+				string constructorvisibility = "public";
+				if (docEntity.IsAbstract)
+				{
+					constructorvisibility = "protected";
+				}
 
-                
-                // helper constructor -- expand fixed lists into separate parameters -- e.g. IfcCartesianPoint(IfcLengthMeasure, IfcLengthMeasure, IfcLengthMeasure)
-                sb.Append("\t" + constructorvisibility + " " + docEntity.Name + "(");
-                foreach (DocAttribute docAttr in listAttr)
-                {
-                    if(docAttr != listAttr[0])
-                    {
-                        sb.Append(", ");
-                    }
 
-                    string type = FormatIdentifier(docAttr.DefinedType);
-                    sb.Append(type);
+				// helper constructor -- expand fixed lists into separate parameters -- e.g. IfcCartesianPoint(IfcLengthMeasure, IfcLengthMeasure, IfcLengthMeasure)
+				sb.Append("\t" + constructorvisibility + " " + docEntity.Name + "(");
+				foreach (DocAttribute docAttr in listAttr)
+				{
+					if (docAttr != listAttr[0])
+					{
+						sb.Append(", ");
+					}
 
-                    DocObject docRef = null;
-                    if (docAttr.DefinedType != null)
-                    {
-                        map.TryGetValue(docAttr.DefinedType, out docRef);
-                    }
+					string type = FormatIdentifier(docAttr.DefinedType);
+					sb.Append(type);
 
-                    if(docAttr.GetAggregation() != DocAggregationEnum.NONE)
-                    {
-                        sb.Append("[]");
-                    }
-                    else if (docAttr.IsOptional && (docRef == null || docRef is DocDefined || docRef is DocEnumeration))
-                    {
-                        sb.Append("?");
-                    }
+					DocObject docRef = null;
+					if (docAttr.DefinedType != null)
+					{
+						map.TryGetValue(docAttr.DefinedType, out docRef);
+					}
 
-                    sb.Append(" __"); // avoid conflict with member fields and properties
-                    sb.Append(docAttr.Name);
-                }
-                sb.AppendLine(sbConstructor.ToString() + ")");
+					if (docAttr.GetAggregation() != DocAggregationEnum.NONE)
+					{
+						sb.Append("[]");
+					}
+					else if (docAttr.IsOptional && (docRef == null || docRef is DocDefined || docRef is DocEnumeration))
+					{
+						sb.Append("?");
+					}
 
-                if (listBase.Count > 0)
-                {
-                    sb.Append("\t\t: base(");
-                    foreach(DocAttribute docAttr in listBase)
-                    {
-                        if(docAttr != listBase[0])
-                        {
-                            sb.Append(", ");
-                        }
+					sb.Append(" " + formatAttributeName(docAttr));
+					
+				}
+				sb.AppendLine(sbConstructor.ToString() + ")");
 
-                        sb.Append("__");
-                        sb.Append(docAttr.Name);
-                    }
+				if (listBase.Count > 0)
+				{
+					sb.Append("\t\t: base(");
+					foreach (DocAttribute docAttr in listBase)
+					{
+						if (docAttr != listBase[0])
+						{
+							sb.Append(", ");
+						}
 
-                    sb.AppendLine(")");
-                }
+						sb.Append(formatAttributeName(docAttr));
+					}
 
-                sb.AppendLine("\t{");
-                sb.Append(sbAssignment.ToString());
-                sb.AppendLine("\t}");
-                sb.AppendLine();
-                
+					sb.AppendLine(")");
+				}
 
-                // if only a single list attribute, then expand x, y, z (include IfcCartesianPoint, NOT IfcSurfaceReinforcementArea)
-                if (sbElemConstructor.Length > 0 && order == 1 && listBase.Count == 0)
-                {
-                    sb.AppendLine(sbElemConstructor.ToString());
-                }
+				sb.AppendLine("\t{");
+				sb.Append(sbAssignment.ToString());
+				sb.AppendLine("\t}");
+				sb.AppendLine();
 
-                sb.Append(sbProperties.ToString());
-                sb.AppendLine();
 
-                // where rules -- for now, captures EXPRESS syntax -- tbd: convert to C# syntax
+				// if only a single list attribute, then expand x, y, z (include IfcCartesianPoint, NOT IfcSurfaceReinforcementArea)
+				if (sbElemConstructor.Length > 0 && order == 1 && listBase.Count == 0)
+				{
+					sb.AppendLine(sbElemConstructor.ToString());
+				}
+
+				sb.Append(sbProperties.ToString());
+				sb.AppendLine();
+
+				// where rules -- for now, captures EXPRESS syntax -- tbd: convert to C# syntax
 #if false //... convert to C# native syntax... use external .exp files for now
                 foreach (DocWhereRule docWhere in docEntity.WhereRules)
                 {
@@ -1199,9 +1250,9 @@ namespace IfcDoc.Format.CSC
                 }
 #endif
 
-                // sb.AppendLine();
+				// sb.AppendLine();
 
-                //sb.AppendLine("// Exchange properties");
+				//sb.AppendLine("// Exchange properties");
 #if false
             // then, model views within scope
             foreach(DocModelView docView in this.m_project.ModelViews)
@@ -1290,365 +1341,405 @@ namespace IfcDoc.Format.CSC
 
 #endif
 
-                sb.AppendLine("}");
-            }
+				sb.AppendLine("}");
+			}
 
-            return sb.ToString();
-        }
+			return sb.ToString();
+		}
 
-        public string FormatEnumeration(DocEnumeration docEnumeration, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
-        {
-            StringBuilder sb = new StringBuilder();
-            using (CSharpCodeProvider prov = new CSharpCodeProvider())
-            {
-                //sb.AppendLine("[Guid(\"" + docEnumeration.Uuid.ToString() + "\")]");
-                sb.AppendLine("public enum " + docEnumeration.Name);
-                sb.AppendLine("{");
-                int counter = 0;
-                foreach (DocConstant docConstant in docEnumeration.Constants)
-                {
-                    int val;
+		public string FormatEnumeration(DocEnumeration docEnumeration, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
+		{
+			StringBuilder sb = new StringBuilder();
+			using (CSharpCodeProvider prov = new CSharpCodeProvider())
+			{
+				sb.AppendLine("[Guid(\"" + docEnumeration.Uuid.ToString() + "\")]");
+				sb.AppendLine("public enum " + docEnumeration.Name);
+				sb.AppendLine("{");
+				int counter = 0;
+				foreach (DocConstant docConstant in docEnumeration.Constants)
+				{
+					int val;
 
-                    if (docConstant.Name.Equals("NOTDEFINED"))
-                    {
-                        val = 0;
-                    }
-                    else if (docConstant.Name.Equals("USERDEFINED"))
-                    {
-                        val = -1;
-                    }
-                    else
-                    {
-                        counter++;
-                        val = counter;
-                    }
+					if (docConstant.Name.Equals("NOTDEFINED"))
+					{
+						val = 0;
+					}
+					else if (docConstant.Name.Equals("USERDEFINED"))
+					{
+						val = -1;
+					}
+					else
+					{
+						counter++;
+						val = counter;
+					}
 
-                    // description
-                    if (!String.IsNullOrEmpty(docConstant.Documentation))
-                    {
-                        sb.Append("\t[Description(");
-                        prov.GenerateCodeFromExpression(new CodePrimitiveExpression(docConstant.Documentation), new StringWriter(sb), null);
-                        sb.AppendLine(")]");
-                    }
+					// description
+					if (!String.IsNullOrEmpty(docConstant.Documentation))
+					{
+						sb.Append("\t[Description(");
+						prov.GenerateCodeFromExpression(new CodePrimitiveExpression(docConstant.Documentation), new StringWriter(sb), null);
+						sb.AppendLine(")]");
+					}
 
-                    sb.AppendLine("\t" + docConstant.Name + " = " + val + ",");
-                    sb.AppendLine();
-                }
-                sb.Append("}");
-            }
-            return sb.ToString();
-        }
+					sb.AppendLine("\t" + docConstant.Name + " = " + val + ",");
+					sb.AppendLine();
+				}
+				sb.Append("}");
+			}
+			return sb.ToString();
+		}
 
-        public string FormatSelect(DocSelect docSelect, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
-        {
-            StringBuilder sb = new StringBuilder();
+		public string FormatSelect(DocSelect docSelect, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
+		{
+			StringBuilder sb = new StringBuilder();
 
-            //sb.AppendLine("[Guid(\"" + docSelect.Uuid.ToString() + "\")]");
-            sb.Append("public interface " + docSelect.Name);
-                
-            BuildSelectEntries(sb, docSelect, map, included, false);
+			sb.AppendLine("[Guid(\"" + docSelect.Uuid.ToString() + "\")]");
+			sb.Append("public interface " + docSelect.Name);
 
-            sb.AppendLine();
-            sb.AppendLine("{"); 
-            sb.AppendLine("}");
-        
-            return sb.ToString();
-        }
+			BuildSelectEntries(sb, docSelect, map, included, false);
 
-        public string FormatDefined(DocDefined docDefined, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
-        {
-            StringBuilder sb = new StringBuilder();
+			sb.AppendLine();
+			sb.AppendLine("{");
+			sb.AppendLine("}");
 
-            //sb.AppendLine("[Guid(\"" + docDefined.Uuid.ToString() + "\")]");
-            sb.Append("public partial struct " + docDefined.Name);
+			return sb.ToString();
+		}
 
-            // implement any selects
-            BuildSelectEntries(sb, docDefined, map, included, false);
+		public string FormatDefined(DocDefined docDefined, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
+		{
+			StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine();
-            sb.AppendLine("{");
+			sb.AppendLine("[Guid(\"" + docDefined.Uuid.ToString() + "\")]");
+			sb.Append("public partial struct " + docDefined.Name);
 
-            sb.AppendLine("\t[XmlText]");
-            if (docDefined.Length != 0)
-            {
-                sb.AppendLine("\t[MaxLength(" + docDefined.Length + ")]");
-            }
-            sb.AppendLine("\tpublic " + FormatIdentifier(docDefined.DefinedType) + " Value { get; private set; }");
-            sb.AppendLine();
+			// implement any selects
+			BuildSelectEntries(sb, docDefined, map, included, false);
 
-            // direct constructor for all types
-            sb.AppendLine("\tpublic " + docDefined.Name + "(" + FormatIdentifier(docDefined.DefinedType) + " value) : this()");
-            sb.AppendLine("\t{");
-            sb.AppendLine("\t\tthis.Value = value;");
-            sb.AppendLine("\t}");
+			sb.AppendLine();
+			sb.AppendLine("{");
 
-            // helper constructor for types that wrap another defined type (e.g. IfcPositiveLengthMeasure(double value) instead of only IfcPositiveLengthMeasure(IfcLengthMeasure value)
-            DocDefined docIndirect = this.m_project.GetDefinition(docDefined.DefinedType) as DocDefined;
-            if (docIndirect != null)
-            {
-                sb.AppendLine("\tpublic " + docDefined.Name + "(" + FormatIdentifier(docIndirect.DefinedType) + " value) : this()");
-                sb.AppendLine("\t{");
-                sb.AppendLine("\t\tthis.Value = new " + docDefined.DefinedType + "(value);");
-                sb.AppendLine("\t}");
-            }
+			sb.AppendLine("\t[XmlText]");
+			if (docDefined.Length != 0)
+			{
+				sb.AppendLine("\t[MaxLength(" + docDefined.Length + ")]");
+			}
+			sb.AppendLine("\tpublic " + FormatIdentifier(docDefined.DefinedType) + " Value { get; private set; }");
+			sb.AppendLine();
 
-            // end of type
-            sb.AppendLine("}");
+			// direct constructor for all types
+			sb.AppendLine("\tpublic " + docDefined.Name + "(" + FormatIdentifier(docDefined.DefinedType) + " value) : this()");
+			sb.AppendLine("\t{");
+			sb.AppendLine("\t\tthis.Value = value;");
+			sb.AppendLine("\t}");
 
-            return sb.ToString();
-        }
+			// helper constructor for types that wrap another defined type (e.g. IfcPositiveLengthMeasure(double value) instead of only IfcPositiveLengthMeasure(IfcLengthMeasure value)
+			DocDefined docIndirect = this.m_project.GetDefinition(docDefined.DefinedType) as DocDefined;
+			if (docIndirect != null)
+			{
+				sb.AppendLine();
+				sb.AppendLine("\tpublic " + docDefined.Name + "(" + FormatIdentifier(docIndirect.DefinedType) + " value) : this()");
+				sb.AppendLine("\t{");
+				sb.AppendLine("\t\tthis.Value = new " + docDefined.DefinedType + "(value);");
+				sb.AppendLine("\t}");
 
-        public string FormatDefinitions(DocProject docProject, DocPublication docPublication, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (DocSection docSection in docProject.Sections)
-            {
-                foreach (DocSchema docSchema in docSection.Schemas)
-                {
-                    foreach (DocType docType in docSchema.Types)
-                    {
-                        bool use = true;
-                        if (included != null)
-                        {
-                            use = false;
-                            included.TryGetValue(docType, out use);
-                        }
-                        if (use)
-                        {
-                            if (docType is DocDefined)
-                            {
-                                DocDefined docDefined = (DocDefined)docType;
-                                string text = this.Indent(this.FormatDefined(docDefined, map, included), 1);
-                                sb.AppendLine(text);
-                            }
-                            else if (docType is DocSelect)
-                            {
-                                DocSelect docSelect = (DocSelect)docType;
-                                string text = this.Indent(this.FormatSelect(docSelect, map, included), 1);
-                                sb.AppendLine(text);
-                            }
-                            else if (docType is DocEnumeration)
-                            {
-                                DocEnumeration docEnumeration = (DocEnumeration)docType;
-                                string text = this.Indent(this.FormatEnumeration(docEnumeration, map, included), 1);
-                                sb.AppendLine(text);
-                            }
-                        }
-                    }
+			}
+			DocDefined definingPrimitive = docIndirect == null ? docDefined : docIndirect;
+			bool stringPrimitive = (string.Compare(definingPrimitive.DefinedType, "string", true) == 0);
+			DocPrimitive primitive = definingPrimitive.Definition as DocPrimitive;
 
-                    foreach (DocEntity docEntity in docSchema.Entities)
-                    {
-                        bool use = true;
-                        if(included != null)
-                        {
-                            use = false;
-                            included.TryGetValue(docEntity, out use);
-                        }
-                        if (use)
-                        {
-                            string text = this.Indent(this.FormatEntity(docEntity, map, included), 1);
-                            sb.AppendLine(text);
-                        }
-                    }
-                }
+			if(primitive != null)
+			{
+				sb.AppendLine();
+				sb.AppendLine("\tpublic static implicit operator " + docDefined.Name + "(" + FormatIdentifier(definingPrimitive.DefinedType) + " value)");
+				sb.AppendLine("\t{");
+				if (stringPrimitive)
+				{
+					sb.AppendLine("\t\tif (value == null)");
+					sb.AppendLine("\t\t\treturn null;");
+					sb.AppendLine();
+				}
+				sb.AppendLine("\t\treturn new " + docDefined.Name + "(value);");
+				sb.AppendLine("\t}");
 
-            }
+				sb.AppendLine();
+				sb.AppendLine("\tpublic static implicit operator " + FormatIdentifier(definingPrimitive.DefinedType)  + "(" + docDefined.Name + " value)");
+				sb.AppendLine("\t{");
+				if (stringPrimitive)
+				{
+					sb.AppendLine("\t\tif (value == null)");
+					sb.AppendLine("\t\t\treturn null;");
+					sb.AppendLine();
+				}
+				sb.AppendLine("\t\treturn value.Value;");
+				sb.AppendLine("\t}");
+			}
+			sb.AppendLine();
+			sb.AppendLine("\tpublic override string ToString()");
+			sb.AppendLine("\t{");
+			if(stringPrimitive)
+				sb.AppendLine("\t\treturn (Value == null ? \"\" : Value.ToString());");
+			else
+				sb.AppendLine("\t\treturn Value.ToString();");
+			sb.AppendLine("\t}");
 
-            return sb.ToString();
-        }
+			// end of type
+			sb.AppendLine("}");
 
-        public string FormatData(DocPublication docPublication, DocExchangeDefinition docExchange, Dictionary<string, DocObject> map, Dictionary<long, SEntity> instances)
-        {
-            //...???
-            return null;
-        }
+			return sb.ToString();
+		}
 
-        public static void GenerateExchange(DocProject docProject, DocModelView docView, string path, Dictionary<string, DocObject> map)
-        {
-            using (CSharpCodeProvider prov = new CSharpCodeProvider())
-            {
+		public string FormatDefinitions(DocProject docProject, DocPublication docPublication, Dictionary<string, DocObject> map, Dictionary<DocObject, bool> included)
+		{
+			StringBuilder sb = new StringBuilder();
+			foreach (DocSection docSection in docProject.Sections)
+			{
+				foreach (DocSchema docSchema in docSection.Schemas)
+				{
+					foreach (DocType docType in docSchema.Types)
+					{
+						bool use = true;
+						if (included != null)
+						{
+							use = false;
+							included.TryGetValue(docType, out use);
+						}
+						if (use)
+						{
+							if (docType is DocDefined)
+							{
+								DocDefined docDefined = (DocDefined)docType;
+								string text = this.Indent(this.FormatDefined(docDefined, map, included), 1);
+								sb.AppendLine(text);
+							}
+							else if (docType is DocSelect)
+							{
+								DocSelect docSelect = (DocSelect)docType;
+								string text = this.Indent(this.FormatSelect(docSelect, map, included), 1);
+								sb.AppendLine(text);
+							}
+							else if (docType is DocEnumeration)
+							{
+								DocEnumeration docEnumeration = (DocEnumeration)docType;
+								string text = this.Indent(this.FormatEnumeration(docEnumeration, map, included), 1);
+								sb.AppendLine(text);
+							}
+						}
+					}
 
-                string schemaid = docView.Code;
+					foreach (DocEntity docEntity in docSchema.Entities)
+					{
+						bool use = true;
+						if (included != null)
+						{
+							use = false;
+							included.TryGetValue(docEntity, out use);
+						}
+						if (use)
+						{
+							string text = this.Indent(this.FormatEntity(docEntity, map, included), 1);
+							sb.AppendLine(text);
+						}
+					}
+				}
 
-                string pathSchema = path + @"\" + schemaid;
-                if (!Directory.Exists(pathSchema))
-                {
-                    Directory.CreateDirectory(pathSchema);
-                }
+			}
 
-                // write assembly version info
-                using (StreamWriter writerAssm = new StreamWriter(pathSchema + @"\AssemblyInfo.cs", false, Encoding.UTF8))
-                {
-                    WriteResource(writerAssm, "IfcDoc.assemblyinfo.txt");
+			return sb.ToString();
+		}
 
-                    writerAssm.WriteLine("[assembly: AssemblyTitle(\"BuildingSmart.Exchange." + schemaid.ToUpper() + "\")]");
+		public string FormatData(DocPublication docPublication, DocExchangeDefinition docExchange, Dictionary<string, DocObject> map, Dictionary<long, SEntity> instances)
+		{
+			//...???
+			return null;
+		}
 
-                    string version = docView.Version;
-                    if (!String.IsNullOrEmpty(version))
-                    {
-                        writerAssm.WriteLine("[assembly: AssemblyVersion(\"" + version + "\")]");
-                        writerAssm.WriteLine("[assembly: AssemblyFileVersion(\"" + version + "\")]");
-                    }
-                }
+		public static void GenerateExchange(DocProject docProject, DocModelView docView, string path, Dictionary<string, DocObject> map)
+		{
+			using (CSharpCodeProvider prov = new CSharpCodeProvider())
+			{
 
-                string ifcschema = docProject.GetSchemaIdentifier();
-                using (StreamWriter writerProj = new StreamWriter(pathSchema + @"\BuildingSmart.Exchange." + schemaid.ToUpper() + ".csproj", false, Encoding.UTF8))
-                {
-                    WriteResource(writerProj, "IfcDoc.csproj1.txt");
-                    writerProj.WriteLine("  </ItemGroup>");
-                    writerProj.WriteLine("    <Reference Include=\"BuildingSmart.Exchange\" />");
-                    writerProj.WriteLine("    <Reference Include=\"BuildingSmart." + ifcschema + "\" />");
-                    writerProj.WriteLine("  <ItemGroup>");
-                    writerProj.WriteLine("    <Compile Include=\"AssemblyInfo.cs\" />");
-                    writerProj.WriteLine("    <Compile Include=\"" + schemaid + ".cs\" />");
-                    WriteResource(writerProj, "IfcDoc.csproj2.txt");
-                }
+				string schemaid = docView.Code;
 
-                using (StreamWriter writerFile = new StreamWriter(pathSchema + @"\" + schemaid + ".cs", false, Encoding.UTF8))
-                {
-                    writerFile.WriteLine("using System;");
-                    writerFile.WriteLine("using System.Collections.Generic;");
-                    writerFile.WriteLine("using System.ComponentModel;");
-                    writerFile.WriteLine("using BuildingSmart.Exchange;");
-                    writerFile.WriteLine();
+				string pathSchema = path + @"\" + schemaid;
+				if (!Directory.Exists(pathSchema))
+				{
+					Directory.CreateDirectory(pathSchema);
+				}
 
-                    HashSet<DocSchema> setNamespaces = new HashSet<DocSchema>();
+				// write assembly version info
+				using (StreamWriter writerAssm = new StreamWriter(pathSchema + @"\AssemblyInfo.cs", false, Encoding.UTF8))
+				{
+					WriteResource(writerAssm, "IfcDoc.assemblyinfo.txt");
 
-                    StringBuilder sbCode = new StringBuilder();
-                    using (StringWriter writerCode = new StringWriter(sbCode))
-                    {
+					writerAssm.WriteLine("[assembly: AssemblyTitle(\"BuildingSmart.Exchange." + schemaid.ToUpper() + "\")]");
 
-                        writerCode.WriteLine();
-                        writerCode.WriteLine("namespace BuildingSmart.Exchange." + schemaid);
-                        writerCode.WriteLine("{");
-                        foreach (DocConceptRoot docConceptRoot in docView.ConceptRoots)
-                        {
-                            if (docConceptRoot.ApplicableEntity != null && !String.IsNullOrEmpty(docConceptRoot.Name))
-                            {
-                                DocSchema docSchema = docProject.GetSchemaOfDefinition(docConceptRoot.ApplicableEntity);
-                                if(!setNamespaces.Contains(docSchema))
-                                {
-                                    setNamespaces.Add(docSchema);
-                                }
+					string version = docView.Version;
+					if (!String.IsNullOrEmpty(version))
+					{
+						writerAssm.WriteLine("[assembly: AssemblyVersion(\"" + version + "\")]");
+						writerAssm.WriteLine("[assembly: AssemblyFileVersion(\"" + version + "\")]");
+					}
+				}
 
-                                string classname = docConceptRoot.Name.Replace(" ", "");
+				string ifcschema = docProject.GetSchemaIdentifier();
+				using (StreamWriter writerProj = new StreamWriter(pathSchema + @"\BuildingSmart.Exchange." + schemaid.ToUpper() + ".csproj", false, Encoding.UTF8))
+				{
+					WriteResource(writerProj, "IfcDoc.csproj1.txt");
+					writerProj.WriteLine("  </ItemGroup>");
+					writerProj.WriteLine("    <Reference Include=\"BuildingSmart.Exchange\" />");
+					writerProj.WriteLine("    <Reference Include=\"BuildingSmart." + ifcschema + "\" />");
+					writerProj.WriteLine("  <ItemGroup>");
+					writerProj.WriteLine("    <Compile Include=\"AssemblyInfo.cs\" />");
+					writerProj.WriteLine("    <Compile Include=\"" + schemaid + ".cs\" />");
+					WriteResource(writerProj, "IfcDoc.csproj2.txt");
+				}
 
-                                // inherits from Concept, where helper functions are defined for getting/setting
-                                writerCode.WriteLine("  public class " + classname + " : Concept");
-                                writerCode.WriteLine("  {");
+				using (StreamWriter writerFile = new StreamWriter(pathSchema + @"\" + schemaid + ".cs", false, Encoding.UTF8))
+				{
+					writerFile.WriteLine("using System;");
+					writerFile.WriteLine("using System.Collections.Generic;");
+					writerFile.WriteLine("using System.ComponentModel;");
+					writerFile.WriteLine("using BuildingSmart.Exchange;");
+					writerFile.WriteLine();
 
-                                // general constructor wraps a new object
-                                writerCode.WriteLine("    public " + classname + "() : base(new " + docConceptRoot.ApplicableEntity.Name + "())");
-                                writerCode.WriteLine("    {");
-                                writerCode.WriteLine("    }");
-                                writerCode.WriteLine();
+					HashSet<DocSchema> setNamespaces = new HashSet<DocSchema>();
 
-                                // parameterized constructor wraps existing object
-                                writerCode.WriteLine("    public " + classname + "(" + docConceptRoot.ApplicableEntity + " target) : base(target)");
-                                writerCode.WriteLine("    {");
-                                writerCode.WriteLine("    }");
-                                writerCode.WriteLine();
+					StringBuilder sbCode = new StringBuilder();
+					using (StringWriter writerCode = new StringWriter(sbCode))
+					{
 
-                                foreach (DocTemplateUsage docConcept in docConceptRoot.Concepts)
-                                {
-                                    if (docConcept.Definition != null && docConcept.Definition.Uuid == DocTemplateDefinition.guidTemplateMapping)
-                                    {
-                                        foreach (DocTemplateItem docItem in docConcept.Items)
-                                        {
-                                            string name = docItem.GetParameterValue("Name");
-                                            string desc = docItem.Documentation;// GetParameterValue("Description");
-                                            string refp = docItem.GetParameterValue("Reference");
-                                            CvtValuePath vpath = CvtValuePath.Parse(refp, map);
-                                            if (vpath != null)
-                                            {
-                                                string type = "object";
-                                                string code = name.Replace(" ", "");
-                                                string opt = "";
-                                                bool vector = false;
-                                                while (vpath.InnerPath != null)
-                                                {
-                                                    if (vpath.Vector)
-                                                    {
-                                                        vector = true;
-                                                    }
+						writerCode.WriteLine();
+						writerCode.WriteLine("namespace BuildingSmart.Exchange." + schemaid);
+						writerCode.WriteLine("{");
+						foreach (DocConceptRoot docConceptRoot in docView.ConceptRoots)
+						{
+							if (docConceptRoot.ApplicableEntity != null && !String.IsNullOrEmpty(docConceptRoot.Name))
+							{
+								DocSchema docSchema = docProject.GetSchemaOfDefinition(docConceptRoot.ApplicableEntity);
+								if (!setNamespaces.Contains(docSchema))
+								{
+									setNamespaces.Add(docSchema);
+								}
 
-                                                    vpath = vpath.InnerPath;
-                                                }
+								string classname = docConceptRoot.Name.Replace(" ", "");
 
-                                                if (vpath.Property != null)
-                                                {
-                                                    type = vpath.Property.DefinedType;
-                                                }
-                                                else if (vpath.Type != null)
-                                                {
-                                                    type = vpath.Type.Name;
-                                                }
+								// inherits from Concept, where helper functions are defined for getting/setting
+								writerCode.WriteLine("  public class " + classname + " : Concept");
+								writerCode.WriteLine("  {");
 
-                                                DocDefinition docItemDef = docProject.GetDefinition(type);
-                                                if (docItemDef != null)
-                                                {
-                                                    DocSchema docItemSchema = docProject.GetSchemaOfDefinition(docItemDef);
-                                                    if (docItemSchema != null && !setNamespaces.Contains(docItemSchema))
-                                                    {
-                                                        setNamespaces.Add(docItemSchema);
-                                                    }
+								// general constructor wraps a new object
+								writerCode.WriteLine("    public " + classname + "() : base(new " + docConceptRoot.ApplicableEntity.Name + "())");
+								writerCode.WriteLine("    {");
+								writerCode.WriteLine("    }");
+								writerCode.WriteLine();
 
-                                                    if (docItemDef is DocDefined || docItemDef is DocEnumeration)
-                                                    {
-                                                        opt = "?";
-                                                    }
-                                                }
+								// parameterized constructor wraps existing object
+								writerCode.WriteLine("    public " + classname + "(" + docConceptRoot.ApplicableEntity + " target) : base(target)");
+								writerCode.WriteLine("    {");
+								writerCode.WriteLine("    }");
+								writerCode.WriteLine();
 
-                                                writerCode.WriteLine("    const string _" + code + " = @\"" + refp + "\";");
+								foreach (DocTemplateUsage docConcept in docConceptRoot.Concepts)
+								{
+									if (docConcept.Definition != null && docConcept.Definition.Uuid == DocTemplateDefinition.guidTemplateMapping)
+									{
+										foreach (DocTemplateItem docItem in docConcept.Items)
+										{
+											string name = docItem.GetParameterValue("Name");
+											string desc = docItem.Documentation;// GetParameterValue("Description");
+											string refp = docItem.GetParameterValue("Reference");
+											CvtValuePath vpath = CvtValuePath.Parse(refp, map);
+											if (vpath != null)
+											{
+												string type = "object";
+												string code = name.Replace(" ", "");
+												string opt = "";
+												bool vector = false;
+												while (vpath.InnerPath != null)
+												{
+													if (vpath.Vector)
+													{
+														vector = true;
+													}
 
-                                                // display name supports usage within property grids, headers when exporting to spreadsheets
-                                                if (name != code)
-                                                {
-                                                    writerCode.WriteLine("    [DisplayName(\"" + name + "\")]");
-                                                }
+													vpath = vpath.InnerPath;
+												}
 
-                                                if (desc != null)
-                                                {
-                                                    StringBuilder sb = new StringBuilder();
-                                                    prov.GenerateCodeFromExpression(new CodePrimitiveExpression(desc), new StringWriter(sb), null);
-                                                    writerCode.WriteLine("    [Description(" + sb.ToString() + ")]");
-                                                }
+												if (vpath.Property != null)
+												{
+													type = vpath.Property.DefinedType;
+												}
+												else if (vpath.Type != null)
+												{
+													type = vpath.Type.Name;
+												}
 
-                                                if (vector)
-                                                {
-                                                    writerCode.WriteLine("    public IList<" + type + "> " + code + " { get { return this.GetValue(_" + code + ") as IList<" + type + ">; } }");
-                                                }
-                                                else
-                                                {
-                                                    writerCode.WriteLine("    public " + type + opt + " " + code + " { get { return this.GetValue(_" + code + ") as " + type + "; } set { this.SetValue(_" + code + ", value); } }");
-                                                }
-                                                writerCode.WriteLine();
-                                            }
-                                        }
-                                    }
-                                }
+												DocDefinition docItemDef = docProject.GetDefinition(type);
+												if (docItemDef != null)
+												{
+													DocSchema docItemSchema = docProject.GetSchemaOfDefinition(docItemDef);
+													if (docItemSchema != null && !setNamespaces.Contains(docItemSchema))
+													{
+														setNamespaces.Add(docItemSchema);
+													}
 
-                                writerCode.WriteLine("  }");
-                                writerCode.WriteLine();
-                            }
-                        }
-                        writerCode.WriteLine("}");
+													if (docItemDef is DocDefined || docItemDef is DocEnumeration)
+													{
+														opt = "?";
+													}
+												}
+
+												writerCode.WriteLine("    const string _" + code + " = @\"" + refp + "\";");
+
+												// display name supports usage within property grids, headers when exporting to spreadsheets
+												if (name != code)
+												{
+													writerCode.WriteLine("    [DisplayName(\"" + name + "\")]");
+												}
+
+												if (desc != null)
+												{
+													StringBuilder sb = new StringBuilder();
+													prov.GenerateCodeFromExpression(new CodePrimitiveExpression(desc), new StringWriter(sb), null);
+													writerCode.WriteLine("    [Description(" + sb.ToString() + ")]");
+												}
+
+												if (vector)
+												{
+													writerCode.WriteLine("    public IList<" + type + "> " + code + " { get { return this.GetValue(_" + code + ") as IList<" + type + ">; } }");
+												}
+												else
+												{
+													writerCode.WriteLine("    public " + type + opt + " " + code + " { get { return this.GetValue(_" + code + ") as " + type + "; } set { this.SetValue(_" + code + ", value); } }");
+												}
+												writerCode.WriteLine();
+											}
+										}
+									}
+								}
+
+								writerCode.WriteLine("  }");
+								writerCode.WriteLine();
+							}
+						}
+						writerCode.WriteLine("}");
 
 
-                        // now write namespace includes
-                        foreach(DocSchema docSchema in setNamespaces)
-                        {
-                            writerFile.WriteLine("using BuildingSmart.IFC." + docSchema.Name + ";");
-                        }
+						// now write namespace includes
+						foreach (DocSchema docSchema in setNamespaces)
+						{
+							writerFile.WriteLine("using BuildingSmart.IFC." + docSchema.Name + ";");
+						}
 
-                        // write code
-                        writerFile.Write(sbCode.ToString());
-                    }
+						// write code
+						writerFile.Write(sbCode.ToString());
+					}
 
-                }
+				}
 
-            }
-        }
-        
-    }
+			}
+		}
+
+	}
 }

@@ -17,54 +17,54 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BuildingSmart.Serialization
 {
-    public class Adapter : Inspector
-    {
-        public Adapter(Type typeProject)
-            : base(typeProject, null, null, null, null)
-        {
-        }
+	public class Adapter : Inspector
+	{
+		public Adapter(Type typeProject)
+			: base(typeProject, null, null, null, null)
+		{
+		}
 
-        public Type GetType(string type)
-        {
-            return this.GetTypeByName(type);
-        }
+		public Type GetType(string type)
+		{
+			return this.GetNonAbstractTypeByName(type);
+		}
 
-        public IList<PropertyInfo> GetDirectFields(Type t)
-        {
-            return this.GetFieldsOrdered(t);
-        }
+		public IEnumerable<PropertyInfo> GetDirectFields(Type t)
+		{
+			return this.GetFieldsOrdered(t).Select(x=>x.Value);
+		}
 
-        public IList<PropertyInfo> GetInverseFields(Type t)
-        {
-            return this.GetFieldsInverseAll(t);
-        }
+		public IList<PropertyInfo> GetInverseFields(Type t)
+		{
+			return this.GetFieldsInverseAll(t);
+		}
 
-        public Type GetCollectionType(Type t)
-        {
-            return this.GetCollectionInstanceType(t);
-        }
+		public Type GetCollectionType(Type t)
+		{
+			return this.GetCollectionInstanceType(t);
+		}
 
-        public void UpdateInverseReferences(object instance, PropertyInfo field, object value)
-        {
-            if (value == null)
-                return;
+		public void UpdateInverseReferences(object instance, PropertyInfo field, object value)
+		{
+			if (value == null)
+				return;
 
-            Type t = value.GetType();
-            if (t.IsValueType || t.IsEnum || t == typeof(string))
-                return;
+			Type t = value.GetType();
+			if (t.IsValueType || t.IsEnum || t == typeof(string))
+				return;
 
-            if (value is IEnumerable)
-            {
-                foreach (object elem in ((IEnumerable)value))
-                {
-                    this.UpdateInverse(instance, field, elem);
-                }
-            }
-            else
-            {
-                this.UpdateInverse(instance, field, value);
-            }
-        }
+			if (value is IEnumerable)
+			{
+				foreach (object elem in ((IEnumerable)value))
+				{
+					this.UpdateInverse(instance, field, elem);
+				}
+			}
+			else
+			{
+				this.UpdateInverse(instance, field, value);
+			}
+		}
 
-    }
+	}
 }

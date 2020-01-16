@@ -15,23 +15,23 @@ using System.Windows.Forms;
 
 namespace IfcDoc
 {
-    public partial class FormSelectItem : Form
-    {
-        public FormSelectItem()
-        {
-            InitializeComponent();
-        }
+	public partial class FormSelectItem : Form
+	{
+		public FormSelectItem()
+		{
+			InitializeComponent();
+		}
 
-        public string Item
-        {
-            get
-            {
-                return this.textBoxItem.Text;
-            }
-            set
-            {
-                this.textBoxItem.Text = value;
-            }
-        }
-    }
+		public string Item
+		{
+			get
+			{
+				return this.textBoxItem.Text;
+			}
+			set
+			{
+				this.textBoxItem.Text = value;
+			}
+		}
+	}
 }

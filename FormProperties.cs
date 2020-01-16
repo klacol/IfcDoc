@@ -18,24 +18,24 @@ using IfcDoc.Format.PNG;
 
 namespace IfcDoc
 {
-    public partial class FormProperties : Form
-    {
-        public FormProperties()
-        {
-            InitializeComponent();
-        }
+	public partial class FormProperties : Form
+	{
+		public FormProperties()
+		{
+			InitializeComponent();
+		}
 
-        //public FormProperties(DocObject docObject, DocObject docParent, DocProject docProject) : this()
-        public FormProperties(DocObject[] path, DocProject docProject)
-            : this()
-        {
-            this.ctlProperties.Init(path, docProject);
-        }
+		//public FormProperties(DocObject docObject, DocObject docParent, DocProject docProject) : this()
+		public FormProperties(DocObject[] path, DocProject docProject)
+			: this()
+		{
+			this.ctlProperties.Init(path, docProject);
+		}
 
-        private void ctlProperties_Load(object sender, EventArgs e)
-        {
+		private void ctlProperties_Load(object sender, EventArgs e)
+		{
 
-        }
+		}
 
-    }    
+	}
 }

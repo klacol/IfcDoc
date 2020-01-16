@@ -1,33 +1,33 @@
 ﻿namespace IfcDoc
 {
-    partial class CtlProperties
-    {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+	partial class CtlProperties
+	{
+		/// <summary> 
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+		/// <summary> 
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CtlProperties));
             this.splitContainerTranslation = new System.Windows.Forms.SplitContainer();
@@ -96,6 +96,9 @@
             this.buttonApplicabilityAddEntity = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPageProperty = new System.Windows.Forms.TabPage();
+            this.buttonPropertyEnumeration = new System.Windows.Forms.Button();
+            this.textBoxPropertyEnumeration = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
             this.comboBoxPropertyAccess = new System.Windows.Forms.ComboBox();
             this.buttonPropertyDataSecondary = new System.Windows.Forms.Button();
@@ -386,6 +389,7 @@
             // toolStripDocumentation
             // 
             this.toolStripDocumentation.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStripDocumentation.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStripDocumentation.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonTranslationInsert,
             this.toolStripButtonTranslationRemove});
@@ -653,6 +657,7 @@
             // toolStrip3
             // 
             this.toolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip3.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonReqImportMandatory,
             this.toolStripButtonReqImportRecommended,
@@ -809,6 +814,9 @@
             // 
             // tabPageProperty
             // 
+            this.tabPageProperty.Controls.Add(this.buttonPropertyEnumeration);
+            this.tabPageProperty.Controls.Add(this.textBoxPropertyEnumeration);
+            this.tabPageProperty.Controls.Add(this.label31);
             this.tabPageProperty.Controls.Add(this.label20);
             this.tabPageProperty.Controls.Add(this.comboBoxPropertyAccess);
             this.tabPageProperty.Controls.Add(this.buttonPropertyDataSecondary);
@@ -822,6 +830,24 @@
             resources.ApplyResources(this.tabPageProperty, "tabPageProperty");
             this.tabPageProperty.Name = "tabPageProperty";
             this.tabPageProperty.UseVisualStyleBackColor = true;
+            // 
+            // buttonPropertyEnumeration
+            // 
+            resources.ApplyResources(this.buttonPropertyEnumeration, "buttonPropertyEnumeration");
+            this.buttonPropertyEnumeration.Name = "buttonPropertyEnumeration";
+            this.buttonPropertyEnumeration.UseVisualStyleBackColor = true;
+            this.buttonPropertyEnumeration.Click += new System.EventHandler(this.buttonPropertyEnumeration_Click);
+            // 
+            // textBoxPropertyEnumeration
+            // 
+            resources.ApplyResources(this.textBoxPropertyEnumeration, "textBoxPropertyEnumeration");
+            this.textBoxPropertyEnumeration.Name = "textBoxPropertyEnumeration";
+            this.textBoxPropertyEnumeration.ReadOnly = true;
+            // 
+            // label31
+            // 
+            resources.ApplyResources(this.label31, "label31");
+            this.label31.Name = "label31";
             // 
             // label20
             // 
@@ -1675,6 +1701,7 @@
             // toolStrip2
             // 
             this.toolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonUsageNavigate,
             this.toolStripButtonUsageMigrate});
@@ -1713,6 +1740,7 @@
             // toolStrip4
             // 
             this.toolStrip4.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip4.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonExampleLoad,
             this.toolStripButtonExampleLink,
@@ -1803,6 +1831,7 @@
             // toolStrip1
             // 
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonRootEntity,
             this.toolStripSeparator1,
@@ -1881,6 +1910,7 @@
             // toolStripChange
             // 
             this.toolStripChange.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStripChange.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStripChange.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonChangeSPF,
             this.toolStripButtonChangeXML,
@@ -1936,6 +1966,7 @@
             // toolStripViews
             // 
             this.toolStripViews.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStripViews.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStripViews.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonViewInsert,
             this.toolStripButtonViewRemove});
@@ -2083,6 +2114,7 @@
             // toolStrip5
             // 
             this.toolStrip5.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip5.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip5.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButtonFormatNone,
             this.toolStripButtonFormatSchema,
@@ -2475,226 +2507,229 @@
             this.tabPageProcess.PerformLayout();
             this.ResumeLayout(false);
 
-        }
+		}
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.TabControl tabControl;
-        private System.Windows.Forms.TabPage tabPageConcept;
-        private System.Windows.Forms.TabPage tabPageRequirements;
-        private System.Windows.Forms.TabPage tabPageQuery;
-        private System.Windows.Forms.TabPage tabPageGeneral;
-        private System.Windows.Forms.TextBox textBoxGeneralDescription;
-        private System.Windows.Forms.TextBox textBoxGeneralName;
-        private System.Windows.Forms.ListView listViewExchange;
-        private System.Windows.Forms.ColumnHeader columnHeaderExchangeName;
-        private System.Windows.Forms.ColumnHeader columnHeaderExchangeImport;
-        private System.Windows.Forms.ColumnHeader columnHeaderExchangeExport;
-        private System.Windows.Forms.ListView listViewLocale;
-        private System.Windows.Forms.ColumnHeader columnHeaderLocale;
-        private System.Windows.Forms.ColumnHeader columnHeaderName;
-        private System.Windows.Forms.ColumnHeader columnHeaderDesc;
-        private System.Windows.Forms.TabPage tabPagePropertySet;
-        private System.Windows.Forms.Button buttonApplicabilityAddEntity;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label labelPsetType;
-        private System.Windows.Forms.ComboBox comboBoxPsetType;
-        private System.Windows.Forms.TabPage tabPageProperty;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox comboBoxPropertyType;
-        private System.Windows.Forms.Button buttonPropertyDataPrimary;
-        private System.Windows.Forms.TextBox textBoxPropertyDataPrimary;
-        private System.Windows.Forms.Label labelPropertyType;
-        private System.Windows.Forms.TabPage tabPageEntity;
-        private System.Windows.Forms.Button buttonEntityBase;
-        private System.Windows.Forms.TextBox textBoxEntityBase;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.CheckBox checkBoxEntityAbstract;
-        private System.Windows.Forms.TabPage tabPageAttribute;
-        private System.Windows.Forms.CheckBox checkBoxAttributeOptional;
-        private System.Windows.Forms.Button buttonAttributeType;
-        private System.Windows.Forms.TextBox textBoxAttributeType;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TabPage tabPageIdentity;
-        private System.Windows.Forms.TextBox textBoxIdentityCopyright;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.TextBox textBoxIdentityOwner;
-        private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.TextBox textBoxIdentityAuthor;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.ComboBox comboBoxIdentityStatus;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBoxIdentityVersion;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox textBoxIdentityCode;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TextBox textBoxIdentityUuid;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.TextBox textBoxLocaleURL;
-        private System.Windows.Forms.ComboBox comboBoxLocaleCategory;
-        private System.Windows.Forms.Label labelAttributeAggregation;
-        private System.Windows.Forms.TabPage tabPageExpression;
-        private System.Windows.Forms.TextBox textBoxExpression;
-        private System.Windows.Forms.TabPage tabPageQuantity;
-        private System.Windows.Forms.Label labelQuantityType;
-        private System.Windows.Forms.ComboBox comboBoxQuantityType;
-        private System.Windows.Forms.TabPage tabPageView;
-        private System.Windows.Forms.Button buttonViewBase;
-        private System.Windows.Forms.TextBox textBoxViewBase;
-        private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.ListView listViewPsetApplicability;
-        private System.Windows.Forms.ColumnHeader columnHeaderPsetEntity;
-        private System.Windows.Forms.ColumnHeader columnHeaderPsetPredefined;
-        private System.Windows.Forms.Button buttonPsetApplicabilityDelete;
-        private System.Windows.Forms.TabPage tabPageExchange;
-        private System.Windows.Forms.CheckBox checkBoxExchangeExport;
-        private System.Windows.Forms.CheckBox checkBoxExchangeImport;
-        private System.Windows.Forms.Label labelExchangeApplicability;
-        private System.Windows.Forms.OpenFileDialog openFileDialogIcon;
-        private System.Windows.Forms.Button buttonApplicabilityAddTemplate;
-        private System.Windows.Forms.ImageList imageListRules;
-        private System.Windows.Forms.Label labelAttributeXsdFormat;
-        private System.Windows.Forms.ComboBox comboBoxAttributeXsdFormat;
-        private System.Windows.Forms.CheckBox checkBoxXsdTagless;
-        private System.Windows.Forms.TabPage tabPageUsage;
-        private System.Windows.Forms.ListView listViewUsage;
-        private System.Windows.Forms.ColumnHeader columnHeaderUsageView;
-        private System.Windows.Forms.ColumnHeader columnHeaderUsageEntity;
-        private System.Windows.Forms.Label label24;
-        private System.Windows.Forms.ComboBox comboBoxExchangeClassReceiver;
-        private System.Windows.Forms.Label label23;
-        private System.Windows.Forms.ComboBox comboBoxExchangeClassSender;
-        private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.ComboBox comboBoxExchangeClassProcess;
-        private System.Windows.Forms.Button buttonAttributeInverse;
-        private System.Windows.Forms.TextBox textBoxAttributeInverse;
-        private System.Windows.Forms.Label labelAttributeInverse;
-        private System.Windows.Forms.ListView listViewAttributeCardinality;
-        private System.Windows.Forms.ColumnHeader columnHeaderCardinalityAggregation;
-        private System.Windows.Forms.ColumnHeader columnHeaderCardinalityMinimum;
-        private System.Windows.Forms.ColumnHeader columnHeaderCardinalityMaximum;
-        private System.Windows.Forms.Label label28;
-        private System.Windows.Forms.Label label27;
-        private System.Windows.Forms.TextBox textBoxAttributeAggregationMax;
-        private System.Windows.Forms.TextBox textBoxAttributeAggregationMin;
-        private System.Windows.Forms.ComboBox comboBoxAttributeAggregation;
-        private System.Windows.Forms.Button buttonAttributeAggregationRemove;
-        private System.Windows.Forms.Button buttonAttributeAggregationInsert;
-        private System.Windows.Forms.Button buttonViewXsdDelete;
-        private System.Windows.Forms.Button buttonViewXsdAttribute;
-        private System.Windows.Forms.Label label29;
-        private System.Windows.Forms.CheckBox checkBoxViewXsdTagless;
-        private System.Windows.Forms.ComboBox comboBoxViewXsd;
-        private System.Windows.Forms.ListView listViewViewXsd;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
-        private System.Windows.Forms.ColumnHeader columnHeader5;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
-        private System.Windows.Forms.TabPage tabPageExample;
-        private System.Windows.Forms.TextBox textBoxExample;
-        private System.Windows.Forms.OpenFileDialog openFileDialogExample;
-        private System.Windows.Forms.Button buttonEntityBaseClear;
-        private CtlRules ctlRules;
-        private CtlParameters ctlParameters;
-        private System.Windows.Forms.TabPage tabPageConstraints;
-        private CtlOperators ctlOperators;
-        private System.Windows.Forms.ToolStrip toolStripDocumentation;
-        private System.Windows.Forms.ToolStripButton toolStripButtonTranslationInsert;
-        private System.Windows.Forms.ToolStripButton toolStripButtonTranslationRemove;
-        private System.Windows.Forms.SplitContainer splitContainerTranslation;
-        private System.Windows.Forms.TabPage tabPageConceptRoot;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeInherit;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeOverride;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeSuppress;
-        private System.Windows.Forms.ListView listViewConceptRoot;
-        private System.Windows.Forms.ColumnHeader columnHeaderRootTemplate;
-        private System.Windows.Forms.ColumnHeader columnHeaderRootEntity;
-        private System.Windows.Forms.ColumnHeader columnHeaderRootStatus;
-        private System.Windows.Forms.ImageList imageListInheritance;
-        private System.Windows.Forms.ToolStrip toolStrip2;
-        private System.Windows.Forms.ToolStripButton toolStripButtonUsageNavigate;
-        private System.Windows.Forms.ToolStripButton toolStripButtonUsageMigrate;
-        private System.Windows.Forms.TextBox textBoxAttributeDerived;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.CheckBox checkBoxAttributeUnique;
-        private System.Windows.Forms.CheckBox checkBoxViewIncludeAll;
-        private System.Windows.Forms.Button buttonViewEntity;
-        private System.Windows.Forms.TextBox textBoxViewRoot;
-        private System.Windows.Forms.Label labelViewEntity;
-        private System.Windows.Forms.TextBox textBoxViewXsdNamespace;
-        private System.Windows.Forms.TabPage tabPageChange;
-        private System.Windows.Forms.ListView listViewChange;
-        private System.Windows.Forms.ColumnHeader columnHeaderChangeAspect;
-        private System.Windows.Forms.ColumnHeader columnHeaderChangeOld;
-        private System.Windows.Forms.ColumnHeader columnHeaderChangeNew;
-        private System.Windows.Forms.ToolStrip toolStripChange;
-        private System.Windows.Forms.ToolStripButton toolStripButtonChangeSPF;
-        private System.Windows.Forms.ToolStripButton toolStripButtonChangeXML;
-        private System.Windows.Forms.ToolStripComboBox toolStripComboBoxChange;
-        private System.Windows.Forms.ToolStrip toolStrip3;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqImportMandatory;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqImportRecommended;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqImportNotRecommended;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqImportExcluded;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqExportMandatory;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqExportRecommended;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqExportNotRecommended;
-        private System.Windows.Forms.ToolStripButton toolStripButtonReqExportExcluded;
-        private System.Windows.Forms.TabPage tabPageViews;
-        private System.Windows.Forms.ListView listViewViews;
-        private System.Windows.Forms.ColumnHeader columnHeaderViewName;
-        private System.Windows.Forms.ToolStrip toolStripViews;
-        private System.Windows.Forms.ToolStripButton toolStripButtonViewInsert;
-        private System.Windows.Forms.ToolStripButton toolStripButtonViewRemove;
-        private System.Windows.Forms.ToolStrip toolStrip4;
-        private System.Windows.Forms.ToolStripButton toolStripButtonExampleLoad;
-        private System.Windows.Forms.ToolStripButton toolStripButtonExampleClear;
-        private System.Windows.Forms.Panel panelIdentityIcon;
-        private System.Windows.Forms.Panel panelIcon;
-        private System.Windows.Forms.Button buttonExchangeIconClear;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button buttonExchangeIconChange;
-        private System.Windows.Forms.TabPage tabPagePublication;
-        private System.Windows.Forms.TextBox textBoxFooter;
-        private System.Windows.Forms.TextBox textBoxHeader;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.CheckBox checkBoxPublishISO;
-        private System.Windows.Forms.CheckBox checkBoxPublishHideHistory;
-        private System.Windows.Forms.TabPage tabPageFormats;
-        private System.Windows.Forms.ListView listViewFormats;
-        private System.Windows.Forms.ColumnHeader columnHeaderFormatName;
-        private System.Windows.Forms.ColumnHeader columnHeaderFormatOutput;
-        private System.Windows.Forms.ToolStrip toolStrip5;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFormatSchema;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFormatExamples;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFormatMarkup;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFormatNone;
-        private System.Windows.Forms.CheckBox checkBoxPublishUML;
-        private System.Windows.Forms.CheckBox checkBoxPublishExchangeTables;
-        private System.Windows.Forms.Button buttonPropertyDataSecondary;
-        private System.Windows.Forms.TextBox textBoxPropertyDataSecondary;
-        private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.ComboBox comboBoxPropertyAccess;
-        private System.Windows.Forms.Label label21;
-        private System.Windows.Forms.ComboBox comboBoxQuantityAccess;
-        private System.Windows.Forms.CheckBox checkBoxPublishHtmlExamples;
-        private System.Windows.Forms.ToolStripButton toolStripButtonExampleLink;
-        private System.Windows.Forms.TextBox textBoxPublicationNote;
-        private System.Windows.Forms.TabPage tabPageProcess;
-        private System.Windows.Forms.Label label25;
-        private System.Windows.Forms.ComboBox comboBoxProcessOutput;
-        private System.Windows.Forms.Label label26;
-        private System.Windows.Forms.ComboBox comboBoxProcessInput;
-        private System.Windows.Forms.Label label30;
-        private System.Windows.Forms.ComboBox comboBoxProcessClassification;
-        private System.Windows.Forms.CheckBox checkBoxPublishBSI;
-        private System.Windows.Forms.ToolStripButton toolStripButtonRootEntity;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ColumnHeader columnHeaderURL;
-    }
+		private System.Windows.Forms.TabControl tabControl;
+		private System.Windows.Forms.TabPage tabPageConcept;
+		private System.Windows.Forms.TabPage tabPageRequirements;
+		private System.Windows.Forms.TabPage tabPageQuery;
+		private System.Windows.Forms.TabPage tabPageGeneral;
+		private System.Windows.Forms.TextBox textBoxGeneralDescription;
+		private System.Windows.Forms.TextBox textBoxGeneralName;
+		private System.Windows.Forms.ListView listViewExchange;
+		private System.Windows.Forms.ColumnHeader columnHeaderExchangeName;
+		private System.Windows.Forms.ColumnHeader columnHeaderExchangeImport;
+		private System.Windows.Forms.ColumnHeader columnHeaderExchangeExport;
+		private System.Windows.Forms.ListView listViewLocale;
+		private System.Windows.Forms.ColumnHeader columnHeaderLocale;
+		private System.Windows.Forms.ColumnHeader columnHeaderName;
+		private System.Windows.Forms.ColumnHeader columnHeaderDesc;
+		private System.Windows.Forms.TabPage tabPagePropertySet;
+		private System.Windows.Forms.Button buttonApplicabilityAddEntity;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label labelPsetType;
+		private System.Windows.Forms.ComboBox comboBoxPsetType;
+		private System.Windows.Forms.TabPage tabPageProperty;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.ComboBox comboBoxPropertyType;
+		private System.Windows.Forms.Button buttonPropertyDataPrimary;
+		private System.Windows.Forms.TextBox textBoxPropertyDataPrimary;
+		private System.Windows.Forms.Label labelPropertyType;
+		private System.Windows.Forms.TabPage tabPageEntity;
+		private System.Windows.Forms.Button buttonEntityBase;
+		private System.Windows.Forms.TextBox textBoxEntityBase;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.CheckBox checkBoxEntityAbstract;
+		private System.Windows.Forms.TabPage tabPageAttribute;
+		private System.Windows.Forms.CheckBox checkBoxAttributeOptional;
+		private System.Windows.Forms.Button buttonAttributeType;
+		private System.Windows.Forms.TextBox textBoxAttributeType;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.TabPage tabPageIdentity;
+		private System.Windows.Forms.TextBox textBoxIdentityCopyright;
+		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.TextBox textBoxIdentityOwner;
+		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.TextBox textBoxIdentityAuthor;
+		private System.Windows.Forms.Label label12;
+		private System.Windows.Forms.ComboBox comboBoxIdentityStatus;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.TextBox textBoxIdentityVersion;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.TextBox textBoxIdentityCode;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.TextBox textBoxIdentityUuid;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label16;
+		private System.Windows.Forms.Label label15;
+		private System.Windows.Forms.TextBox textBoxLocaleURL;
+		private System.Windows.Forms.ComboBox comboBoxLocaleCategory;
+		private System.Windows.Forms.Label labelAttributeAggregation;
+		private System.Windows.Forms.TabPage tabPageExpression;
+		private System.Windows.Forms.TextBox textBoxExpression;
+		private System.Windows.Forms.TabPage tabPageQuantity;
+		private System.Windows.Forms.Label labelQuantityType;
+		private System.Windows.Forms.ComboBox comboBoxQuantityType;
+		private System.Windows.Forms.TabPage tabPageView;
+		private System.Windows.Forms.Button buttonViewBase;
+		private System.Windows.Forms.TextBox textBoxViewBase;
+		private System.Windows.Forms.Label label19;
+		private System.Windows.Forms.ListView listViewPsetApplicability;
+		private System.Windows.Forms.ColumnHeader columnHeaderPsetEntity;
+		private System.Windows.Forms.ColumnHeader columnHeaderPsetPredefined;
+		private System.Windows.Forms.Button buttonPsetApplicabilityDelete;
+		private System.Windows.Forms.TabPage tabPageExchange;
+		private System.Windows.Forms.CheckBox checkBoxExchangeExport;
+		private System.Windows.Forms.CheckBox checkBoxExchangeImport;
+		private System.Windows.Forms.Label labelExchangeApplicability;
+		private System.Windows.Forms.OpenFileDialog openFileDialogIcon;
+		private System.Windows.Forms.Button buttonApplicabilityAddTemplate;
+		private System.Windows.Forms.ImageList imageListRules;
+		private System.Windows.Forms.Label labelAttributeXsdFormat;
+		private System.Windows.Forms.ComboBox comboBoxAttributeXsdFormat;
+		private System.Windows.Forms.CheckBox checkBoxXsdTagless;
+		private System.Windows.Forms.TabPage tabPageUsage;
+		private System.Windows.Forms.ListView listViewUsage;
+		private System.Windows.Forms.ColumnHeader columnHeaderUsageView;
+		private System.Windows.Forms.ColumnHeader columnHeaderUsageEntity;
+		private System.Windows.Forms.Label label24;
+		private System.Windows.Forms.ComboBox comboBoxExchangeClassReceiver;
+		private System.Windows.Forms.Label label23;
+		private System.Windows.Forms.ComboBox comboBoxExchangeClassSender;
+		private System.Windows.Forms.Label label22;
+		private System.Windows.Forms.ComboBox comboBoxExchangeClassProcess;
+		private System.Windows.Forms.Button buttonAttributeInverse;
+		private System.Windows.Forms.TextBox textBoxAttributeInverse;
+		private System.Windows.Forms.Label labelAttributeInverse;
+		private System.Windows.Forms.ListView listViewAttributeCardinality;
+		private System.Windows.Forms.ColumnHeader columnHeaderCardinalityAggregation;
+		private System.Windows.Forms.ColumnHeader columnHeaderCardinalityMinimum;
+		private System.Windows.Forms.ColumnHeader columnHeaderCardinalityMaximum;
+		private System.Windows.Forms.Label label28;
+		private System.Windows.Forms.Label label27;
+		private System.Windows.Forms.TextBox textBoxAttributeAggregationMax;
+		private System.Windows.Forms.TextBox textBoxAttributeAggregationMin;
+		private System.Windows.Forms.ComboBox comboBoxAttributeAggregation;
+		private System.Windows.Forms.Button buttonAttributeAggregationRemove;
+		private System.Windows.Forms.Button buttonAttributeAggregationInsert;
+		private System.Windows.Forms.Button buttonViewXsdDelete;
+		private System.Windows.Forms.Button buttonViewXsdAttribute;
+		private System.Windows.Forms.Label label29;
+		private System.Windows.Forms.CheckBox checkBoxViewXsdTagless;
+		private System.Windows.Forms.ComboBox comboBoxViewXsd;
+		private System.Windows.Forms.ListView listViewViewXsd;
+		private System.Windows.Forms.ColumnHeader columnHeader3;
+		private System.Windows.Forms.ColumnHeader columnHeader4;
+		private System.Windows.Forms.ColumnHeader columnHeader5;
+		private System.Windows.Forms.ColumnHeader columnHeader6;
+		private System.Windows.Forms.TabPage tabPageExample;
+		private System.Windows.Forms.TextBox textBoxExample;
+		private System.Windows.Forms.OpenFileDialog openFileDialogExample;
+		private System.Windows.Forms.Button buttonEntityBaseClear;
+		private CtlRules ctlRules;
+		private CtlParameters ctlParameters;
+		private System.Windows.Forms.TabPage tabPageConstraints;
+		private CtlOperators ctlOperators;
+		private System.Windows.Forms.ToolStrip toolStripDocumentation;
+		private System.Windows.Forms.ToolStripButton toolStripButtonTranslationInsert;
+		private System.Windows.Forms.ToolStripButton toolStripButtonTranslationRemove;
+		private System.Windows.Forms.SplitContainer splitContainerTranslation;
+		private System.Windows.Forms.TabPage tabPageConceptRoot;
+		private System.Windows.Forms.ToolStrip toolStrip1;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeInherit;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeOverride;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemModeSuppress;
+		private System.Windows.Forms.ListView listViewConceptRoot;
+		private System.Windows.Forms.ColumnHeader columnHeaderRootTemplate;
+		private System.Windows.Forms.ColumnHeader columnHeaderRootEntity;
+		private System.Windows.Forms.ColumnHeader columnHeaderRootStatus;
+		private System.Windows.Forms.ImageList imageListInheritance;
+		private System.Windows.Forms.ToolStrip toolStrip2;
+		private System.Windows.Forms.ToolStripButton toolStripButtonUsageNavigate;
+		private System.Windows.Forms.ToolStripButton toolStripButtonUsageMigrate;
+		private System.Windows.Forms.TextBox textBoxAttributeDerived;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.CheckBox checkBoxAttributeUnique;
+		private System.Windows.Forms.CheckBox checkBoxViewIncludeAll;
+		private System.Windows.Forms.Button buttonViewEntity;
+		private System.Windows.Forms.TextBox textBoxViewRoot;
+		private System.Windows.Forms.Label labelViewEntity;
+		private System.Windows.Forms.TextBox textBoxViewXsdNamespace;
+		private System.Windows.Forms.TabPage tabPageChange;
+		private System.Windows.Forms.ListView listViewChange;
+		private System.Windows.Forms.ColumnHeader columnHeaderChangeAspect;
+		private System.Windows.Forms.ColumnHeader columnHeaderChangeOld;
+		private System.Windows.Forms.ColumnHeader columnHeaderChangeNew;
+		private System.Windows.Forms.ToolStrip toolStripChange;
+		private System.Windows.Forms.ToolStripButton toolStripButtonChangeSPF;
+		private System.Windows.Forms.ToolStripButton toolStripButtonChangeXML;
+		private System.Windows.Forms.ToolStripComboBox toolStripComboBoxChange;
+		private System.Windows.Forms.ToolStrip toolStrip3;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqImportMandatory;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqImportRecommended;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqImportNotRecommended;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqImportExcluded;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqExportMandatory;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqExportRecommended;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqExportNotRecommended;
+		private System.Windows.Forms.ToolStripButton toolStripButtonReqExportExcluded;
+		private System.Windows.Forms.TabPage tabPageViews;
+		private System.Windows.Forms.ListView listViewViews;
+		private System.Windows.Forms.ColumnHeader columnHeaderViewName;
+		private System.Windows.Forms.ToolStrip toolStripViews;
+		private System.Windows.Forms.ToolStripButton toolStripButtonViewInsert;
+		private System.Windows.Forms.ToolStripButton toolStripButtonViewRemove;
+		private System.Windows.Forms.ToolStrip toolStrip4;
+		private System.Windows.Forms.ToolStripButton toolStripButtonExampleLoad;
+		private System.Windows.Forms.ToolStripButton toolStripButtonExampleClear;
+		private System.Windows.Forms.Panel panelIdentityIcon;
+		private System.Windows.Forms.Panel panelIcon;
+		private System.Windows.Forms.Button buttonExchangeIconClear;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Button buttonExchangeIconChange;
+		private System.Windows.Forms.TabPage tabPagePublication;
+		private System.Windows.Forms.TextBox textBoxFooter;
+		private System.Windows.Forms.TextBox textBoxHeader;
+		private System.Windows.Forms.Label label17;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.CheckBox checkBoxPublishISO;
+		private System.Windows.Forms.CheckBox checkBoxPublishHideHistory;
+		private System.Windows.Forms.TabPage tabPageFormats;
+		private System.Windows.Forms.ListView listViewFormats;
+		private System.Windows.Forms.ColumnHeader columnHeaderFormatName;
+		private System.Windows.Forms.ColumnHeader columnHeaderFormatOutput;
+		private System.Windows.Forms.ToolStrip toolStrip5;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFormatSchema;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFormatExamples;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFormatMarkup;
+		private System.Windows.Forms.ToolStripButton toolStripButtonFormatNone;
+		private System.Windows.Forms.CheckBox checkBoxPublishUML;
+		private System.Windows.Forms.CheckBox checkBoxPublishExchangeTables;
+		private System.Windows.Forms.Button buttonPropertyDataSecondary;
+		private System.Windows.Forms.TextBox textBoxPropertyDataSecondary;
+		private System.Windows.Forms.Label label18;
+		private System.Windows.Forms.Label label20;
+		private System.Windows.Forms.ComboBox comboBoxPropertyAccess;
+		private System.Windows.Forms.Label label21;
+		private System.Windows.Forms.ComboBox comboBoxQuantityAccess;
+		private System.Windows.Forms.CheckBox checkBoxPublishHtmlExamples;
+		private System.Windows.Forms.ToolStripButton toolStripButtonExampleLink;
+		private System.Windows.Forms.TextBox textBoxPublicationNote;
+		private System.Windows.Forms.TabPage tabPageProcess;
+		private System.Windows.Forms.Label label25;
+		private System.Windows.Forms.ComboBox comboBoxProcessOutput;
+		private System.Windows.Forms.Label label26;
+		private System.Windows.Forms.ComboBox comboBoxProcessInput;
+		private System.Windows.Forms.Label label30;
+		private System.Windows.Forms.ComboBox comboBoxProcessClassification;
+		private System.Windows.Forms.CheckBox checkBoxPublishBSI;
+		private System.Windows.Forms.ToolStripButton toolStripButtonRootEntity;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private System.Windows.Forms.ColumnHeader columnHeaderURL;
+		private System.Windows.Forms.Button buttonPropertyEnumeration;
+		private System.Windows.Forms.TextBox textBoxPropertyEnumeration;
+		private System.Windows.Forms.Label label31;
+	}
 }

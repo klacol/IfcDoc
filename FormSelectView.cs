@@ -17,115 +17,115 @@ using IfcDoc.Schema.DOC;
 
 namespace IfcDoc
 {
-    public partial class FormSelectView : Form
-    {
-        DocProject m_project;
+	public partial class FormSelectView : Form
+	{
+		DocProject m_project;
 
-        public FormSelectView()
-        {
-            InitializeComponent();
-        }
+		public FormSelectView()
+		{
+			InitializeComponent();
+		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="project">The project.</param>
-        public FormSelectView(DocProject project, string description)
-            : this()
-        {
-            this.m_project = project;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="project">The project.</param>
+		public FormSelectView(DocProject project, string description)
+			: this()
+		{
+			this.m_project = project;
 
-            if (description != null)
-            {
-                this.labelDescription.Text = description;
-            }
+			if (description != null)
+			{
+				this.labelDescription.Text = description;
+			}
 
-            foreach (DocModelView docView in this.m_project.ModelViews)
-            {
-                FillTree(null, docView);
-            }
+			foreach (DocModelView docView in this.m_project.ModelViews)
+			{
+				FillTree(null, docView);
+			}
 
-            this.treeView.ExpandAll();
-        }
+			this.treeView.ExpandAll();
+		}
 
-        private void FillTree(TreeNode tnParent, DocModelView docView)
-        {
-            TreeNode tn = new TreeNode();
-            tn.Tag = docView;
-            tn.Text = docView.Name;
-            tn.ImageIndex = 0;
+		private void FillTree(TreeNode tnParent, DocModelView docView)
+		{
+			TreeNode tn = new TreeNode();
+			tn.Tag = docView;
+			tn.Text = docView.Name;
+			tn.ImageIndex = 0;
 
-            if (tnParent != null)
-            {
-                tnParent.Nodes.Add(tn);
-            }
-            else
-            {
-                this.treeView.Nodes.Add(tn);
-            }
+			if (tnParent != null)
+			{
+				tnParent.Nodes.Add(tn);
+			}
+			else
+			{
+				this.treeView.Nodes.Add(tn);
+			}
 
-            // recurse
-            foreach (DocModelView docSub in docView.ModelViews)
-            {
-                FillTree(tn, docSub);
-            }
-        }
+			// recurse
+			foreach (DocModelView docSub in docView.ModelViews)
+			{
+				FillTree(tn, docSub);
+			}
+		}
 
-        public string VersionMVDXML
-        {
-            get
-            {
-                switch(this.comboBoxMVDXML.SelectedIndex)
-                {
-                    case 0:
-                        return IfcDoc.Schema.MVD.mvdXML.NamespaceV11;
+		public string VersionMVDXML
+		{
+			get
+			{
+				switch (this.comboBoxMVDXML.SelectedIndex)
+				{
+					case 0:
+						return IfcDoc.Schema.MVD.mvdXML.NamespaceV11;
 
-                    case 1:
-                        return IfcDoc.Schema.MVD.mvdXML.NamespaceV12;
-                }
+					case 1:
+						return IfcDoc.Schema.MVD.mvdXML.NamespaceV12;
+				}
 
-                return null;
-            }
-            set
-            {
-                if (value != null)
-                {
-                    this.comboBoxMVDXML.Visible = true;
-                    switch(value)
-                    {
-                        case IfcDoc.Schema.MVD.mvdXML.NamespaceV11:
-                            this.comboBoxMVDXML.SelectedIndex = 0;
-                            break;
+				return null;
+			}
+			set
+			{
+				if (value != null)
+				{
+					this.comboBoxMVDXML.Visible = true;
+					switch (value)
+					{
+						case IfcDoc.Schema.MVD.mvdXML.NamespaceV11:
+							this.comboBoxMVDXML.SelectedIndex = 0;
+							break;
 
-                        case IfcDoc.Schema.MVD.mvdXML.NamespaceV12:
-                            this.comboBoxMVDXML.SelectedIndex = 1;
-                            break;
-                    }
-                }
-                else
-                {
-                    this.comboBoxMVDXML.Visible = false;
-                }
-            }
-        }
+						case IfcDoc.Schema.MVD.mvdXML.NamespaceV12:
+							this.comboBoxMVDXML.SelectedIndex = 1;
+							break;
+					}
+				}
+				else
+				{
+					this.comboBoxMVDXML.Visible = false;
+				}
+			}
+		}
 
-        public DocModelView[] Selection
-        {
-            get
-            {
-                DocModelView[] sel = null;
-                if (this.treeView.SelectedNode != null)
-                {
-                    sel = new DocModelView [1];
-                    sel[0] = (DocModelView)this.treeView.SelectedNode.Tag;
-                }
+		public DocModelView[] Selection
+		{
+			get
+			{
+				DocModelView[] sel = null;
+				if (this.treeView.SelectedNode != null)
+				{
+					sel = new DocModelView[1];
+					sel[0] = (DocModelView)this.treeView.SelectedNode.Tag;
+				}
 
-                return sel;
-            }
-            set
-            {
-                //...
-            }
-        }
-    }
+				return sel;
+			}
+			set
+			{
+				//...
+			}
+		}
+	}
 }

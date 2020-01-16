@@ -23,6 +23,23 @@ namespace BuildingSmart.IFC.IfcUtilityResource
 		{
 			this.Value = value;
 		}
+		public static implicit operator IfcGloballyUniqueId(string value)
+		{
+			if (value == null)
+				return null;
+
+			return new IfcGloballyUniqueId(value);
+		}
+
+		public static implicit operator string(IfcGloballyUniqueId value)
+		{
+			return value.Value;
+		}
+
+		public override string ToString()
+		{
+			return Value.ToString();
+		}
 	}
 	
 }

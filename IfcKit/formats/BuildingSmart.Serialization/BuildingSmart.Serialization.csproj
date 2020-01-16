@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adapter.cs" />
-    <Compile Include="Header.cs" />
     <Compile Include="Inspector.cs" />
     <Compile Include="Grammar.cs" />
     <Compile Include="Serializer.cs" />

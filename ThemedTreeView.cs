@@ -13,22 +13,22 @@ using System.Runtime.InteropServices;
 
 namespace IfcDoc
 {
-    public class ThemedTreeView : System.Windows.Forms.TreeView
-    {
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
+	public class ThemedTreeView : System.Windows.Forms.TreeView
+	{
+		protected override void OnHandleCreated(EventArgs e)
+		{
+			base.OnHandleCreated(e);
 
-            if (!this.DesignMode && Environment.OSVersion.Platform ==
-              PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 6)
-            {
-                SetWindowTheme(this.Handle, "explorer", null);
-                this.ShowLines = false;
-            }
-        }
+			if (!this.DesignMode && Environment.OSVersion.Platform ==
+			  PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 6)
+			{
+				SetWindowTheme(this.Handle, "explorer", null);
+				this.ShowLines = false;
+			}
+		}
 
-        [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
-        public extern static int SetWindowTheme
-            (IntPtr hWnd, string pszSubAppName, string pszSubIdList);
-    }
+		[DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
+		public extern static int SetWindowTheme
+			(IntPtr hWnd, string pszSubAppName, string pszSubIdList);
+	}
 }

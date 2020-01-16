@@ -92,6 +92,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.11.12.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>packages\HtmlAgilityPack.1.11.12\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Markdig, Version=0.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Markdig.0.17.1\lib\net40\Markdig.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -178,11 +184,20 @@
     <Compile Include="FormSaveFolder.Designer.cs">
       <DependentUpon>FormSaveFolder.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormSelectGeneric.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FormSelectProperty.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormSelectProperty.Designer.cs">
       <DependentUpon>FormSelectProperty.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSelect.Designer.cs">
+      <DependentUpon>FormSelect.cs</DependentUpon>
     </Compile>
     <Compile Include="FormSelectQuantity.cs">
       <SubType>Form</SubType>
@@ -214,8 +229,10 @@
     <Compile Include="FormValidateMappings.Designer.cs">
       <DependentUpon>FormValidateMappings.cs</DependentUpon>
     </Compile>
+    <Compile Include="IfcDocUtils.cs" />
     <Compile Include="SchemaSVG.cs" />
     <Compile Include="SchemaXsd.cs" />
+    <Compile Include="System\ComponentModel\CustomComponentResourceManager.cs" />
     <Compile Include="ThemedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -279,12 +296,6 @@
     </Compile>
     <Compile Include="FormSelectLocale.Designer.cs">
       <DependentUpon>FormSelectLocale.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FormSelectPropertyEnum.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormSelectPropertyEnum.Designer.cs">
-      <DependentUpon>FormSelectPropertyEnum.cs</DependentUpon>
     </Compile>
     <Compile Include="FormSelectSchema.cs">
       <SubType>Form</SubType>
@@ -429,6 +440,9 @@
     <EmbeddedResource Include="FormSelectProperty.resx">
       <DependentUpon>FormSelectProperty.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormSelect.resx">
+      <DependentUpon>FormSelect.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormSelectQuantity.resx">
       <DependentUpon>FormSelectQuantity.cs</DependentUpon>
     </EmbeddedResource>
@@ -484,9 +498,6 @@
       <DependentUpon>FormSelectLocale.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSelectPropertyEnum.resx">
-      <DependentUpon>FormSelectPropertyEnum.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FormSelectSchema.resx">
       <DependentUpon>FormSelectSchema.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -534,6 +545,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -600,6 +612,24 @@
       <Project>{ecb9f199-28f2-48b9-82e9-b4edade8aebb}</Project>
       <Name>BuildingSmart.Utilities.Dictionary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ContextInsert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\toolStripMenuItemContextInsert.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\toolStripMenuItemInsertProperty.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\toolStripMenuItemContextInsertConstant.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\toolStripMenuItemInsertPropertyConstant.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\toolStripMenuItemInsertQuantity.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

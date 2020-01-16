@@ -17,43 +17,43 @@ using System.Globalization;
 
 namespace IfcDoc
 {
-    public partial class FormSelectLocale : Form
-    {
-        public FormSelectLocale()
-        {
-            InitializeComponent();
+	public partial class FormSelectLocale : Form
+	{
+		public FormSelectLocale()
+		{
+			InitializeComponent();
 
-            CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.NeutralCultures);
-            CultureInfo[] specific = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
-            foreach (CultureInfo item in cultures)
-            {
-                TreeNode lvi = new TreeNode();
-                lvi.Tag = item;
-                lvi.Text = item.Name + " - " + item.DisplayName;
-                this.treeViewLocale.Nodes.Add(lvi);
+			CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.NeutralCultures);
+			CultureInfo[] specific = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
+			foreach (CultureInfo item in cultures)
+			{
+				TreeNode lvi = new TreeNode();
+				lvi.Tag = item;
+				lvi.Text = item.Name + " - " + item.DisplayName;
+				this.treeViewLocale.Nodes.Add(lvi);
 
-                foreach (CultureInfo spec in specific)
-                {
-                    if (spec.Parent.Equals(item))
-                    {
-                        TreeNode tnSpec = new TreeNode();
-                        tnSpec.Tag = spec;
-                        tnSpec.Text = spec.Name + " - " + spec.DisplayName;
-                        lvi.Nodes.Add(tnSpec);
-                    }
-                }
-            }
-        }
+				foreach (CultureInfo spec in specific)
+				{
+					if (spec.Parent.Equals(item))
+					{
+						TreeNode tnSpec = new TreeNode();
+						tnSpec.Tag = spec;
+						tnSpec.Text = spec.Name + " - " + spec.DisplayName;
+						lvi.Nodes.Add(tnSpec);
+					}
+				}
+			}
+		}
 
-        public CultureInfo SelectedLocale
-        {
-            get
-            {
-                if (this.treeViewLocale.SelectedNode == null)
-                    return null;
+		public CultureInfo SelectedLocale
+		{
+			get
+			{
+				if (this.treeViewLocale.SelectedNode == null)
+					return null;
 
-                return this.treeViewLocale.SelectedNode.Tag as CultureInfo;                
-            }
-        }
-    }
+				return this.treeViewLocale.SelectedNode.Tag as CultureInfo;
+			}
+		}
+	}
 }
