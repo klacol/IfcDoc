@@ -128,6 +128,10 @@ Thomas Liebich - MSG Leader (tl@aec3.com)
 Comments, issues or any other feedback may be posted at:
 https://github.com/BuildingSMART/IfcDoc
 
-MVD-XML Version 1.1, 1.2 preview</value>
+MVD-XML Version 1.1, 1.2 preview
+
+Patched version by KLAE, Compile time 21.01.2020 - 13:00
+https://github.com/klacol/IfcDoc       
+    </value>
   </data>
 </root>

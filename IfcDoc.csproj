@@ -108,6 +108,9 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
+	<Content Include="Content\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeLogGenerator.cs" />
@@ -545,6 +548,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="content\img\Thumbs.db" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -630,6 +634,43 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\toolStripMenuItemInsertQuantity.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="content\blank.htm" />
+    <Content Include="content\copyright.htm" />
+    <Content Include="content\credits.htm" />
+    <Content Include="content\details-shim.css" />
+    <Content Include="content\details-shim.js" />
+    <Content Include="content\favicon.ico" />
+    <Content Include="content\frame.htm" />
+    <Content Include="content\ifc-styles.css" />
+    <Content Include="content\img\attr-excluded.png" />
+    <Content Include="content\img\attr-mandatory.png" />
+    <Content Include="content\img\attr-notrelevant.png" />
+    <Content Include="content\img\attr-optional.png" />
+    <Content Include="content\img\background.gif" />
+    <Content Include="content\img\buildingSMART_logo.png" />
+    <Content Include="content\img\buildingSMART_standards_triangle.png" />
+    <Content Include="content\img\concerthall.png" />
+    <Content Include="content\img\copyright_logo_bw.gif" />
+    <Content Include="content\img\copyright_logo_color.gif" />
+    <Content Include="content\img\diagram.png" />
+    <Content Include="content\img\doclink.png" />
+    <Content Include="content\img\expg.gif" />
+    <Content Include="content\img\external.png" />
+    <Content Include="content\img\IFC4_layered_architecture.png" />
+    <Content Include="content\img\layout_icon.gif" />
+    <Content Include="content\img\locale-de.png" />
+    <Content Include="content\img\locale-en.png" />
+    <Content Include="content\img\locale-fr.png" />
+    <Content Include="content\img\locale-ja.png" />
+    <Content Include="content\img\locale-ko.png" />
+    <Content Include="content\img\locale-zh.png" />
+    <Content Include="content\img\navleft.png" />
+    <Content Include="content\img\navright.png" />
+    <Content Include="content\img\permlink.png" />
+    <Content Include="content\img\source_background.png" />
+    <Content Include="content\index.htm" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

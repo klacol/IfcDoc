@@ -1892,6 +1892,7 @@ namespace IfcDoc
 		public static string MakeLinkName(string str)
 		{ 
 			StringBuilder sb = new StringBuilder();
+			if (str !=null)
 			for (int i = 0; i < str.Length; i++)
 			{
 				Char ch = str[i];
