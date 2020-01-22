@@ -1976,29 +1976,36 @@ namespace IfcDoc
 
 		private void checkBoxViewXsdTagless_CheckedChanged(object sender, EventArgs e)
 		{
-			DocXsdFormat docFormat = (DocXsdFormat)this.listViewViewXsd.SelectedItems[0].Tag;
-			switch (this.checkBoxViewXsdTagless.CheckState)
-			{
-				case CheckState.Checked:
-					docFormat.XsdTagless = true;
-					break;
+			if (this.listViewViewXsd?.SelectedItems.Count > 0)
+			{ 
+				DocXsdFormat docFormat = (DocXsdFormat)this.listViewViewXsd.SelectedItems[0].Tag;
+				switch (this.checkBoxViewXsdTagless.CheckState)
+				{
+					case CheckState.Checked:
+						docFormat.XsdTagless = true;
+						break;
 
-				case CheckState.Unchecked:
-					docFormat.XsdTagless = false;
-					break;
+					case CheckState.Unchecked:
+						docFormat.XsdTagless = false;
+						break;
 
-				case CheckState.Indeterminate:
-					docFormat.XsdTagless = null;
-					break;
-			}
+					case CheckState.Indeterminate:
+						docFormat.XsdTagless = null;
+						break;
+				}
 
-			if (docFormat.XsdTagless != null)
-			{
-				this.listViewViewXsd.SelectedItems[0].SubItems[3].Text = docFormat.XsdTagless.ToString();
+				if (docFormat.XsdTagless != null)
+				{
+					this.listViewViewXsd.SelectedItems[0].SubItems[3].Text = docFormat.XsdTagless.ToString();
+				}
+				else
+				{
+					this.listViewViewXsd.SelectedItems[0].SubItems[3].Text = String.Empty;
+				}
 			}
 			else
 			{
-				this.listViewViewXsd.SelectedItems[0].SubItems[3].Text = String.Empty;
+				System.Diagnostics.Debug.WriteLine("Selection is empty");
 			}
 		}
 
