@@ -62,14 +62,15 @@ namespace IfcDoc
 				// schema could not be compiled according to definition
 			}
 
-			foreach (Type t in types)
-			{
-				// todo: make root type configurable with schema
-				if (t.Name.Equals("IfcProject"))
-					return t;
-			}
+			// todo: make root type configurable with schema
+			// added IfcProjektLibrary to the possible root type, if no IfcProject exists in the file, that shall be validated
+			Type type = types.Where(x => x.Name == nameof(BuildingSmart.IFC.IfcKernel.IfcProject)).FirstOrDefault();
+			if (type == null)
+				type = types.Where(x => x.Name == nameof(BuildingSmart.IFC.IfcKernel.IfcProjectLibrary)).FirstOrDefault();
 
-			return null; // no root type
+			if (type != null)
+				return type;
+			else return null; // no root type
 		}
 
 		public Compiler(DocProject project, DocModelView[] views, DocExchangeDefinition exchange, bool psets)
