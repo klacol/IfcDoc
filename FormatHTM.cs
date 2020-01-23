@@ -371,35 +371,35 @@ namespace IfcDoc.Format.HTM
 					}
 					else
 					{
-						if (this.m_stream is FileStream && ((FileStream)this.m_stream).Name.Contains("\\annex-a\\"))//EndsWith(".xsd.htm"))
+						if (this.m_stream is FileStream && ((FileStream)this.m_stream).Name.Contains("\\annex-a\\"))//EndsWith(".xsd.html"))
 						{
-							string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".htm";
+							string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".html";
 							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
 						}
 						else if (this.m_stream is FileStream && ((FileStream)this.m_stream).Name.Contains("\\schema\\templates\\"))
 						{
 							// hack to force relative directory
-							string hyperlink = @"../" + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".htm";
+							string hyperlink = @"../" + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".html";
 							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
 						}
 						else if (ent is DocPropertyEnumeration)
 						{
-							string hyperlink = urlprefix + @"/penum/" + definition.ToLower() + ".htm";
+							string hyperlink = urlprefix + @"/penum/" + definition.ToLower() + ".html";
 							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
 						}
 						else if (ent is DocPropertySet)
 						{
-							string hyperlink = urlprefix + schema.ToLower() + @"/pset/" + definition.ToLower() + ".htm";
+							string hyperlink = urlprefix + schema.ToLower() + @"/pset/" + definition.ToLower() + ".html";
 							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
 						}
 						else if (ent is DocQuantitySet)
 						{
-							string hyperlink = urlprefix + schema.ToLower() + @"/qset/" + definition.ToLower() + ".htm";
+							string hyperlink = urlprefix + schema.ToLower() + @"/qset/" + definition.ToLower() + ".html";
 							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
 						}
 						else //if (ent is DocDefinition)
 						{
-							string hyperlink = urlprefix + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".htm";
+							string hyperlink = urlprefix + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".html";
 							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
 						}
 					}
@@ -989,7 +989,7 @@ namespace IfcDoc.Format.HTM
 				this.m_writer.WriteLine(
 					"<p class=\"std\">" +
 					"<a href=\"../../../annex/annex-d/" + schema.ToLower() + "/diagram_" + diagramnumber.ToString("D4") +
-					".htm\" ><img src=\"../../../img/diagram.png\" style=\"border: 0px\" title=\"Link to EXPRESS-G diagram\" alt=\"Link to EXPRESS-G diagram\">&nbsp;EXPRESS-G diagram</a>" +
+					".html\" ><img src=\"../../../img/diagram.png\" style=\"border: 0px\" title=\"Link to EXPRESS-G diagram\" alt=\"Link to EXPRESS-G diagram\">&nbsp;EXPRESS-G diagram</a>" +
 					"</p>");
 			}
 		}
@@ -1297,15 +1297,15 @@ namespace IfcDoc.Format.HTM
 				string hyperlink = null;
 				if (entity is DocPropertySet)
 				{
-					hyperlink = @"../../../schema/" + schema.ToLower() + @"/pset/" + entity.Name.ToLower() + ".htm";
+					hyperlink = @"../../../schema/" + schema.ToLower() + @"/pset/" + entity.Name.ToLower() + ".html";
 				}
 				else if (entity is DocQuantitySet)
 				{
-					hyperlink = @"../../../schema/" + schema.ToLower() + @"/qset/" + entity.Name.ToLower() + ".htm";
+					hyperlink = @"../../../schema/" + schema.ToLower() + @"/qset/" + entity.Name.ToLower() + ".html";
 				}
 				else
 				{
-					hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".htm";
+					hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 				}
 				this.WriteLine("<li><a class=\"listing-link\" href=\"" + hyperlink + "\">" + key + "</a></li>\r\n");
 			}
@@ -1328,9 +1328,9 @@ namespace IfcDoc.Format.HTM
 
 			this.WriteFooter(docPublication.Footer);
 
-			using (FormatHTM htmLink = new FormatHTM(path + "/link/" + linkid + ".htm", this.m_mapEntity, this.m_mapSchema, this.m_included))
+			using (FormatHTM htmLink = new FormatHTM(path + "/link/" + linkid + ".htm.", this.m_mapEntity, this.m_mapSchema, this.m_included))
 			{
-				htmLink.WriteLinkPage("../annex/annex-b/" + locale.Substring(0, 2).ToLower() + "/alphabeticalorder_" + name + ".htm", docPublication);
+				htmLink.WriteLinkPage("../annex/annex-b/" + locale.Substring(0, 2).ToLower() + "/alphabeticalorder_" + name + ".html", docPublication);
 			}
 		}
 
@@ -1371,7 +1371,7 @@ namespace IfcDoc.Format.HTM
 				string hyperlink = null;
 				if (entity is DocPropertyEnumeration)
 				{
-					hyperlink = @"../../penum/" + entity.Name.ToLower() + ".htm";
+					hyperlink = @"../../penum/" + entity.Name.ToLower() + ".html";
 				}
 				else
 				{
@@ -1379,15 +1379,15 @@ namespace IfcDoc.Format.HTM
 
 					if (entity is DocPropertySet)
 					{
-						hyperlink = @"../../schema/" + schema.ToLower() + @"/pset/" + entity.Name.ToLower() + ".htm";
+						hyperlink = @"../../schema/" + schema.ToLower() + @"/pset/" + entity.Name.ToLower() + ".html";
 					}
 					else if (entity is DocQuantitySet)
 					{
-						hyperlink = @"../../schema/" + schema.ToLower() + @"/qset/" + entity.Name.ToLower() + ".htm";
+						hyperlink = @"../../schema/" + schema.ToLower() + @"/qset/" + entity.Name.ToLower() + ".html";
 					}
 					else
 					{
-						hyperlink = @"../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".htm";
+						hyperlink = @"../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 					}
 				}
 				this.WriteLine("<li><a class=\"listing-link\" href=\"" + hyperlink + "\">" + entity.Name + "</a></li>\r\n");
@@ -1399,9 +1399,9 @@ namespace IfcDoc.Format.HTM
 			this.WriteLinkTo(docPublication, linkid, 2);
 			this.WriteFooter(docPublication.Footer);
 
-			using (FormatHTM htmLink = new FormatHTM(path + "/link/" + linkid + ".htm", this.m_mapEntity, this.m_mapSchema, this.m_included))
+			using (FormatHTM htmLink = new FormatHTM(path + "/link/" + linkid + ".html", this.m_mapEntity, this.m_mapSchema, this.m_included))
 			{
-				htmLink.WriteLinkPage("../annex/annex-b/alphabeticalorder_" + name.ToLower() + ".htm", docPublication);
+				htmLink.WriteLinkPage("../annex/annex-b/alphabeticalorder_" + name.ToLower() + ".html", docPublication);
 			}
 		}
 
@@ -1449,7 +1449,7 @@ namespace IfcDoc.Format.HTM
 		{
 			bool isTemplateUsed = false;
 
-			string templateUrl = "../schema/templates/" + DocumentationISO.MakeLinkName(docTemplateDefinition) + ".htm";
+			string templateUrl = "../schema/templates/" + DocumentationISO.MakeLinkName(docTemplateDefinition) + ".html";
 			string templateAnchor = "<a href=\"" + templateUrl + "\">" + docTemplateDefinition.Name + "</a>";
 
 			StringBuilder sB = new StringBuilder();
@@ -1504,7 +1504,7 @@ namespace IfcDoc.Format.HTM
 				if (entity.BaseDefinition == baseclass)
 				{
 					string schema = this.m_mapSchema[entity.Name];
-					string hyperlink = @"../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".htm";
+					string hyperlink = @"../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 
 					this.Write("<tr><td>");
 
@@ -1585,9 +1585,9 @@ namespace IfcDoc.Format.HTM
 			this.WriteLinkTo(docPublication, linkid, 3);
 			this.WriteFooter(docPublication.Footer);
 
-			using (FormatHTM htmLink = new FormatHTM(path + "/link/" + linkid + ".htm", this.m_mapEntity, this.m_mapSchema, this.m_included))
+			using (FormatHTM htmLink = new FormatHTM(path + "/link/" + linkid + ".html", this.m_mapEntity, this.m_mapSchema, this.m_included))
 			{
-				htmLink.WriteLinkPage("../annex/annex-c/" + DocumentationISO.MakeLinkName(docView) + "/" + filename + ".htm", docPublication);
+				htmLink.WriteLinkPage("../annex/annex-c/" + DocumentationISO.MakeLinkName(docView) + "/" + filename + ".html", docPublication);
 			}
 		}
 
@@ -1598,7 +1598,7 @@ namespace IfcDoc.Format.HTM
 				if (entity.BaseDefinition == baseclass)
 				{
 					string schema = this.m_mapSchema[entity.Name];
-					string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".htm";
+					string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 
 					this.Write("<li><a class=\"listing-link\" href=\"" + hyperlink + "\">" + entity.Name + "</a>");
 
@@ -1607,7 +1607,7 @@ namespace IfcDoc.Format.HTM
 						DocEntity entType = this.m_mapEntity[entity.Name + "Type"] as DocEntity;
 						if (entType != null && list.Contains(entType))
 						{
-							this.Write(" - <a class=\"listing-link\" href=\"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + "type.htm\">" + entity.Name + "Type</a>");
+							this.Write(" - <a class=\"listing-link\" href=\"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + "type.html\">" + entity.Name + "Type</a>");
 						}
 					}
 
@@ -1665,7 +1665,7 @@ namespace IfcDoc.Format.HTM
 						string url = content.Substring(index, tail - index);
 						url = url.Replace("/psd/", "/");
 						url = url.Replace("/Pset_", "/pset/pset_");
-						url = url.Replace(".xml", ".htm");
+						url = url.Replace(".xml", ".html");
 						url = url.ToLower();
 
 						content = content.Substring(0, index) + url + content.Substring(tail);
@@ -1687,7 +1687,7 @@ namespace IfcDoc.Format.HTM
 						string url = content.Substring(index, tail - index);
 						url = url.Replace("/qto/", "/");
 						url = url.Replace("/Qto_", "/qset/qto_");
-						url = url.Replace(".xml", ".htm");
+						url = url.Replace(".xml", ".html");
 						url = url.ToLower();
 
 						content = content.Substring(0, index) + url + content.Substring(tail);
@@ -1779,7 +1779,7 @@ namespace IfcDoc.Format.HTM
 								if (def.StartsWith(prefix) && this.m_mapSchema.TryGetValue(def, out schema))
 								{
 									// only 1 level up
-									string hyperlink = schema.ToLower() + @"/lexical/" + def.ToLower() + ".htm";
+									string hyperlink = schema.ToLower() + @"/lexical/" + def.ToLower() + ".html";
 									if (!(current is DocSection))
 									{
 										hyperlink = "../" + hyperlink;
@@ -1789,7 +1789,7 @@ namespace IfcDoc.Format.HTM
 								}
 								else if (docDef is DocTemplateDefinition)
 								{
-									string hyperlink = def.ToLower().Replace(' ', '-') + ".htm";
+									string hyperlink = def.ToLower().Replace(' ', '-') + ".html";
 									if (current is DocSection)
 									{
 										hyperlink = "templates/" + hyperlink;
@@ -1808,7 +1808,7 @@ namespace IfcDoc.Format.HTM
 								string schema = null;
 								if (def.StartsWith(prefix) && this.m_mapSchema.TryGetValue(def, out schema))
 								{
-									string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + def.ToLower() + ".htm";
+									string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + def.ToLower() + ".html";
 									string format = "<a href=\"" + hyperlink + "\">" + def + "</a>";
 									content = content.Substring(0, index) + format + content.Substring(end + 4);
 								}
@@ -1818,7 +1818,7 @@ namespace IfcDoc.Format.HTM
 								string schema = null;
 								if (def.StartsWith(prefix) && this.m_mapSchema.TryGetValue(def, out schema))
 								{
-									string hyperlink = @"../../schema/" + schema.ToLower() + @"/lexical/" + def.ToLower() + ".htm";
+									string hyperlink = @"../../schema/" + schema.ToLower() + @"/lexical/" + def.ToLower() + ".html";
 									string format = "<a href=\"" + hyperlink + "\">" + def + "</a>";
 									content = content.Substring(0, index) + format + content.Substring(end + 4);
 								}
@@ -1988,7 +1988,7 @@ namespace IfcDoc.Format.HTM
 				"\r\n" +
 				"<script type=\"text/javascript\">\r\n" +
 				"<!--\r\n" +
-				"    parent.index.location.replace(\"" + path + "blank.htm\");\r\n" +
+				"    parent.index.location.replace(\"" + path + "blank.html\");\r\n" +
 				"//-->\r\n" +
 				"</script>\r\n");
 		}
@@ -2005,7 +2005,7 @@ namespace IfcDoc.Format.HTM
 						"\r\n" +
 						"<script type=\"text/javascript\">\r\n" +
 						"<!--\r\n" +
-						"    parent.index.location.replace(\"toc-" + chAnnex.ToString().ToLower() + ".htm\");\r\n" +
+						"    parent.index.location.replace(\"toc-" + chAnnex.ToString().ToLower() + ".html\");\r\n" +
 						"//-->\r\n" +
 						"</script>\r\n");
 				}
@@ -2016,7 +2016,7 @@ namespace IfcDoc.Format.HTM
 						"\r\n" +
 						"<script type=\"text/javascript\">\r\n" +
 						"<!--\r\n" +
-						"    parent.index.location.replace(\"../../toc-" + chAnnex.ToString().ToLower() + ".htm\");\r\n" +
+						"    parent.index.location.replace(\"../../toc-" + chAnnex.ToString().ToLower() + ".html\");\r\n" +
 						"//-->\r\n" +
 						"</script>\r\n");
 				}
@@ -2029,7 +2029,7 @@ namespace IfcDoc.Format.HTM
 							"\r\n" +
 							"<script type=\"text/javascript\">\r\n" +
 							"<!--\r\n" +
-							"    parent.index.location.replace(\"../../toc-" + chAnnex.ToString().ToLower() + ".htm#" + iSchema.ToString() + "\");\r\n" +
+							"    parent.index.location.replace(\"../../toc-" + chAnnex.ToString().ToLower() + ".html#" + iSchema.ToString() + "\");\r\n" +
 							"//-->\r\n" +
 							"</script>\r\n");
 					}
@@ -2052,7 +2052,7 @@ namespace IfcDoc.Format.HTM
 						"\r\n" +
 						"<script type=\"text/javascript\">\r\n" +
 						"<!--\r\n" +
-						"    parent.index.location.replace(\"../toc-" + chAnnex.ToString().ToLower() + ".htm\");\r\n" +
+						"    parent.index.location.replace(\"../toc-" + chAnnex.ToString().ToLower() + ".html\");\r\n" +
 						"//-->\r\n" +
 						"</script>\r\n");
 				}
@@ -2064,7 +2064,7 @@ namespace IfcDoc.Format.HTM
 					"\r\n" +
 					"<script type=\"text/javascript\">\r\n" +
 					"<!--\r\n" +
-					"    parent.index.location.replace(\"../../toc-1.htm#\");\r\n" +
+					"    parent.index.location.replace(\"../../toc-1.html#\");\r\n" +
 					"//-->\r\n" +
 					"</script>\r\n");
 			}
@@ -2075,7 +2075,7 @@ namespace IfcDoc.Format.HTM
 					"\r\n" +
 					"<script type=\"text/javascript\">\r\n" +
 					"<!--\r\n" +
-					"    parent.index.location.replace(\"toc-" + iSection.ToString() + ".htm#\");\r\n" +
+					"    parent.index.location.replace(\"toc-" + iSection.ToString() + ".html#\");\r\n" +
 					"//-->\r\n" +
 					"</script>\r\n");
 			}
@@ -2092,7 +2092,7 @@ namespace IfcDoc.Format.HTM
 					"\r\n" +
 					"<script type=\"text/javascript\">\r\n" +
 					"<!--\r\n" +
-					"    parent.index.location.replace(\"" + linkprefix + "../toc-" + iSection.ToString() + ".htm#" + iSection.ToString() + "." + iSchema.ToString() + "." + iType.ToString() + "." + iItem.ToString() + "\");\r\n" +
+					"    parent.index.location.replace(\"" + linkprefix + "../toc-" + iSection.ToString() + ".html#" + iSection.ToString() + "." + iSchema.ToString() + "." + iType.ToString() + "." + iItem.ToString() + "\");\r\n" +
 					"//-->\r\n" +
 					"</script>\r\n");
 			}
@@ -2103,7 +2103,7 @@ namespace IfcDoc.Format.HTM
 					"\r\n" +
 					"<script type=\"text/javascript\">\r\n" +
 					"<!--\r\n" +
-					"    parent.index.location.replace(\"" + linkprefix + "../toc-" + iSection.ToString() + ".htm#" + iSection.ToString() + "." + iSchema.ToString() + "\");\r\n" +
+					"    parent.index.location.replace(\"" + linkprefix + "../toc-" + iSection.ToString() + ".html#" + iSection.ToString() + "." + iSchema.ToString() + "\");\r\n" +
 					"//-->\r\n" +
 					"</script>\r\n");
 			}
@@ -2119,20 +2119,20 @@ namespace IfcDoc.Format.HTM
 				string link = "";
 				if (target is DocTemplateDefinition)
 				{
-					link = "schema/templates/" + DocumentationISO.MakeLinkName(target) + ".htm";
+					link = "schema/templates/" + DocumentationISO.MakeLinkName(target) + ".html";
 				}
 				else if (target is DocEntity || target is DocType)
 				{
 					string schema = this.m_mapSchema[target.Name];
-					link = "schema/" + schema.ToLower() + "/lexical/" + DocumentationISO.MakeLinkName(target) + ".htm";
+					link = "schema/" + schema.ToLower() + "/lexical/" + DocumentationISO.MakeLinkName(target) + ".html";
 				}
 				else if (target is DocSchema)
 				{
-					link = "schema/" + target.Name.ToLower() + "/content.htm";
+					link = "schema/" + target.Name.ToLower() + "/content.html";
 				}
 				else if (target is DocExample)
 				{
-					link = "annex/annex-e/" + DocumentationISO.MakeLinkName(target) + ".htm";
+					link = "annex/annex-e/" + DocumentationISO.MakeLinkName(target) + ".html";
 				}
 
 				this.m_writer.WriteLine("<a class=\"listing-link\" href=\"" + link + "\">" + prefix + " " + (iFigure + 1).ToString() + " &mdash; " + figurename + "</a><br />");
@@ -2176,17 +2176,17 @@ namespace IfcDoc.Format.HTM
 				{
 					if (docChange.Name.StartsWith("Pset_") || docChange.Name.StartsWith("PEnum_"))
 					{
-						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/pset/" + docChange.Name.ToLower() + ".htm";
+						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/pset/" + docChange.Name.ToLower() + ".html";
 						sb.Append("<a href=\"" + hyperlink + "\">" + docChange.Name + "</a>");
 					}
 					else if (docChange.Name.StartsWith("Qto_"))
 					{
-						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/qset/" + docChange.Name.ToLower() + ".htm";
+						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/qset/" + docChange.Name.ToLower() + ".html";
 						sb.Append("<a href=\"" + hyperlink + "\">" + docChange.Name + "</a>");
 					}
 					else
 					{
-						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + docChange.Name.ToLower() + ".htm";
+						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + docChange.Name.ToLower() + ".html";
 						sb.Append("<a href=\"" + hyperlink + "\">" + docChange.Name + "</a>");
 					}
 				}
@@ -2283,7 +2283,7 @@ namespace IfcDoc.Format.HTM
 				{
 					iTemplateDef++;
 
-					string rellink = DocumentationISO.MakeLinkName(docTemplateDef) + ".htm";
+					string rellink = DocumentationISO.MakeLinkName(docTemplateDef) + ".html";
 					htmTOC.WriteTOC(level, "<a href=\"schema/templates/" + rellink + "\">" + prefix + "." + iTemplateDef.ToString() + " " + docTemplateDef.Name + "</a>");
 
 					if (level == 1)
@@ -2511,7 +2511,7 @@ namespace IfcDoc.Format.HTM
 				{
 					this.WriteLine("/");
 
-					this.Write(" <a href=\"../../../penum/" + docprop.Enumeration.Name.ToLower() + ".htm\">" + docprop.Enumeration.Name + "</a>");
+					this.Write(" <a href=\"../../../penum/" + docprop.Enumeration.Name.ToLower() + ".html\">" + docprop.Enumeration.Name + "</a>");
 				}
 				else if (!String.IsNullOrEmpty(docprop.SecondaryDataType))
 				{
@@ -2694,12 +2694,12 @@ namespace IfcDoc.Format.HTM
 				up += "../";
 			}
 
-			if (docPublication.ReportIssues)
+			if (true) //(docPublication.ReportIssues)
 			{
-				this.WriteLine("<p><a href=\"http://jira.buildingsmart.org/issues/?jql=project%20%3D%20IFR%20AND%20text%20~%20%22" + identifier + "%22\" target=\"_blank\" ><img src=\"" + up + "img/external.png\" style=\"border: 0px\" title=\"Report issue\" alt=\"Report issue\"/>&nbsp; Report an issue</a></p>");
+				this.WriteLine("<p><a href=\"https://github.com/buildingSMART/IFC/issues" + identifier + "%22\" target=\"_blank\" ><img src=\"" + up + "img/external.png\" style=\"border: 0px\" title=\"Report issue\" alt=\"Report issue\"/>&nbsp; Report an issue</a></p>");
 			}
 
-			this.WriteLine("<p><a href=\"" + up + "link/" + identifier + ".htm\" target=\"_top\" ><img src=\"" + up + "img/permlink.png\" style=\"border: 0px\" title=\"Link to this page\" alt=\"Link to this page\"/>&nbsp; Link to this page</a></p>");
+			this.WriteLine("<p><a href=\"" + up + "link/" + identifier + ".html\" target=\"_blank\" ><img src=\"" + up + "img/permlink.png\" style=\"border: 0px\" title=\"Link to this page\" alt=\"Link to this page\"/>&nbsp; Link to this page</a></p>");
 		}
 
 		internal void WriteViewIcons(DocDefinition type, DocProject docProject, Dictionary<DocObject, bool>[] dictionaryViews, string path)
@@ -2715,7 +2715,7 @@ namespace IfcDoc.Format.HTM
 						DocModelView docViewMap = docProject.ModelViews[iMapView];
 						if (docViewMap.Icon != null)
 						{
-							this.WriteLine("<a href=\"../../views/" + DocumentationISO.MakeLinkName(docViewMap) + "/index.htm\" ><img src=\"../../../img/view-" + DocumentationISO.MakeLinkName(docViewMap) + ".png\" title=\"" + docViewMap.Name + "\"/></a>");
+							this.WriteLine("<a href=\"../../views/" + DocumentationISO.MakeLinkName(docViewMap) + "/index.html\" ><img src=\"../../../img/view-" + DocumentationISO.MakeLinkName(docViewMap) + ".png\" title=\"" + docViewMap.Name + "\"/></a>");
 						}
 					}
 				}
@@ -2744,9 +2744,9 @@ namespace IfcDoc.Format.HTM
 			"</head>" +
 
 			"<frameset rows=\"110px,*\">" +
-			"    <frame src=\"../content.htm\" name=\"menu\" frameborder=\"0\">" +
+			"    <frame src=\"../content.html\" name=\"menu\" frameborder=\"0\">" +
 			"	<frameset cols=\"15%,*\">" +
-			"		<frame src=\"../blank.htm\" name=\"index\" frameborder=\"0\">" +
+			"		<frame src=\"../blank.html\" name=\"index\" frameborder=\"0\">" +
 			"		<frame src=\"" + linkurl + "\" name=\"info\" frameborder=\"0\">" +
 			"	</frameset>" +
 			"	<noframes>" +
@@ -2831,7 +2831,7 @@ namespace IfcDoc.Format.HTM
                                 "<tr>" +
                                 "<td>" + desc + "</td>" +
                                 "<td><a href=\"" + linkprefix + "." + ext + "\" target=\"_blank\">" + code + "." + ext + "</a></td>" +
-                                "<td><a href=\"" + linkprefix + "." + ext + ".htm\" >" + code + "." + ext + ".htm</a></td>" +
+                                "<td><a href=\"" + linkprefix + "." + ext + ".html\" >" + code + "." + ext + ".htm</a></td>" +
                                 "</tr>");
                         }
                     }
@@ -2949,7 +2949,7 @@ namespace IfcDoc.Format.HTM
 				for (int iDiagram = 1; iDiagram <= iLastDiagram; iDiagram++)
 				{
 					string formatnumber = iDiagram.ToString("D4"); // 0001
-					this.WriteLine("<a href=\"" + docSchema.Name.ToLower() + "/diagram_" + formatnumber + ".htm\">" +
+					this.WriteLine("<a href=\"" + docSchema.Name.ToLower() + "/diagram_" + formatnumber + ".html\">" +
 						"<img src=\"" + docSchema.Name.ToLower() + "/small_diagram_" + formatnumber + ".png\" width=\"100\" height=\"148\" /></a>"); // width=\"150\" height=\"222\"> 
 				}
 
@@ -3485,7 +3485,7 @@ namespace IfcDoc.Format.HTM
 
 				foreach (DocChangeSet docChangeSet in mapChange.Keys)
 				{
-					this.WriteLine("<td colspan=5><b><a href=\"../../../annex/annex-f/" + DocumentationISO.MakeLinkName(docChangeSet) + "/index.htm\">" + docChangeSet.Name + "</a></b></td>");
+					this.WriteLine("<td colspan=5><b><a href=\"../../../annex/annex-f/" + DocumentationISO.MakeLinkName(docChangeSet) + "/index.html\">" + docChangeSet.Name + "</a></b></td>");
 					DocChangeAction docChangeAction = mapChange[docChangeSet];
 					this.WriteChangeItem(docChangeAction, 2);
 				}

@@ -5926,7 +5926,7 @@ namespace IfcDoc
 
 			if (Properties.Settings.Default.ValidateReport)
 			{
-				string path = Properties.Settings.Default.ValidateFile + ".htm";
+				string path = Properties.Settings.Default.ValidateFile + ".html";
 				using (System.IO.FileStream fs = new System.IO.FileStream(path, System.IO.FileMode.Create))
 				{
 					using (System.IO.StreamWriter writer = new System.IO.StreamWriter(fs))
