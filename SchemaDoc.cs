@@ -597,7 +597,7 @@ namespace IfcDoc.Schema.DOC
 		[DataMember(Order = 9)] [XmlAttribute] public bool Comparison { get; set; } // IfcDoc 9.9: compare mappings between tabular exchanges, e.g. GSA
 		[DataMember(Order = 10)] [XmlAttribute] public bool Exchanges { get; set; } // IfcDoc 9.9: show exchange tables
 		[DataMember(Order = 11)] [XmlAttribute] public bool HtmlExamples { get; set; } // IfcDoc 10.7: include examples with HTML markup
-		[DataMember(Order = 12)] [XmlAttribute] public bool ReportIssues { get; set; } // IfcDoc 11.5: link to Jira database specific to each page
+		[DataMember(Order = 12)] [XmlAttribute] public bool ReportIssues { get; set; } // IfcDoc 11.5: link to Github specific to each page
 
 		// unserialized
 		private List<string> m_errorlog; // list of filenames missing for images

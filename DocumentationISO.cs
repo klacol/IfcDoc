@@ -5000,7 +5000,7 @@ namespace IfcDoc
                         </script>
                         <div style=""margin-top: 50px; align: center"">
                           <p>&nbsp;</p>
-                          <table style=""margin-left: auto; margin-right: auto; background-repeat: no-repeat; background-image: url(img/concerthall.png); width: 740px; padding: 20px"">
+                          <table style=""margin-left: auto; margin-right: auto; background-repeat: no-repeat; background-image: url(Figures/CoverPhoto.png); width: 740px; padding: 20px"">
                             <tbody><tr style=""height: 90px"">
                               <td>&nbsp;</td>
                             </tr>
@@ -5009,10 +5009,10 @@ namespace IfcDoc
                             </tr>
                             <tr style=""height: 320px"">
                               <td style=""vertical-align: top"">
-                                <p style=""text-align:left;"">
-                                  <span style=""font-family:Arial, Verdana, Tahoma, sans-serif; font-size:xx-large; color:#FFFFFF; "">
+                                <p style=""text-align:left;line-height: 1.8;"" >
+                                  <span style=""font-family:Arial, Verdana, Tahoma, sans-serif; font-size:xx-large; color:#17569e; "">
                                     <b>{docPublication.Name}</b></span><br><br><br>
-                                  <span style=""font-family:Arial, Verdana, Tahoma, sans-serif; font-size:x-large; color:#FFFFFF; "">
+                                  <span style=""font-family:Arial, Verdana, Tahoma, sans-serif; font-size:x-large; color:#17569e; "">
                                     <b>Version {docPublication.Version}</b></span> 
                                 </p>
                               </td>

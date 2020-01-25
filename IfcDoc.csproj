@@ -135,36 +135,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\ifc-styles.css" />
-    <Content Include="Content\img\attr-excluded.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\attr-mandatory.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\attr-notrelevant.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\attr-optional.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\background.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\buildingSMART_logo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\buildingSMART_standards_triangle.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\concerthall.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Content\img\attr-excluded.png" />
+    <Content Include="Content\img\attr-mandatory.png" />
     <Content Include="Content\img\copyright_logo_bw.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\img\copyright_logo_color.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\img\CoverPhoto.png" />
     <Content Include="Content\img\diagram.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -745,14 +724,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="content\favicon.ico" />
-    <Content Include="content\img\attr-excluded.png" />
-    <Content Include="content\img\attr-mandatory.png" />
     <Content Include="content\img\attr-notrelevant.png" />
     <Content Include="content\img\attr-optional.png" />
     <Content Include="content\img\background.gif" />
     <Content Include="content\img\buildingSMART_logo.png" />
     <Content Include="content\img\buildingSMART_standards_triangle.png" />
-    <Content Include="content\img\concerthall.png" />
     <Content Include="content\img\copyright_logo_bw.gif" />
     <Content Include="content\img\copyright_logo_color.gif" />
     <Content Include="content\img\diagram.png" />

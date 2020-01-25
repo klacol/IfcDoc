@@ -574,7 +574,7 @@ namespace IfcDoc
 					this.checkBoxPublishHideHistory.Checked = docPublication.HideHistory;
 					this.checkBoxPublishISO.Checked = docPublication.ISO;
 					this.checkBoxPublishUML.Checked = docPublication.UML;
-					this.checkBoxPublishBSI.Checked = docPublication.ReportIssues;
+					this.checkBoxEnableIssueCreation.Checked = docPublication.ReportIssues;
 					this.checkBoxPublishExchangeTables.Checked = docPublication.Exchanges;
 					this.checkBoxPublishHtmlExamples.Checked = docPublication.HtmlExamples;
 
@@ -2954,10 +2954,10 @@ namespace IfcDoc
 			}
 		}
 
-		private void checkBoxPublishBSI_CheckedChanged(object sender, EventArgs e)
+		private void checkBoxEnableIssueCreation_CheckedChanged(object sender, EventArgs e)
 		{
 			DocPublication docPub = (DocPublication)this.m_target;
-			docPub.ReportIssues = this.checkBoxPublishBSI.Checked;
+			docPub.ReportIssues = this.checkBoxEnableIssueCreation.Checked;
 		}
 
 		private void toolStripButtonRootEntity_Click(object sender, EventArgs e)

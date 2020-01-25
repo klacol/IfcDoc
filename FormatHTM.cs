@@ -2694,9 +2694,9 @@ namespace IfcDoc.Format.HTM
 				up += "../";
 			}
 
-			if (true) //(docPublication.ReportIssues)
+			if (docPublication.ReportIssues) //(docPublication.ReportIssues)
 			{
-				this.WriteLine("<p><a href=\"https://github.com/buildingSMART/IFC/issues" + identifier + "%22\" target=\"_blank\" ><img src=\"" + up + "img/external.png\" style=\"border: 0px\" title=\"Report issue\" alt=\"Report issue\"/>&nbsp; Report an issue</a></p>");
+				this.WriteLine("<p><a href=\"https://github.com/buildingSMART/ProductData/issues/new?&title=" + identifier + ":"+"%22\" target=\"_blank\" ><img src=\"" + up + "img/external.png\" style=\"border: 0px\" title=\"Report issue\" alt=\"Report issue\"/>&nbsp; Report an issue</a></p>");
 			}
 
 			this.WriteLine("<p><a href=\"" + up + "link/" + identifier + ".html\" target=\"_blank\" ><img src=\"" + up + "img/permlink.png\" style=\"border: 0px\" title=\"Link to this page\" alt=\"Link to this page\"/>&nbsp; Link to this page</a></p>");

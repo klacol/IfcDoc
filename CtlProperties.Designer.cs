@@ -220,7 +220,7 @@
             this.toolStripButtonViewInsert = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonViewRemove = new System.Windows.Forms.ToolStripButton();
             this.tabPagePublication = new System.Windows.Forms.TabPage();
-            this.checkBoxPublishBSI = new System.Windows.Forms.CheckBox();
+            this.checkBoxEnableIssueCreation = new System.Windows.Forms.CheckBox();
             this.textBoxPublicationNote = new System.Windows.Forms.TextBox();
             this.checkBoxPublishHtmlExamples = new System.Windows.Forms.CheckBox();
             this.checkBoxPublishExchangeTables = new System.Windows.Forms.CheckBox();
@@ -1989,7 +1989,7 @@
             // 
             // tabPagePublication
             // 
-            this.tabPagePublication.Controls.Add(this.checkBoxPublishBSI);
+            this.tabPagePublication.Controls.Add(this.checkBoxEnableIssueCreation);
             this.tabPagePublication.Controls.Add(this.textBoxPublicationNote);
             this.tabPagePublication.Controls.Add(this.checkBoxPublishHtmlExamples);
             this.tabPagePublication.Controls.Add(this.checkBoxPublishExchangeTables);
@@ -2004,12 +2004,12 @@
             this.tabPagePublication.Name = "tabPagePublication";
             this.tabPagePublication.UseVisualStyleBackColor = true;
             // 
-            // checkBoxPublishBSI
+            // checkBoxEnableIssueCreation
             // 
-            resources.ApplyResources(this.checkBoxPublishBSI, "checkBoxPublishBSI");
-            this.checkBoxPublishBSI.Name = "checkBoxPublishBSI";
-            this.checkBoxPublishBSI.UseVisualStyleBackColor = true;
-            this.checkBoxPublishBSI.CheckedChanged += new System.EventHandler(this.checkBoxPublishBSI_CheckedChanged);
+            resources.ApplyResources(this.checkBoxEnableIssueCreation, "checkBoxEnableIssueCreation");
+            this.checkBoxEnableIssueCreation.Name = "checkBoxEnableIssueCreation";
+            this.checkBoxEnableIssueCreation.UseVisualStyleBackColor = true;
+            this.checkBoxEnableIssueCreation.CheckedChanged += new System.EventHandler(this.checkBoxEnableIssueCreation_CheckedChanged);
             // 
             // textBoxPublicationNote
             // 
@@ -2724,7 +2724,7 @@
 		private System.Windows.Forms.ComboBox comboBoxProcessInput;
 		private System.Windows.Forms.Label label30;
 		private System.Windows.Forms.ComboBox comboBoxProcessClassification;
-		private System.Windows.Forms.CheckBox checkBoxPublishBSI;
+		private System.Windows.Forms.CheckBox checkBoxEnableIssueCreation;
 		private System.Windows.Forms.ToolStripButton toolStripButtonRootEntity;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		private System.Windows.Forms.ColumnHeader columnHeaderURL;
