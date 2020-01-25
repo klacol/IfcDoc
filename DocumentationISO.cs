@@ -4744,6 +4744,10 @@ namespace IfcDoc
 				}
 			}
 
+
+			// copy over folder figures from MVD folder
+			CopyFiles(Properties.Settings.Default.InputPathGeneral, System.IO.Path.Combine(path, "Figures"), overrideExisting: true);
+
 			// copy over static content * if it doesn't already exist *
 			string pathContent = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			if (pathContent.EndsWith(@"bin\x86\Debug") || pathContent.EndsWith(@"bin\x64\Debug")) // debugging
