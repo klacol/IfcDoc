@@ -943,9 +943,12 @@ namespace IfcDoc
 
 		private void toolStripMenuItemModeInherit_Click(object sender, EventArgs e)
 		{
-			this.m_conceptleaf.Override = false;
-			this.m_conceptleaf.Suppress = false;
-			this.UpdateInheritance();
+			if (this.ConceptLeaf != null)
+			{ 
+				this.m_conceptleaf.Override = false;
+				this.m_conceptleaf.Suppress = false;
+				this.UpdateInheritance();
+			}
 		}
 
 		private void toolStripMenuItemModeOverride_Click(object sender, EventArgs e)

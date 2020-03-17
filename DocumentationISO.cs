@@ -1290,7 +1290,6 @@ namespace IfcDoc
 
 				sb.AppendLine("</table>");
 			}
-
 			return sb.ToString();
 		}
 
@@ -1430,11 +1429,29 @@ namespace IfcDoc
 						DocExchangeDefinition docExchange = docView.Exchanges[iExchange];
 						foreach (DocExchangeItem docExchangeItem in docUsage.Exchanges)
 						{
-							if (docExchangeItem.Exchange == docExchange &&
-								(docExchangeItem.Requirement == DocExchangeRequirementEnum.Mandatory || docExchangeItem.Requirement == DocExchangeRequirementEnum.Optional))
+							if (docExchangeItem.Exchange == docExchange)
 							{
-								sb.Append("<img width=\"16\" src=\"../../../img/attr-mandatory.png\" title=\"\" />");
-								break;
+								string iconFileName = string.Empty;	
+								switch (docExchangeItem.Requirement)
+								{
+									case DocExchangeRequirementEnum.Mandatory:
+										iconFileName = "attr-mandatory.png";
+										break;
+									case DocExchangeRequirementEnum.Optional:
+										iconFileName = "attr-optional.png";
+										break;
+									case DocExchangeRequirementEnum.Excluded:
+										iconFileName = "attr-excluded.png";
+										break;
+									case DocExchangeRequirementEnum.NotRecommended:
+										iconFileName = "attr-notrelevant.png";
+										break;
+									case DocExchangeRequirementEnum.NotRelevant:
+										iconFileName = "attr-notrelevant.png";
+										break;
+								}
+								if (iconFileName != string.Empty)
+									sb.Append($"<img width=\"16\" src=\"../../../img/{iconFileName}\" title=\"{docExchangeItem.Requirement.ToString()}\" />");
 							}
 						}
 						sb.Append("</td>");
@@ -2964,7 +2981,7 @@ namespace IfcDoc
 								desc = valpath.ToString().Replace("\\", "&#10;");
 							}
 
-							sb.Append("<th title=\"" + desc + "\">");//<a href=\"../../schema/views/" + DocumentationISO.MakeLinkName(docView) + "/" + DocumentationISO.MakeLinkName(docExchange) + ".htm#" + DocumentationISO.MakeLinkName(docConcept) + "\" title=\"" + desc + "\">");
+							sb.Append("<th title=\"" + desc + "\">");//<a href=\"../../schema/views/" + DocumentationISO.MakeLinkName(docView) + "/" + DocumentationISO.MakeLinkName(docExchange) + ".html#" + DocumentationISO.MakeLinkName(docConcept) + "\" title=\"" + desc + "\">");
 							sb.Append(name);
 							sb.Append("</th>");
 						};
@@ -3356,7 +3373,7 @@ namespace IfcDoc
                                         desc = valpath.ToString().Replace("\\", "&#10;");
                                     }
 
-                                    sb.Append("<th title=\"" + desc + "\">");//<a href=\"../../schema/views/" + DocumentationISO.MakeLinkName(docView) + "/" + DocumentationISO.MakeLinkName(docExchange) + ".htm#" + DocumentationISO.MakeLinkName(docConcept) + "\" title=\"" + desc + "\">");
+                                    sb.Append("<th title=\"" + desc + "\">");//<a href=\"../../schema/views/" + DocumentationISO.MakeLinkName(docView) + "/" + DocumentationISO.MakeLinkName(docExchange) + ".html#" + DocumentationISO.MakeLinkName(docConcept) + "\" title=\"" + desc + "\">");
                                     sb.Append(name);
                                     sb.Append("</th>");
                                 };
@@ -4023,7 +4040,7 @@ namespace IfcDoc
 
 											sbSuper.Append("<a href=\"../../");
 											sbSuper.Append(schema);
-											sbSuper.Append("/lexical/" + MakeLinkName(docSuper) + ".htm#" + templateid + "\">");
+											sbSuper.Append("/lexical/" + MakeLinkName(docSuper) + ".html#" + templateid + "\">");
 											if (suppress || overiden)
 											{
 												sbSuper.Append("<del>");
@@ -4746,7 +4763,9 @@ namespace IfcDoc
 
 
 			// copy over folder figures from MVD folder
-			CopyFiles(Properties.Settings.Default.InputPathGeneral, System.IO.Path.Combine(path, "Figures"), overrideExisting: true);
+			string nameFiguresSubFolder = "figures"; //GitHub-Pages are cases sentitive, figures ist now lowercase.
+			System.IO.Directory.CreateDirectory(System.IO.Path.Combine(path, nameFiguresSubFolder));
+			CopyFiles(Properties.Settings.Default.InputPathGeneral, System.IO.Path.Combine(path, nameFiguresSubFolder), overrideExisting: true);
 
 			// copy over static content * if it doesn't already exist *
 			string pathContent = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -5004,7 +5023,7 @@ namespace IfcDoc
                         </script>
                         <div style=""margin-top: 50px; align: center"">
                           <p>&nbsp;</p>
-                          <table style=""margin-left: auto; margin-right: auto; background-repeat: no-repeat; background-image: url(Figures/CoverPhoto.png); width: 740px; padding: 20px"">
+                          <table style=""margin-left: auto; margin-right: auto; background-repeat: no-repeat; background-image: url(figures/CoverPhoto.png); width: 740px; padding: 20px"">
                             <tbody><tr style=""height: 90px"">
                               <td>&nbsp;</td>
                             </tr>

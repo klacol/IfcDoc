@@ -92,6 +92,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Content\favicon.ico" />
+    <Content Include="Content\ifc-styles.css" />
+    <Content Include="Content\index.html" />
     <Reference Include="HtmlAgilityPack, Version=1.11.12.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>packages\HtmlAgilityPack.1.11.12\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
@@ -108,96 +111,40 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
-    <Content Include="Content\blank.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\copyright.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\credits.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\details-shim.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Content\blank.html" />
+    <Content Include="Content\copyright.html" />
+    <Content Include="Content\credits.html" />
     <Content Include="Content\details-shim.css" />
-    <Content Include="Content\details-shim.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Content\details-shim.css" />
     <Content Include="Content\details-shim.js" />
-    <Content Include="Content\favicon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\frame.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\ifc-styles.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\ifc-styles.css" />
+    <Content Include="Content\details-shim.js" />
+    <Content Include="Content\frame.html" />
     <Content Include="Content\img\attr-excluded.png" />
     <Content Include="Content\img\attr-mandatory.png" />
-    <Content Include="Content\img\copyright_logo_bw.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\copyright_logo_color.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Content\img\attr-notrelevant.png" />
+    <Content Include="Content\img\attr-optional.png" />
+    <Content Include="Content\img\background.gif" />
+    <Content Include="Content\img\buildingSMART_logo.png" />
+    <Content Include="Content\img\buildingSMART_standards_triangle.png" />
+    <Content Include="Content\img\copyright_logo_bw.gif" />
+    <Content Include="Content\img\copyright_logo_color.gif" />
     <Content Include="Content\img\CoverPhoto.png" />
-    <Content Include="Content\img\diagram.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\doclink.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\expg.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\external.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\IFC4_layered_architecture.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\layout_icon.gif">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\locale-de.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\locale-en.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\locale-fr.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\locale-ja.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\locale-ko.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\locale-zh.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\navleft.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\navright.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\permlink.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\source_background.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\img\Thumbs.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Content\img\diagram.png" />
+    <Content Include="Content\img\doclink.png" />
+    <Content Include="Content\img\expg.gif" />
+    <Content Include="Content\img\external.png" />
+    <Content Include="Content\img\IFC4_layered_architecture.png" />
+    <Content Include="Content\img\layout_icon.gif" />
+    <Content Include="Content\img\locale-de.png" />
+    <Content Include="Content\img\locale-en.png" />
+    <Content Include="Content\img\locale-fr.png" />
+    <Content Include="Content\img\locale-ja.png" />
+    <Content Include="Content\img\locale-ko.png" />
+    <Content Include="Content\img\locale-zh.png" />
+    <Content Include="Content\img\navleft.png" />
+    <Content Include="Content\img\navright.png" />
+    <Content Include="Content\img\permlink.png" />
+    <Content Include="Content\img\source_background.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeLogGenerator.cs" />
@@ -635,7 +582,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="content\img\Thumbs.db" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -721,32 +667,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\toolStripMenuItemInsertQuantity.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="content\favicon.ico" />
-    <Content Include="content\img\attr-notrelevant.png" />
-    <Content Include="content\img\attr-optional.png" />
-    <Content Include="content\img\background.gif" />
-    <Content Include="content\img\buildingSMART_logo.png" />
-    <Content Include="content\img\buildingSMART_standards_triangle.png" />
-    <Content Include="content\img\copyright_logo_bw.gif" />
-    <Content Include="content\img\copyright_logo_color.gif" />
-    <Content Include="content\img\diagram.png" />
-    <Content Include="content\img\doclink.png" />
-    <Content Include="content\img\expg.gif" />
-    <Content Include="content\img\external.png" />
-    <Content Include="content\img\IFC4_layered_architecture.png" />
-    <Content Include="content\img\layout_icon.gif" />
-    <Content Include="content\img\locale-de.png" />
-    <Content Include="content\img\locale-en.png" />
-    <Content Include="content\img\locale-fr.png" />
-    <Content Include="content\img\locale-ja.png" />
-    <Content Include="content\img\locale-ko.png" />
-    <Content Include="content\img\locale-zh.png" />
-    <Content Include="content\img\navleft.png" />
-    <Content Include="content\img\navright.png" />
-    <Content Include="content\img\permlink.png" />
-    <Content Include="content\img\source_background.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

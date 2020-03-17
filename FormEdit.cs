@@ -4608,16 +4608,23 @@ namespace IfcDoc
 
 		private void toolStripMenuItemInsertPropertyset_Click(object sender, EventArgs e)
 		{
-			TreeNode tn = this.treeView.SelectedNode;
-			if (tn.Parent.Tag is DocSchema)
-			{
-				tn = tn.Parent;
+			try
+			{ 
+				TreeNode tn = this.treeView.SelectedNode;
+				if (tn.Parent?.Tag is DocSchema)
+				{
+					tn = tn.Parent;
+				}
+				DocSchema docSchema = (DocSchema)tn.Tag;
+				DocPropertySet docPset = new DocPropertySet();
+				docSchema.PropertySets.Add(docPset);
+				this.treeView.SelectedNode = this.LoadNode(tn.Nodes[4], docPset, docPset.Name, true);
+				this.toolStripMenuItemEditRename_Click(sender, e);
 			}
-			DocSchema docSchema = (DocSchema)tn.Tag;
-			DocPropertySet docPset = new DocPropertySet();
-			docSchema.PropertySets.Add(docPset);
-			this.treeView.SelectedNode = this.LoadNode(tn.Nodes[4], docPset, docPset.Name, true);
-			this.toolStripMenuItemEditRename_Click(sender, e);
+			catch (Exception ex)
+			{
+
+			}
 		}
 
 		private void ToolStripMenuItemInsertProperty_Click(object sender, EventArgs e)

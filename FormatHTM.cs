@@ -2040,7 +2040,7 @@ namespace IfcDoc.Format.HTM
 							"\r\n" +
 							"<script type=\"text/javascript\">\r\n" +
 							"<!--\r\n" +
-							"    parent.index.location.replace(\"../toc-" + chAnnex.ToString().ToLower() + ".htm#" + iSchema.ToString() + "\");\r\n" +
+							"    parent.index.location.replace(\"../toc-" + chAnnex.ToString().ToLower() + ".html#" + iSchema.ToString() + "\");\r\n" +
 							"//-->\r\n" +
 							"</script>\r\n");
 					}

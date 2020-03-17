@@ -572,7 +572,7 @@ namespace IfcDoc
 
 		private void toolStripButtonTemplateRemove_Click(object sender, EventArgs e)
 		{
-			if (this.treeViewTemplate.SelectedNode.Tag is DocTemplateDefinition)
+			if (this.treeViewTemplate?.SelectedNode?.Tag is DocTemplateDefinition)
 			{
 				DocTemplateDefinition dtd = (DocTemplateDefinition)this.treeViewTemplate.SelectedNode.Tag;
 				if (treeViewTemplate.SelectedNode.Parent != null)

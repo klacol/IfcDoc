@@ -599,7 +599,8 @@ namespace IfcDoc
 				valpath.Property != null &&
 				valpath.Property.Name.Equals("HasAssignments") &&
 				valpath.InnerPath != null && valpath.InnerPath.Type.Name.Equals("IfcRelAssignsToControl") &&
-				valpath.InnerPath.InnerPath != null && valpath.InnerPath.InnerPath.Type.Name.Equals("IfcPerformanceHistory"))
+				valpath.InnerPath.InnerPath != null && valpath.InnerPath.InnerPath.Type.Name.Equals("IfcPerformanceHistory") &&
+				valpath.Identifier != null)
 			{
 				DocObject docPset = null;
 				if (mapEntity.TryGetValue(valpath.InnerPath.InnerPath.Identifier, out docPset))
@@ -625,7 +626,8 @@ namespace IfcDoc
 			else if (valpath != null &&
 				valpath.Property != null &&
 				valpath.Property.Name.Equals("HasPropertySets") &&
-				valpath.InnerPath != null && valpath.InnerPath.Type.Name.Equals("IfcPropertySet") && !string.IsNullOrEmpty(valpath.Identifier))
+				valpath.InnerPath != null && valpath.InnerPath.Type.Name.Equals("IfcPropertySet") && !string.IsNullOrEmpty(valpath.Identifier) &&
+				valpath.Identifier != null)
 			{
 				DocObject docPset = null;
 				mapEntity.TryGetValue(valpath.Identifier, out docPset);
@@ -648,7 +650,8 @@ namespace IfcDoc
 				valpath.Property != null &&
 				valpath.Property.Name.Equals("Material") &&
 				valpath.InnerPath != null && valpath.InnerPath.Type.Name.Equals("IfcMaterial") &&
-				valpath.InnerPath.InnerPath != null && valpath.InnerPath.InnerPath.Type.Name.Equals("IfcMaterialProperties"))
+				valpath.InnerPath.InnerPath != null && valpath.InnerPath.InnerPath.Type.Name.Equals("IfcMaterialProperties") &&
+				valpath.Identifier != null)
 			{
 				DocObject docPset = null;
 				mapEntity.TryGetValue(valpath.InnerPath.Identifier, out docPset);
@@ -665,7 +668,8 @@ namespace IfcDoc
 			else if (valpath != null &&
 				valpath.Property != null &&
 				valpath.Property.Name.Equals("HasProperties") &&
-				valpath.InnerPath != null && valpath.InnerPath.Type.Name.Equals("IfcMaterialProperties"))
+				valpath.InnerPath != null && valpath.InnerPath.Type.Name.Equals("IfcMaterialProperties") &&
+				valpath.Identifier != null)
 			{
 				DocObject docPset = null;
 				mapEntity.TryGetValue(valpath.Identifier, out docPset);
@@ -682,7 +686,8 @@ namespace IfcDoc
 			else if (valpath != null &&
 				valpath.Property != null &&
 				valpath.Property.Name.Equals("IsNestedBy") &&
-				valpath.InnerPath != null && valpath.InnerPath.InnerPath != null && valpath.InnerPath.InnerPath != null)
+				valpath.InnerPath != null && valpath.InnerPath.InnerPath != null && valpath.InnerPath.InnerPath != null &&
+				valpath.Identifier != null)
 			{
 				CvtValuePath pathInner = valpath.InnerPath.InnerPath;
 				if (pathInner.Type != null && pathInner.Type.Name.Equals("IfcDistributionPort"))

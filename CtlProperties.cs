@@ -238,7 +238,7 @@ namespace IfcDoc
 									ListViewItem lvi = new ListViewItem();
 									lvi.Tag = usagepath;
 									lvi.Text = docView.Name;
-									lvi.SubItems.Add(docRoot.ApplicableEntity.Name);
+									lvi.SubItems.Add(docRoot.ApplicableEntity?.Name);
 									this.listViewUsage.Items.Add(lvi);
 								}
 							}

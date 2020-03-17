@@ -243,7 +243,7 @@ namespace IfcDoc
 					desc = /*valpath.GetDescription(map) + "&#10;&#10;" + */valpath.ToString().Replace("\\", "&#10;");
 				}
 
-				sb.Append("<th><a href=\"../../schema/views/" + DocumentationISO.MakeLinkName(docView) + "/" + DocumentationISO.MakeLinkName(docExchange) + ".htm#" + DocumentationISO.MakeLinkName(docConcept) + "\" title=\"" + desc + "\">");
+				sb.Append("<th><a href=\"../../schema/views/" + DocumentationISO.MakeLinkName(docView) + "/" + DocumentationISO.MakeLinkName(docExchange) + ".html#" + DocumentationISO.MakeLinkName(docConcept) + "\" title=\"" + desc + "\">");
 				sb.Append(name);
 				sb.Append("</a></th>");
 			};
