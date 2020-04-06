@@ -2757,6 +2757,9 @@ namespace IfcDoc.Schema.DOC
 		public DocDefinition GetParameterType(string parameter, Dictionary<string, DocObject> map)
 		{
 			DocObject docEnt = null;
+			if (this.Type == null)
+				return null;
+
 			if (!map.TryGetValue(this.Type, out docEnt) || !(docEnt is DocEntity))
 				return null;
 

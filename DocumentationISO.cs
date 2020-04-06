@@ -725,9 +725,9 @@ namespace IfcDoc
 								sb.Append(table);
 
 								sb.Append("</td><td>");
-								AppendRequirement(sb, reqImport, 3);
+								AppendRequirement(sb, reqImport, "import", 3);
 								sb.Append("</td><td>");
-								AppendRequirement(sb, reqExport, 3);
+								AppendRequirement(sb, reqExport, "export",  3);
 								sb.AppendLine("</td></tr>");
 							}
 						}
@@ -1153,7 +1153,7 @@ namespace IfcDoc
 							{
 								foreach (DocExchangeDefinition docExchange in docView.Exchanges)
 								{
-									sb.Append("<th><a href=\"../views/");
+									sb.Append("<th style=\"text-align: center\"><a href=\"../views/");
 									sb.Append(MakeLinkName(docView));
 									sb.Append("/");
 									sb.Append(MakeLinkName(docExchange));
@@ -1161,7 +1161,7 @@ namespace IfcDoc
 									sb.Append(MakeLinkName(docExchange));
 									sb.Append(".png\" title=\"");
 									sb.Append(docExchange.Name);
-									sb.Append("\"/></a></th>");
+									sb.Append($"\"/></a><br>{docExchange.Name}</th>");
 									sb.AppendLine();
 								}
 							}
@@ -1180,7 +1180,7 @@ namespace IfcDoc
 									{
 										foreach (DocExchangeDefinition docExchange in docView.Exchanges)
 										{
-											sb.Append("<td>");
+											sb.Append("<td style=\"text-align:center\">");
 
 											DocExchangeRequirementEnum reqImport = DocExchangeRequirementEnum.NotRelevant;
 											DocExchangeRequirementEnum reqExport = DocExchangeRequirementEnum.NotRelevant;
@@ -1200,9 +1200,9 @@ namespace IfcDoc
 												}
 											}
 
-											AppendRequirement(sb, reqImport, 2);
+											AppendRequirement(sb, reqImport, "import", 2);
 											sb.Append("<br/>");
-											AppendRequirement(sb, reqExport, 2);
+											AppendRequirement(sb, reqExport, "export", 2);
 
 											sb.Append("</td>");
 											sb.AppendLine();
@@ -1263,7 +1263,7 @@ namespace IfcDoc
 					{
 						if (dti.Exchange == docExchange && dti.Applicability == DocExchangeApplicabilityEnum.Import)
 						{
-							AppendRequirement(sb, dti.Requirement, 3);
+							AppendRequirement(sb, dti.Requirement, "import", 3);
 						}
 					}
 					sb.Append("</td>");
@@ -1280,7 +1280,7 @@ namespace IfcDoc
 					{
 						if (dti.Exchange == docExchange && dti.Applicability == DocExchangeApplicabilityEnum.Export)
 						{
-							AppendRequirement(sb, dti.Requirement, 3);
+							AppendRequirement(sb, dti.Requirement, "export", 3);
 						}
 					}
 					sb.Append("</td>");
@@ -1819,25 +1819,25 @@ namespace IfcDoc
 		}
 
 
-		private static void AppendRequirement(StringBuilder sb, DocExchangeRequirementEnum req, int level)
+		private static void AppendRequirement(StringBuilder sb, DocExchangeRequirementEnum req, string reqType, int level)
 		{
 			// new-style character (allows copy/paste into word without slowdown)
 			switch (req)
 			{
 				case DocExchangeRequirementEnum.Excluded:
-					sb.Append("X");
+					sb.Append($"excluded on {reqType}");
 					break;
 
 				case DocExchangeRequirementEnum.Mandatory:
-					sb.Append("R");
+					sb.Append($"required on {reqType}");
 					break;
 
 				case DocExchangeRequirementEnum.NotRelevant:
-					sb.Append("-");
+					sb.Append($"not relevant on {reqType}");
 					break;
 
 				case DocExchangeRequirementEnum.Optional:
-					sb.Append("O");
+					sb.Append($"optional on {reqType}");
 					break;
 			}
 		}
