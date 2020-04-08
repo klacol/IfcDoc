@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2010 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;
@@ -64,7 +64,7 @@ namespace IfcDoc.Schema.PSD
 		[XmlAttribute("templatetype")]
 		public string TemplateType;
 
-		public const string DefaultNamespace = "http://buildingSMART-tech.org/xml/psd/PSD_IFC4.xsd";
+		public const string DefaultNamespace = "https://standards.buildingsmart.org/xml/psd/PSD_IFC4.xsd";
 		public const string DefaultFile = "PSD_IFC4.xsd";
 
 		[XmlAttribute(Namespace = "http://www.w3.org/2001/XMLSchema-instance", AttributeName = "noNamespaceSchemaLocation")]

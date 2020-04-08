@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2010 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;
@@ -144,17 +144,17 @@ namespace IfcDoc.Schema.MVD
 		public static readonly string[] Namespaces = new string[]
 		{
 			NamespaceV12,
-			"http://buildingsmart-tech.org/mvdXML/mvdXML1-0",
-			"http://buildingsmart-tech.org/mvdXML/mvdXML_V1-0",
-			"http://buildingsmart-tech.org/mvdXML/mvdXML1-1",
-			"http://buildingsmart-tech.org/mvd/XML/1.1"
+			"https://standards.buildingsmart.org/mvdXML/mvdXML1-0",
+			"https://standards.buildingsmart.org/mvdXML/mvdXML_V1-0",
+			"https://standards.buildingsmart.org/mvdXML/mvdXML1-1",
+			"https://standards.buildingsmart.org/mvd/XML/1.1"
 		};
 
-		public const string LocationV11 = "http://standards.buildingsmart.org/MVD/RELEASE/mvdXML/v1-1/mvdXML_V1.1.xsd";
-		public const string LocationV12 = "http://www.buildingsmart-tech.org/mvd/XML/1.2 http://www.buildingsmart-tech.org/mvd/XML/1.2/mvdXML_V1.2.xsd";
+		public const string LocationV11 = "https://standards.buildingsmart.org/MVD/RELEASE/mvdXML/v1-1/mvdXML_V1.1.xsd";
+		public const string LocationV12 = "https://standards.buildingsmart.org/mvd/XML/1.2 https://standards.buildingsmart.org/mvd/XML/1.2/mvdXML_V1.2.xsd";
 
-		public const string NamespaceV11 = "http://buildingsmart-tech.org/mvd/XML/1.1";
-		public const string NamespaceV12 = "http://buildingsmart-tech.org/mvd/XML/1.2";
+		public const string NamespaceV11 = "https://standards.buildingsmart.org/mvd/XML/1.1";
+		public const string NamespaceV12 = "https://standards.buildingsmart.org/mvd/XML/1.2";
 	}
 
 	[XmlType("ConceptTemplate")]

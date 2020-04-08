@@ -735,9 +735,9 @@ namespace IfcDoc
 
 			string ifcversion = docProject.GetSchemaIdentifier();
 
-			//string ifcns = "http://www.buildingsmart-tech.org/ifcOWL/" + ifcversion;
+			//string ifcns = "https://technical.buildingsmart.org/ifcOWL/" + ifcversion;
 			//string ifcns = "http://ifcowl.openbimstandards.org/" + ifcversion;
-			string ifcns = "http://www.buildingsmart-tech.org/ifc/" + ifcversion;
+			string ifcns = "https://technical.buildingsmart.org/ifc/" + ifcversion;
 
 			// namespace definitions
 			sb.AppendLine("@prefix :      <" + ifcns + "#> .");

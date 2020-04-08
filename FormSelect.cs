@@ -1,7 +1,7 @@
 ﻿// Name:        FormSelectGeneric.cs
 // Description: Dialog box for selecting enumeration
 // Copyright:   (c) 2013 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;

@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2012 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 // Portions of code within this file originated from DifferenceEngine on CodeProject.org (file containing referenced data definitions).
 

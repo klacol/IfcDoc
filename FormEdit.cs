@@ -9236,7 +9236,7 @@ namespace IfcDoc
 			if (docProject == null)
 			{
 				MessageBox.Show(this, "Conversion requires an IFC schema to be defined, with IfcProject in scope at a minimum. " +
-					"Before using this functionality, use File/Open to open an IFC baseline definition file, which may be found at www.buildingsmart-tech.org", "Convert File");
+					"Before using this functionality, use File/Open to open an IFC baseline definition file, which may be found at https://technical.buildingsmart.org", "Convert File");
 
 				return;
 			}
@@ -9343,7 +9343,7 @@ namespace IfcDoc
 				}
 				else
 				{
-					MessageBox.Show(this, "The required file information is missing. You may need to re-download the application from www.buildingsmart-tech.org.");
+					MessageBox.Show(this, "The required file information is missing. You may need to re-download the application from https://technical.buildingsmart.org.");
 				}
 			}
 

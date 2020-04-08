@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2010 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;
@@ -2887,28 +2887,28 @@ namespace IfcDoc.Format.HTM
 				if (!docPublication.ISO) // don't provide mvdXML for ISO
 				{
 					this.Write(
-		"<h4 class=\"annex\"><a>" + key3 + " Model view definition</a></h4>" +
-		"<p>Model view definitions are defined according to formats as follows.</p>" +
-		"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
-		"<col width=\"60%\">" +
-		"<col width=\"20%\">" +
-		"<col width=\"20%\">" +
-		"<tr style=\"border: 1px grey solid;\">" +
-		"<th>Description</td>" +
-		"<th>ASCII file</td>" +
-		"<th>HTML file</td>" +
-		"</tr>" +
-		"<tr>" +
-		"<td>MVD-XML model view definitions</td>" +
-		"<td><a href=\"" + linkprefix + ".mvdxml\" target=\"_blank\">" + code + ".mvdxml</a></td>" +
-		"<td>&nbsp;</td>" +
-		"</tr>" +
-		"<tr>" +
-		"<td>EXPRESS XSD configuration</td>" +
-		"<td><a href=\"" + linkprefix + ".xml\" target=\"_blank\">" + code + ".xml</a></td>" +
-		"<td>&nbsp;</td>" +
-		"</tr>" +
-		"</table>");
+						"<h4 class=\"annex\"><a>" + key3 + " Model view definition</a></h4>" +
+						"<p>Model view definitions are defined according to formats as follows.</p>" +
+						"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
+						"<col width=\"60%\">" +
+						"<col width=\"20%\">" +
+						"<col width=\"20%\">" +
+						"<tr style=\"border: 1px grey solid;\">" +
+						"<th>Description</td>" +
+						"<th>ASCII file</td>" +
+						"<th>HTML file</td>" +
+						"</tr>" +
+						"<tr>" +
+						"<td>MVD-XML model view definitions</td>" +
+						"<td><a href=\"" + linkprefix + ".mvdxml\" target=\"_blank\">" + code + ".mvdxml</a></td>" +
+						"<td>&nbsp;</td>" +
+						"</tr>" +
+						"<tr>" +
+						"<td>EXPRESS XSD configuration</td>" +
+						"<td><a href=\"" + linkprefix + ".xml\" target=\"_blank\">" + code + ".xml</a></td>" +
+						"<td>&nbsp;</td>" +
+						"</tr>" +
+						"</table>");
 				}
 			}
 

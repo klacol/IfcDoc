@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2013 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;
@@ -66,7 +66,7 @@ namespace IfcDoc.Schema.CNF
 
 		//[XmlAttribute("schemaLocation", Namespace="xsi")]
 		[XmlAttribute(Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
-		public string schemaLocation = "urn:iso:std:iso:10303:-28:ed-2:tech:XMLschema:configuration_language http://www.buildingsmart-tech.org/ifcXML/IFC4/P28/cnf.xsd";
+		public string schemaLocation = "urn:iso:std:iso:10303:-28:ed-2:tech:XMLschema:configuration_language https://technical.buildingsmart.org/ifcXML/IFC4/P28/cnf.xsd";
 
 		[XmlElement]
 		public List<option> option = new List<option>();

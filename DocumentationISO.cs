@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2010 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Linq;
 //using System.Xml.Serialization;
 
 using BuildingSmart.IFC;
@@ -37,6 +38,7 @@ using BuildingSmart.Serialization.Step;
 using BuildingSmart.Serialization.Turtle;
 using BuildingSmart.Serialization.Xml;
 using BuildingSmart.Utilities.Conversion;
+using System.Net;
 
 namespace IfcDoc
 {
@@ -1143,11 +1145,11 @@ namespace IfcDoc
 						{
 							sb.AppendLine("<hr/>");
 							sb.AppendLine("<h4>" + docView.Name + "</h4>");
-
+							sb.AppendLine("<p>This concept shall be applied as follows to the exchanges. All inherited classes from the classes shown in the figure can be instanciated.</p>");
 							int cExchange = docView.Exchanges.Count;
 
 							sb.AppendLine("<table class=\"exchange\">");
-							sb.Append("<tr><th>Entity</th>");
+							sb.Append("<tr><th>Entity </th>");
 
 							if (docPublication.Exchanges)
 							{
@@ -4680,7 +4682,7 @@ namespace IfcDoc
 			DocModelView[] views = docPublication.Views.ToArray();
 
 			List<DocXsdFormat> xsdFormatBase = docProject.BuildXsdFormatList();
-			string xmlns = "http://www.buildingsmart-tech.org/ifcXML/IFC4/final";
+			string xmlns = "https://standards.buildingsmart.org/IFC/RELEASE/IFC4/Add2TC1";
 
 			if (views.Length > 0 && !String.IsNullOrEmpty(views[0].XsdUri))
 			{
@@ -4738,22 +4740,27 @@ namespace IfcDoc
 						else if(version.StartsWith("2.3.0"))
 						{
 							serializer.NameSpace = @"http://www.iai-tech.org/ifcXML/IFC2x3/FINAL";
-							serializer.SchemaLocation = @"http://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/XML/IFC2X3.xsd";
+							serializer.SchemaLocation = @"https://standards.buildingsmart.org/IFC/RELEASE/IFC2x3/TC1/XML/IFC2X3.xsd";
+						}
+						else if (version.StartsWith("4.0.2.1"))
+						{
+							serializer.NameSpace = @"https://standards.buildingsmart.org/IFC/RELEASE/IFC4/Add2TC1";
+							serializer.SchemaLocation = @"https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/XML/IFC4.xsd";
 						}
 						else if(version.StartsWith("4.0.2"))
 						{
 							serializer.NameSpace = @"http://www.buildingsmart-tech.org/ifcXML/IFC4/Add2";
-							serializer.SchemaLocation = @"http://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/XML/IFC4_ADD2.xsd";
+							serializer.SchemaLocation = @"https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/XML/IFC4_ADD2.xsd";
 						}
 						else if (version.StartsWith("4.1"))
 						{
 							serializer.NameSpace = @"http://www.buildingsmart-tech.org/ifc/IFC4x1/final";
-							serializer.SchemaLocation = @"http://standards.buildingsmart.org/IFC/RELEASE/IFC4_1/FINAL/XML/IFC4x1.xsd";
+							serializer.SchemaLocation = @"https://standards.buildingsmart.org/IFC/RELEASE/IFC4_1/FINAL/XML/IFC4x1.xsd";
 						}
 						else if (version.StartsWith("4.2"))
 						{
 							serializer.NameSpace = @"http://www.buildingsmart-tech.org/ifc/review/IFC4x2/unspecifiedrelease";
-							serializer.SchemaLocation = @"http://standards.buildingsmart.org/IFC/DEV/IFC4_2/FINAL/XML/IFC4x2.xsd";
+							serializer.SchemaLocation = @"https://standards.buildingsmart.org/IFC/DEV/IFC4_2/FINAL/XML/IFC4x2.xsd";
 						}
 						mapFormatData.Add(docFormat.FormatType, serializer);
 						break;
@@ -6482,7 +6489,7 @@ namespace IfcDoc
 								htmSection.WriteLine("<p>Official schema publications for this release are at the following URLs:</p>");
 
 								htmSection.WriteLine("<table class=\"gridtable\">");
-								htmSection.WriteLine("<tr><th>Format</th><th>URL</th></tr>");
+								htmSection.WriteLine("<tr><th>Format</th><th>URL official</th></tr>");
 								foreach (DocFormat docFormat in docPublication.Formats)
 								{
 									if (docFormat.FormatOptions != DocFormatOptionEnum.None)
@@ -6494,11 +6501,19 @@ namespace IfcDoc
 										{
 											formatdesc = attrs[0].Description;
 										}
-
+									
 										//string formaturi = uriprefix + "/" + version + "_" + release.ToUpper() + "." + docFormat.ExtensionSchema;
-										string formaturi = uriprefix + "/" + "IFC4" /*version*/ + "." + docFormat.ExtensionSchema;
+										string formatUri = uriprefix + "/" + "IFC4" /*version*/ + "." + docFormat.ExtensionSchema;
+										string formatName = formatUri;
+										if (!checkWebsite(formatUri))
+										{ 
+											var view = docPublication.Views.Where(x => x.Code == docPublication.Code).FirstOrDefault();
+											// annex-a/construction-objects-data-view/COD.1.xsd
+											formatName = $"{docPublication.Code}.{docFormat.ExtensionSchema}";
+											formatUri = $"annex-a/{view.Name.Replace(" ","-").ToLower()}/{formatName}";
+										}
 
-										htmSection.WriteLine("<tr><td>" + formatdesc + "</td><td><a href=\"" + formaturi + "\" target=\"_blank\">" + formaturi + "</a></td></tr>");
+										htmSection.WriteLine("<tr><td>" + formatdesc + "</td><td><a href=\"" + formatUri + "\" target=\"_blank\">" + formatName + "</a></td></tr>");
 									}
 								}
 								htmSection.WriteLine("</table>");
@@ -7645,6 +7660,20 @@ namespace IfcDoc
 				htmIndex.WriteFooter(docPublication.Footer);
 
 				return indexPath;
+			}
+		}
+
+		private static bool checkWebsite(string URL)
+		{
+			try
+			{
+				WebClient wc = new WebClient();
+				string HTMLSource = wc.DownloadString(URL);
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
 			}
 		}
 	}

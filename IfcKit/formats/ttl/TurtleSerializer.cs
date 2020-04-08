@@ -3,7 +3,7 @@
 // Author:      Pieter Pauwels
 // Origination: Work performed for BuildingSmart by Pieter Pauwels
 // Copyright:   (c) 2016 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.IO;

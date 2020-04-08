@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart International Ltd. and Georgia Tech by Constructivity.com LLC.
 // Copyright:   (c) 2012-2014 BuildingSmart International Ltd., (c) 2014 Georgia Tech
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;

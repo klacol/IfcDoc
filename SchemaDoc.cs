@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2010 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://standards.buildingsmart.org/legal
 
 using System;
 using System.Collections;
@@ -775,10 +775,10 @@ namespace IfcDoc.Schema.DOC
 				draft = "review/";
 			}
 
-			return "http://www.buildingsmart-tech.org/ifc/" + draft + this.GetSchemaIdentifier() + "/" + release.ToLower();
+			return "https://technical.buildingsmart.org/ifc/" + draft + this.GetSchemaIdentifier() + "/" + release.ToLower();
 
 			// for now...temp hack...
-			//return "http://www.buildingsmart-tech.org/ifc/IFC4/Add2TC1";
+			//return "https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/XML/IFC4.xsd";
 		}
 
 		public DocTemplateDefinition GetTemplate(Guid guid)

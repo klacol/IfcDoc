@@ -3361,14 +3361,14 @@ namespace IfcDoc
 			cnf.option.Add(opt);
 
 			IfcDoc.Schema.CNF.schema sch = new IfcDoc.Schema.CNF.schema();
-			sch.targetNamespace = "http://www.buildingsmart-tech.org/ifcXML/IFC4/final"; //... make parameter...
+			sch.targetNamespace = "https://standards.buildingsmart.org/IFC/RELEASE/IFC4/Add2TC1"; //... make parameter...
 			sch.embed_schema_items = true;
 			sch.elementFormDefault = Schema.CNF.qual.qualified;
 			sch.attributeFormDefault = Schema.CNF.qual.unqualified;
 
 			IfcDoc.Schema.CNF._namespace ns = new Schema.CNF._namespace();
 			ns.prefix = "ifc";
-			ns.alias = "http://www.buildingsmart-tech.org/ifcXML/IFC4/final";
+			ns.alias = "https://standards.buildingsmart.org/IFC/RELEASE/IFC4/Add2TC1";
 			sch._namespace = ns;
 
 			cnf.schema.Add(sch);

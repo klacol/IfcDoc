@@ -3,7 +3,7 @@
 // Author:      Tim Chipman
 // Origination: Work performed for BuildingSmart by Constructivity.com LLC.
 // Copyright:   (c) 2013 BuildingSmart International Ltd.
-// License:     http://www.buildingsmart-tech.org/legal
+// License:     https://technical.buildingsmart.org/legal
 
 using System;
 using System.Collections.Generic;
@@ -103,7 +103,7 @@ namespace IfcDoc.Format.JAV
 
 			using (System.IO.StreamWriter writer = new System.IO.StreamWriter(this.m_filename))
 			{
-				writer.WriteLine("// This file was automatically generated from IFCDOC at www.buildingsmart-tech.org.");
+				writer.WriteLine("// This file was automatically generated from IFCDOC at https://technical.buildingsmart.org.");
 				writer.WriteLine("// IFC content is copyright (C) 1996-2013 BuildingSMART International Ltd.");
 				writer.WriteLine();
 
