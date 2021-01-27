@@ -40,6 +40,8 @@ using BuildingSmart.Serialization.Xml;
 using BuildingSmart.Utilities.Conversion;
 using System.Net;
 
+using Xceed.Words.NET;
+
 namespace IfcDoc
 {
 	public static class DocumentationISO
@@ -4673,6 +4675,65 @@ namespace IfcDoc
 			System.IO.Directory.CreateDirectory(pathPublication); // ensure directory exists
 			System.IO.Directory.CreateDirectory(path); // ensure directory exists
 
+			//#CSL docx Ordner anlegen
+			string docPath = pathPublication + @"\docx";
+			System.IO.Directory.CreateDirectory(docPath); // ensure directory exist
+
+			//#CSL Dokument erstellen
+			Xceed.Words.NET.Licenser.LicenseKey = "WDN18-XXXXX-XXXXX-XXXXX";
+			DocX docxDocument = DocX.Create(docPath + @"\Content.docx");
+
+			// format definitions
+			// TITLE
+			var formatTitle = new Xceed.Document.NET.Formatting();
+			formatTitle.Bold = true;
+			formatTitle.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
+			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatTitle.Size = 30;
+			// SUBTITLE
+			var formatVersion = new Xceed.Document.NET.Formatting();
+			formatVersion.Bold = true;
+			formatVersion.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
+			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatVersion.Size = 20;
+			// REGULAR TEXT
+			var formatRegular = new Xceed.Document.NET.Formatting();
+			formatRegular.FontColor = Color.Black;
+			formatRegular.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatRegular.Size = 9; // 12px
+
+			//InsertPageBreakBeforeSelf
+			// Insert cover image, title and copyright notice
+			var image = docxDocument.AddImage(pathPublication + @"\html\img\CoverPhoto.png");
+			var picture = image.CreatePicture(320.0f, 477.0f);
+			var pCover1 = docxDocument.InsertParagraph("");
+			pCover1.AppendPicture(picture);
+			pCover1.Append(docPublication.Name + "\n", formatTitle);
+			pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
+			pCover1.SpacingAfter(40);
+			var pCover2 = docxDocument.InsertParagraph("");
+			var copyright = $"© buildingSMART 1996-{DateTime.Now.Year} - This docxDocument is owned and copyrighted by {docPublication.Owner}\n" +
+				"By using the IFC4 specification you agree to the following copyright notice:\n\nXXX TODO";
+			pCover2.Append(copyright + "\n", formatRegular);
+
+			pCover2.InsertPageBreakAfterSelf();
+
+			var pTOC = docxDocument.InsertParagraph();
+			Xceed.Document.NET.ExtensionsHeadings.Heading(pTOC, Xceed.Document.NET.HeadingType.Heading1).Append("Contents");
+			pTOC.InsertPageBreakAfterSelf();
+
+			var pForeword = docxDocument.InsertParagraph();
+			Xceed.Document.NET.ExtensionsHeadings.Heading(pForeword, Xceed.Document.NET.HeadingType.Heading1).Append("Foreword");
+			pForeword.InsertPageBreakAfterSelf();
+
+			var pIntroduction = docxDocument.InsertParagraph();
+			Xceed.Document.NET.ExtensionsHeadings.Heading(pIntroduction, Xceed.Document.NET.HeadingType.Heading1).Append("Introduction");
+			pIntroduction.InsertPageBreakAfterSelf();
+
+			// Save the docxDocument.
+			docxDocument.Save();
+			//#CSL
+
 			DiagramFormat diagramformat = DiagramFormat.ExpressG;
 			if (docPublication.UML)
 			{
@@ -4899,6 +4960,8 @@ namespace IfcDoc
 
 			DocEntity docEntityRoot = docProject.GetDefinition("IfcRoot") as DocEntity;
 
+			//#CSL Daten für Titelblatt
+
 			// upper contents page
 			string pathHeaderFrame = path + "\\content.html";
 			using (FormatHTM htmProp = new FormatHTM(pathHeaderFrame, mapEntity, mapSchema, included))
@@ -5051,7 +5114,7 @@ namespace IfcDoc
                               <td style=""vertical-align: top;"">
                                 <p style=""text-align:left;"">
                                   <span style=""font-family:Arial, Verdana, Tahoma, sans-serif; font-size:small; "">
-                                    © buildingSMART 1996-{DateTime.Now.Year} - This document is owned and copyrighted by {docPublication.Owner}<br>
+                                    © buildingSMART 1996-{DateTime.Now.Year} - This docxDocument is owned and copyrighted by {docPublication.Owner}<br>
                                     By using the IFC4 specification you agree to the following <a href=""copyright.html"" target=""info""><b>copyright notice</b></a></span>
                                 </p>
                               </td>
@@ -5642,7 +5705,7 @@ namespace IfcDoc
 								// ensure directory exists
 								System.IO.Directory.CreateDirectory(pathSchema + @"\" + schema.Name.ToLower() + @"\lexical\");
 
-								// create schema document
+								// create schema docxDocument
 								using (FormatHTM htmSchema = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + @"\content.html", mapEntity, mapSchema, included))
 								{
 									{
