@@ -1,4 +1,4 @@
-name: .NET
+name: Build_IfcDoc
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Restore NUget Packages
-      run: nuget.exe restore src/CafmConnect.sln 
+      run: nuget.exe restore IfcDoc.sln 
     - name: Build IfcDoc.sln
       run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}}
     - name: Publish IfcDoc
