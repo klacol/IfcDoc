@@ -2188,7 +2188,7 @@
     <value>Magenta</value>
   </data>
   <data name="toolStripMenuItemFileNew.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Strg+N</value>
+    <value>Control+N</value>
   </data>
   <data name="toolStripMenuItemFileNew.Size" type="System.Drawing.Size, System.Drawing">
     <value>179, 22</value>
