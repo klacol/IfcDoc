@@ -28,4 +28,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: IfcDoc_0.${{github.run_number}}
-        path: D:\a\IfcDoc\IfcDoc\IfcDoc\bin\Release
+        path: D:\a\IfcDoc\IfcDoc\bin\x86\Release
