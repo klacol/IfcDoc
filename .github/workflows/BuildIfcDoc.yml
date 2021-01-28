@@ -14,6 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: docx_generation
     - name: List all NuGet feeds
       run: nuget sources list
     - name: Setup MSBuild.exe
