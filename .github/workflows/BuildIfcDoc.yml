@@ -1,25 +1,29 @@
 name: .NET
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ docx_generation ]
   pull_request:
-    branches: [ master ]
+    branches: [ docx_generation ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+    - name: List all NuGet feeds
+      run: nuget sources list
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Restore NUget Packages
+      run: nuget.exe restore src/CafmConnect.sln 
+    - name: Build IfcDoc.sln
+      run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}}
+    - name: Publish IfcDoc
+      uses: actions/upload-artifact@v2
       with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+        name: IfcDoc_0.${{github.run_number}}
+        path: D:\a\IfcDoc\IfcDoc\IfcDoc\bin\Release
