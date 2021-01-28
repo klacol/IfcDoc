@@ -41,6 +41,7 @@ using BuildingSmart.Utilities.Conversion;
 using System.Net;
 
 using Xceed.Words.NET;
+using Xceed.Document.NET;
 
 namespace IfcDoc
 {
@@ -954,7 +955,7 @@ namespace IfcDoc
 					if (def is DocTemplateDefinition)
 					{
 						System.IO.Directory.CreateDirectory(path + "\\schema\\templates\\diagrams");
-						using (Image image = IfcDoc.Format.PNG.FormatPNG.CreateTemplateDiagram((DocTemplateDefinition)def, layout, docProject, null))
+						using (System.Drawing.Image image = IfcDoc.Format.PNG.FormatPNG.CreateTemplateDiagram((DocTemplateDefinition)def, layout, docProject, null))
 						{
 							if (image != null)
 							{
@@ -966,7 +967,7 @@ namespace IfcDoc
 					else if (def is DocEntity) // no longer used directly; now for each model view in annex D
 					{
 						System.IO.Directory.CreateDirectory(path + "\\diagrams\\" + MakeLinkName(docView));
-						using (Image image = IfcDoc.Format.PNG.FormatPNG.CreateConceptDiagram((DocEntity)def, docView, layout, docProject, null))
+						using (System.Drawing.Image image = IfcDoc.Format.PNG.FormatPNG.CreateConceptDiagram((DocEntity)def, docView, layout, docProject, null))
 						{
 							string filepath = path + "\\diagrams\\" + MakeLinkName(docView) + "\\" + filename;
 							image.Save(filepath, System.Drawing.Imaging.ImageFormat.Png);
@@ -4675,64 +4676,35 @@ namespace IfcDoc
 			System.IO.Directory.CreateDirectory(pathPublication); // ensure directory exists
 			System.IO.Directory.CreateDirectory(path); // ensure directory exists
 
-			//#CSL docx Ordner anlegen
+			// DOCX: Create Folder
 			string docPath = pathPublication + @"\docx";
 			System.IO.Directory.CreateDirectory(docPath); // ensure directory exist
 
-			//#CSL Dokument erstellen
+			// DOCX: Create Document and save for later loading.
 			Xceed.Words.NET.Licenser.LicenseKey = "WDN18-XXXXX-XXXXX-XXXXX";
-			DocX docxDocument = DocX.Create(docPath + @"\Content.docx");
+			using (DocX docxDocument = DocX.Create(docPath + @"\Content.docx"))
+			{
+				docxDocument.Save();
+			}
 
-			// format definitions
+			// DOCX: Format Definitions
 			// TITLE
-			var formatTitle = new Xceed.Document.NET.Formatting();
+			var formatTitle = new Formatting();
 			formatTitle.Bold = true;
 			formatTitle.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
 			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatTitle.Size = 30;
 			// SUBTITLE
-			var formatVersion = new Xceed.Document.NET.Formatting();
+			var formatVersion = new Formatting();
 			formatVersion.Bold = true;
 			formatVersion.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
 			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatVersion.Size = 20;
 			// REGULAR TEXT
-			var formatRegular = new Xceed.Document.NET.Formatting();
+			var formatRegular = new Formatting();
 			formatRegular.FontColor = Color.Black;
 			formatRegular.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatRegular.Size = 9; // 12px
-
-			//InsertPageBreakBeforeSelf
-			// Insert cover image, title and copyright notice
-			var image = docxDocument.AddImage(pathPublication + @"\html\img\CoverPhoto.png");
-			var picture = image.CreatePicture(320.0f, 477.0f);
-			var pCover1 = docxDocument.InsertParagraph("");
-			pCover1.AppendPicture(picture);
-			pCover1.Append(docPublication.Name + "\n", formatTitle);
-			pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
-			pCover1.SpacingAfter(40);
-			var pCover2 = docxDocument.InsertParagraph("");
-			var copyright = $"© buildingSMART 1996-{DateTime.Now.Year} - This docxDocument is owned and copyrighted by {docPublication.Owner}\n" +
-				"By using the IFC4 specification you agree to the following copyright notice:\n\nXXX TODO";
-			pCover2.Append(copyright + "\n", formatRegular);
-
-			pCover2.InsertPageBreakAfterSelf();
-
-			var pTOC = docxDocument.InsertParagraph();
-			Xceed.Document.NET.ExtensionsHeadings.Heading(pTOC, Xceed.Document.NET.HeadingType.Heading1).Append("Contents");
-			pTOC.InsertPageBreakAfterSelf();
-
-			var pForeword = docxDocument.InsertParagraph();
-			Xceed.Document.NET.ExtensionsHeadings.Heading(pForeword, Xceed.Document.NET.HeadingType.Heading1).Append("Foreword");
-			pForeword.InsertPageBreakAfterSelf();
-
-			var pIntroduction = docxDocument.InsertParagraph();
-			Xceed.Document.NET.ExtensionsHeadings.Heading(pIntroduction, Xceed.Document.NET.HeadingType.Heading1).Append("Introduction");
-			pIntroduction.InsertPageBreakAfterSelf();
-
-			// Save the docxDocument.
-			docxDocument.Save();
-			//#CSL
 
 			DiagramFormat diagramformat = DiagramFormat.ExpressG;
 			if (docPublication.UML)
@@ -4960,8 +4932,6 @@ namespace IfcDoc
 
 			DocEntity docEntityRoot = docProject.GetDefinition("IfcRoot") as DocEntity;
 
-			//#CSL Daten für Titelblatt
-
 			// upper contents page
 			string pathHeaderFrame = path + "\\content.html";
 			using (FormatHTM htmProp = new FormatHTM(pathHeaderFrame, mapEntity, mapSchema, included))
@@ -5114,7 +5084,7 @@ namespace IfcDoc
                               <td style=""vertical-align: top;"">
                                 <p style=""text-align:left;"">
                                   <span style=""font-family:Arial, Verdana, Tahoma, sans-serif; font-size:small; "">
-                                    © buildingSMART 1996-{DateTime.Now.Year} - This docxDocument is owned and copyrighted by {docPublication.Owner}<br>
+                                    © buildingSMART 1996-{DateTime.Now.Year} - This document is owned and copyrighted by {docPublication.Owner}<br>
                                     By using the IFC4 specification you agree to the following <a href=""copyright.html"" target=""info""><b>copyright notice</b></a></span>
                                 </p>
                               </td>
@@ -5127,6 +5097,37 @@ namespace IfcDoc
 				}
 			}
 
+			// DOCX: Insert cover image, title, copyright notice and TOC
+			using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+			{
+				var image = docxDocument.AddImage(pathPublication + @"\html\img\CoverPhoto.png");
+				var picture = image.CreatePicture(320.0f, 477.0f);
+				var pCover1 = docxDocument.InsertParagraph("");
+				pCover1.AppendPicture(picture);
+				pCover1.Append(docPublication.Name + "\n", formatTitle);
+				pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
+				pCover1.SpacingAfter(40);
+				var pCover2 = docxDocument.InsertParagraph("");
+				var copyright = $"© buildingSMART 1996-{DateTime.Now.Year} - This docxDocument is owned and copyrighted by {docPublication.Owner}\n" +
+					"By using the IFC4 specification you agree to the following copyright notice:\n\nXXX TODO";
+				pCover2.Append(copyright + "\n", formatRegular);
+				//pCover2.Append(docPublication.Copyright + "\n", formatRegular); // xxx -> "CEN - European Committee for Standardization"
+
+				pCover2.InsertPageBreakAfterSelf();
+
+				var pTOCHeader = docxDocument.InsertParagraph();
+				var pTOC = pTOCHeader.InsertParagraphAfterSelf(pTOCHeader);
+				ExtensionsHeadings.Heading(pTOCHeader, HeadingType.Heading1).Append("Contents");
+				var tocSwitches = new Dictionary<TableOfContentsSwitches, string>()
+					{
+					  { TableOfContentsSwitches.None, ""}
+					};
+				docxDocument.InsertTableOfContents(pTOC, "", tocSwitches, "Heading5");
+				pTOC.InsertPageBreakAfterSelf();
+
+				docxDocument.Save();
+			}
+
 			using (FormatHTM htmSection = new FormatHTM(path + "\\foreword.html", mapEntity, mapSchema, included))
 			{
 				DocAnnotation docAnnotation = docPublication.Annotations[0];
@@ -5136,6 +5137,19 @@ namespace IfcDoc
 				htmSection.WriteLine(docAnnotation.DocumentationHtml());
 				htmSection.WriteLinkTo(docPublication, "foreword", 0);
 				htmSection.WriteFooter(docPublication.Footer);
+
+				// DOCX: Insert Foreword
+				using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+				{
+					var pForeword = docxDocument.InsertParagraph();
+					ExtensionsHeadings.Heading(pForeword, HeadingType.Heading1).Append("Foreword");
+					pForeword.AppendLine();
+					pForeword.Append(docAnnotation.Documentation, formatRegular);
+					pForeword.InsertPageBreakAfterSelf();
+
+					docxDocument.Save();
+				}
+
 			}
 			using (FormatHTM htmLink = new FormatHTM(path + "/link/foreword.html", mapEntity, mapSchema, included))
 			{
@@ -5158,6 +5172,18 @@ namespace IfcDoc
 				htmSection.WriteLine(docAnnotation.DocumentationHtml());
 				htmSection.WriteLinkTo(docPublication, "introduction", 0);
 				htmSection.WriteFooter(docPublication.Footer);
+
+				// DOCX: Insert Introduction
+				using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+				{
+					var pIntroduction = docxDocument.InsertParagraph();
+					ExtensionsHeadings.Heading(pIntroduction, HeadingType.Heading1).Append("Introduction");
+					pIntroduction.AppendLine();
+					pIntroduction.Append(docAnnotation.Documentation, formatRegular);
+					pIntroduction.InsertPageBreakAfterSelf();
+
+					docxDocument.Save();
+				}
 			}
 			using (FormatHTM htmLink = new FormatHTM(path + "/link/introduction.html", mapEntity, mapSchema, included))
 			{
@@ -5193,7 +5219,7 @@ namespace IfcDoc
 								}
 
 
-								foreach (DocProperty docProp in docPset.Properties)
+								foreach (IfcDoc.Schema.DOC.DocProperty docProp in docPset.Properties)
 								{
 									string datatype = docProp.PrimaryDataType;
 									if (datatype == null)
@@ -5705,7 +5731,7 @@ namespace IfcDoc
 								// ensure directory exists
 								System.IO.Directory.CreateDirectory(pathSchema + @"\" + schema.Name.ToLower() + @"\lexical\");
 
-								// create schema docxDocument
+								// create schema document
 								using (FormatHTM htmSchema = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + @"\content.html", mapEntity, mapSchema, included))
 								{
 									{
@@ -6050,9 +6076,9 @@ namespace IfcDoc
 															htmDef.WriteLine("<h5 class=\"num\">Inherited definitions from supertypes</h5>");
 
 															Dictionary<Rectangle, DocEntity> map = new Dictionary<Rectangle, DocEntity>();
-															using (Font font = new Font(FontFamily.GenericSansSerif, 8.0f))
+															using (System.Drawing.Font font = new System.Drawing.Font(FontFamily.GenericSansSerif, 8.0f))
 															{
-																using (Image img = FormatPNG.CreateInheritanceDiagramForEntity(docProject, included, entity, font, map))
+																using (System.Drawing.Image img = FormatPNG.CreateInheritanceDiagramForEntity(docProject, included, entity, font, map))
 																{
 																	try
 																	{
@@ -6829,7 +6855,7 @@ namespace IfcDoc
 												Dictionary<DocObject, bool> viewinclude = new Dictionary<DocObject, bool>();
 												Dictionary<Rectangle, DocEntity> mapRectangle = new Dictionary<Rectangle, DocEntity>();
 												docProject.RegisterObjectsInScope(docView, viewinclude);
-												using (Image imgDiagram = FormatPNG.CreateInheritanceDiagram(docProject, viewinclude, docEntityRoot, null, new Font(FontFamily.GenericSansSerif, 8.0f), mapRectangle))
+												using (System.Drawing.Image imgDiagram = FormatPNG.CreateInheritanceDiagram(docProject, viewinclude, docEntityRoot, null, new System.Drawing.Font(FontFamily.GenericSansSerif, 8.0f), mapRectangle))
 												{
 													using (FormatHTM htmCover = new FormatHTM(path + @"\annex\annex-c\" + MakeLinkName(docView) + @"\index.html", mapEntity, mapSchema, included))
 													{
@@ -6935,7 +6961,7 @@ namespace IfcDoc
 											// generate diagrams
 											//if (!Properties.Settings.Default.SkipDiagrams)
 											{
-												Image imageSchema = FormatPNG.CreateSchemaDiagram(docSchema, docProject, diagramformat);
+												System.Drawing.Image imageSchema = FormatPNG.CreateSchemaDiagram(docSchema, docProject, diagramformat);
 
 												using (FormatHTM htmSchemaDiagram = new FormatHTM(path + "/annex/annex-d/" + MakeLinkName(docSchema) + "/index.html", mapEntity, mapSchema, included))
 												{
@@ -6961,7 +6987,7 @@ namespace IfcDoc
 															int pageX = (iDiagram - 1) % docSchema.DiagramPagesHorz;
 															int pagePixelCX = CtlExpressG.PageX;
 															int pagePixelCY = CtlExpressG.PageY;
-															using (Image imagePage = new Bitmap(pagePixelCX, pagePixelCY))
+															using (System.Drawing.Image imagePage = new Bitmap(pagePixelCX, pagePixelCY))
 															{
 																using (Graphics g = Graphics.FromImage(imagePage))
 																{
@@ -7721,6 +7747,17 @@ namespace IfcDoc
 
 				htmIndex.WriteLine("</p>");
 				htmIndex.WriteFooter(docPublication.Footer);
+
+				// DOCX: Update TOC and save a last time.
+				using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+				{
+					// Update TOC
+					docxDocument.UpdateFields();
+					// xxx -> this doesn't seem to work....
+					// see https://doc.xceed.com/xceed-document-libraries-for-net/webframe.html#Updating_a_Table_of_Contents.html
+
+					docxDocument.Save();
+				}
 
 				return indexPath;
 			}
