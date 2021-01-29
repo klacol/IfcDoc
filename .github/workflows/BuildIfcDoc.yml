@@ -24,7 +24,7 @@ jobs:
       run: nuget.exe restore IfcDoc.sln
     - uses: microsoft/variable-substitution@v1 
       with:
-        files: 'Properties/Settings.settings'
+        files: 'app.config'
       env:
         XceedLicense: ${{ secrets.XCEEDLICENSE }}
     - name: Build IfcDoc.sln
