@@ -4681,7 +4681,7 @@ namespace IfcDoc
 			System.IO.Directory.CreateDirectory(docPath); // ensure directory exist
 
 			// DOCX: Create Document and save for later loading.
-			Xceed.Words.NET.Licenser.LicenseKey = "WDN18-XXXXX-XXXXX-XXXXX";
+			Xceed.Words.NET.Licenser.LicenseKey = Properties.Settings.Default.XceedLicense;
 			using (DocX docxDocument = DocX.Create(docPath + @"\Content.docx"))
 			{
 				docxDocument.Save();

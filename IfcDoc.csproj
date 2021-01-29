@@ -353,6 +353,11 @@
       <DependentUpon>FormValidateMappings.cs</DependentUpon>
     </Compile>
     <Compile Include="IfcDocUtils.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="SchemaSVG.cs" />
     <Compile Include="SchemaXsd.cs" />
     <Compile Include="System\ComponentModel\CustomComponentResourceManager.cs" />
@@ -468,11 +473,6 @@
     </Compile>
     <Compile Include="FormSelectView.Designer.cs">
       <DependentUpon>FormSelectView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SchemaCNF.cs" />
     <Compile Include="SchemaMvd.cs" />
