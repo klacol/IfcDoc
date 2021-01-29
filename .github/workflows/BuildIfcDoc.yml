@@ -21,9 +21,14 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Restore NUget Packages
-      run: nuget.exe restore IfcDoc.sln 
+      run: nuget.exe restore IfcDoc.sln
+    - uses: microsoft/variable-substitution@v1 
+      with:
+        files: 'Properties/Settings.settings'
+      env:
+        XceedLicense: ${{ secrets.XCEEDLICENSE }}
     - name: Build IfcDoc.sln
-      run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}} /property:XceedLicense=${{ secrets.XCEEDLICENSE }}
+      run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}}
     - name: Publish IfcDoc
       uses: actions/upload-artifact@v2
       with:
