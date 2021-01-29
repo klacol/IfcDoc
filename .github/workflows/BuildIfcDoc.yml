@@ -23,7 +23,7 @@ jobs:
     - name: Restore NUget Packages
       run: nuget.exe restore IfcDoc.sln 
     - name: Build IfcDoc.sln
-      run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}} /property:IfcDoc.Properties.Settings.XceedLicense=${{ secrets.XCEEDLICENSE }}
+      run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}} /property:XceedLicense=${{ secrets.XCEEDLICENSE }}
     - name: Publish IfcDoc
       uses: actions/upload-artifact@v2
       with:
