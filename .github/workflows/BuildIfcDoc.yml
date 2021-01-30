@@ -22,11 +22,12 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Restore NUget Packages
       run: nuget.exe restore IfcDoc.sln
-    - uses: microsoft/variable-substitution@v1 
-      with:
-        files: 'app.config'
+    - name: Set the XCEEDLICENSE in app.config
+      shell: pwsh
       env:
-        XceedLicense: ${{ secrets.XCEEDLICENSE }}
+        XCEEDLICENSE: ${{ secrets.XCEEDLICENSE }}
+      run: |
+        (get-content app.config) | foreach-object {$_ -replace "$$LicenseNumber$$", "$env:XCEEDLICENSE"} | set-content app.config
     - name: Build IfcDoc.sln
       run: msbuild IfcDoc.sln /p:Configuration=Release /p:VersionNumber=3.${{github.run_number}}
     - name: Publish IfcDoc
