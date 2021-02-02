@@ -234,6 +234,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeLogGenerator.cs" />
+    <Compile Include="FormatDOC.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="CtlCheckGrid.cs">
       <SubType>Component</SubType>

@@ -27,6 +27,7 @@ using IfcDoc.Schema.MVD;
 using IfcDoc.Format.EXP;
 using IfcDoc.Format.CSC;
 using IfcDoc.Format.JAV;
+using IfcDoc.Format.DOC;
 using IfcDoc.Format.HTM;
 using IfcDoc.Format.XSD;
 using IfcDoc.Format.XML;
@@ -47,6 +48,7 @@ namespace IfcDoc
 {
 	public static class DocumentationISO
 	{
+		public static string DOCX_PATH;
 		/// <summary>
 		/// Capture link to table or figure
 		/// </summary>
@@ -4676,13 +4678,10 @@ namespace IfcDoc
 			System.IO.Directory.CreateDirectory(pathPublication); // ensure directory exists
 			System.IO.Directory.CreateDirectory(path); // ensure directory exists
 
-			// DOCX: Create Folder
-			string docPath = pathPublication + @"\docx";
-			System.IO.Directory.CreateDirectory(docPath); // ensure directory exist
-
 			// DOCX: Create Document and save for later loading.
+			DOCX_PATH = path + @"\Content.docx";
 			Xceed.Words.NET.Licenser.LicenseKey = Properties.Settings.Default.XceedLicense;
-			using (DocX docxDocument = DocX.Create(docPath + @"\Content.docx"))
+			using (DocX docxDocument = DocX.Create(DOCX_PATH))
 			{
 				docxDocument.Save();
 			}
@@ -5098,7 +5097,7 @@ namespace IfcDoc
 			}
 
 			// DOCX: Insert cover image, title, copyright notice and TOC
-			using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+			using (DocX docxDocument = DocX.Load(DOCX_PATH))
 			{
 				var image = docxDocument.AddImage(pathPublication + @"\html\img\CoverPhoto.png");
 				var picture = image.CreatePicture(320.0f, 477.0f);
@@ -5139,14 +5138,11 @@ namespace IfcDoc
 				htmSection.WriteFooter(docPublication.Footer);
 
 				// DOCX: Insert Foreword
-				using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+				using (DocX docxDocument = DocX.Load(DOCX_PATH))
 				{
 					var pForeword = docxDocument.InsertParagraph();
 					ExtensionsHeadings.Heading(pForeword, HeadingType.Heading1).Append("Foreword");
-					pForeword.AppendLine();
-					pForeword.Append(docAnnotation.Documentation, formatRegular);
-					pForeword.InsertPageBreakAfterSelf();
-
+					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pForeword);
 					docxDocument.Save();
 				}
 
@@ -5174,17 +5170,16 @@ namespace IfcDoc
 				htmSection.WriteFooter(docPublication.Footer);
 
 				// DOCX: Insert Introduction
-				using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+				using (DocX docxDocument = DocX.Load(DOCX_PATH))
 				{
 					var pIntroduction = docxDocument.InsertParagraph();
+					pIntroduction.InsertPageBreakBeforeSelf();
 					ExtensionsHeadings.Heading(pIntroduction, HeadingType.Heading1).Append("Introduction");
-					pIntroduction.AppendLine();
-					pIntroduction.Append(docAnnotation.Documentation, formatRegular);
-					pIntroduction.InsertPageBreakAfterSelf();
-
+					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pIntroduction);
 					docxDocument.Save();
 				}
 			}
+
 			using (FormatHTM htmLink = new FormatHTM(path + "/link/introduction.html", mapEntity, mapSchema, included))
 			{
 				htmLink.WriteLinkPage("../introduction.html", docPublication);
@@ -5320,6 +5315,9 @@ namespace IfcDoc
 				}
 			}
 
+			// DOCX: Start FormatDOC for our own HTML text.
+			FormatDOC docxMain = new FormatDOC(mapEntity, mapSchema, included);
+
 			string pathTOC = path + @"\toc.html";
 			using (FormatHTM htmTOC = new FormatHTM(pathTOC, mapEntity, mapSchema, included))
 			{
@@ -5376,7 +5374,6 @@ namespace IfcDoc
 					}
 				}
 
-
 				// each section
 				int iSection = 0;
 				foreach (DocSection section in docProject.Sections)
@@ -5413,8 +5410,11 @@ namespace IfcDoc
 							htmSection.WriteScript(iSection, 0, 0, 0);
 							htmSection.WriteLine("<h1 class=\"num\" id=\"scope\">" + section.Name + "</h1>");
 
+							docxMain.Write("<h1>" + iSection + ". " + section.Name + "</h1>");
+
 							string documentation = UpdateNumbering(section.DocumentationHtml(), listFigures, listTables, section);
 							htmSection.WriteDocumentationMarkup(documentation, section, docPublication, path);
+							docxMain.Write(section.DocumentationHtml());
 
 
 							if (iSection == 1)
@@ -5425,6 +5425,10 @@ namespace IfcDoc
 									htmSection.Write("<tr><th>Format</th><th>Description</th></tr>");
 									htmSection.Write("<tr><td>Tab-delimited</th><td><a href=\"..\\infobase.csv\">infobase.csv</a></td></tr>");
 									htmSection.Write("</table>");
+									docxMain.Write("<table>");
+									docxMain.Write("<tr><th>Format</th><th>Description</th></tr>");
+									docxMain.Write("<tr><td>Tab-delimited</th><td><a href=\"infobase.csv\">infobase.csv</a></td></tr>");
+									docxMain.Write("</table>");
 								}
 
 								string delim = ",";
@@ -5593,15 +5597,19 @@ namespace IfcDoc
 							else if (iSection == 2)
 							{
 								htmSection.WriteLine("<dl>");
+								docxMain.Write("<dl>");
 								if (docProject.NormativeReferences != null)
 								{
 									foreach (DocReference docRef in docProject.NormativeReferences)
 									{
 										htmSection.WriteLine("<dt class=\"normativereference\"><a id=\"" + MakeLinkName(docRef) + "\">" + docRef.Name + "</a>, <i>" + docRef.DocumentationHtml() + "</i></dt>");
 										htmSection.WriteLine("<dd>&nbsp;</dd>");
+										docxMain.Write("<dt>" + docRef.Name + ", <i>" + docRef.DocumentationHtml() + "</i></dt>");
+										docxMain.Write("<dd>&nbsp;</dd>");
 									}
 								}
 								htmSection.WriteLine("</dl>");
+								docxMain.Write("</dl>");
 							}
 							else if (iSection == 3)
 							{
@@ -5613,7 +5621,9 @@ namespace IfcDoc
 
 								htmSection.WriteLine("<a id=\"terms\"/>");
 								htmSection.WriteLine("<h2>3.1 Terms and definitions</h2>");
+								docxMain.Write("<h2>3.1 Terms and definitions</h2>");
 								htmSection.WriteLine("<dl>");
+								docxMain.Write("<dl>");
 								if (docProject.Terms != null)
 								{
 									int[] indexpath = new int[] { 3, 1, 0 };
@@ -5621,12 +5631,16 @@ namespace IfcDoc
 									{
 										indexpath[2]++;
 										htmSection.WriteTerm(docTerm, indexpath);
+										docxMain.WriteTerm(docTerm, indexpath);
 									}
 								}
 								htmSection.WriteLine("</dl>");
+								docxMain.Write("</dl>");
 								htmSection.WriteLine("<a id=\"abbreviated\"/>");
 								htmSection.WriteLine("<h2>3.2 Abbreviated terms</h2>");
+								docxMain.Write("<h2>3.2 Abbreviated terms</h2>");
 								htmSection.WriteLine("<table class=\"abbreviatedterms\">");
+								docxMain.Write("<table>");
 								if (docProject.Abbreviations != null)
 								{
 									SortedList<string, DocAbbreviation> sl = new SortedList<string, DocAbbreviation>();
@@ -5640,9 +5654,12 @@ namespace IfcDoc
 										DocAbbreviation docRef = sl[s];
 										htmSection.WriteLine("<tr><td class=\"abbreviatedterm\" id=\"" + MakeLinkName(docRef) + "\">" + docRef.Name + "</td>");
 										htmSection.WriteLine("<td class=\"abbreviatedterm\">" + docRef.DocumentationHtmlNoParagraphs() + "</td></tr>");
+										docxMain.Write("<tr><td>" + docRef.Name + "</td>");
+										docxMain.Write("<td>" + docRef.DocumentationHtmlNoParagraphs() + "</td></tr>");
 									}
 								}
 								htmSection.WriteLine("</table>");
+								docxMain.Write("</table>");
 							}
 							else if (iSection == 4)
 							{
@@ -5652,53 +5669,70 @@ namespace IfcDoc
 								htmSection.WriteSummaryHeader("Concept templates", true, docPublication);
 								htmSection.WriteLine("<table class=\"gridtable\">");
 								htmSection.WriteLine("<tr><th>Template</th>");
+								docxMain.WriteSummaryHeader("Concept templates", true, docPublication);
+								docxMain.WriteLine("<table>");
+								docxMain.WriteLine("<tr><th>Template</th>");
 								for (int i = 0; i < docProject.ModelViews.Count; i++)
 								{
 									DocModelView docView = docProject.ModelViews[i];
 									if (included != null && included.ContainsKey(docView))
 									{
 										htmSection.WriteLine("<th>" + docProject.ModelViews[i].Name + "</th>");
+										docxMain.WriteLine("<th>" + docProject.ModelViews[i].Name + "</th>");
 									}
 								}
 								htmSection.WriteLine("</tr>");
+								docxMain.WriteLine("</tr>");
 								foreach (DocTemplateDefinition docTemplateDefinition in docProject.Templates)
 								{
 									if (!String.IsNullOrEmpty(docTemplateDefinition.Type))
 									{
 										htmSection.WriteTemplateTable(docProject, docTemplateDefinition, 0, dictionaryViews);
+										docxMain.WriteTemplateTable(docProject, docTemplateDefinition, 0, dictionaryViews);
 									}
 								}
 								htmSection.WriteLine("</table>");
 								htmSection.WriteSummaryFooter(docPublication);
+								docxMain.WriteLine("</table>");
+								docxMain.WriteSummaryFooter(docPublication);
 
 								htmSection.WriteLine("<p>");
+								docxMain.WriteLine("<p>");
 
 								// (b) partial templates
 								htmSection.WriteSummaryHeader("Partial templates in use", true, docPublication);
 								htmSection.WriteLine("<table class=\"gridtable\">");
 								htmSection.WriteLine("<tr><th>Template</th>");
+								docxMain.WriteSummaryHeader("Partial templates in use", true, docPublication);
+								docxMain.WriteLine("<table class=\"gridtable\">");
+								docxMain.WriteLine("<tr><th>Template</th>");
 								for (int i = 0; i < docProject.ModelViews.Count; i++)
 								{
 									DocModelView docView = docProject.ModelViews[i];
 									if (included != null && included.ContainsKey(docView))
 									{
 										htmSection.WriteLine("<th>" + docProject.ModelViews[i].Name + "</th>");
+										docxMain.WriteLine("<th>" + docProject.ModelViews[i].Name + "</th>");
 									}
 								}
 								htmSection.WriteLine("</tr>");
+								docxMain.WriteLine("</tr>");
 								foreach (DocTemplateDefinition docTemplateDefinition in docProject.Templates)
 								{
 									if (String.IsNullOrEmpty(docTemplateDefinition.Type))
 									{
 										htmSection.WriteTemplateTable(docProject, docTemplateDefinition, 0, dictionaryViews);
+										docxMain.WriteTemplateTable(docProject, docTemplateDefinition, 0, dictionaryViews);
 									}
 								}
 								htmSection.WriteLine("</table>");
 								htmSection.WriteSummaryFooter(docPublication);
-
+								docxMain.WriteLine("</table>");
+								docxMain.WriteSummaryFooter(docPublication);
 							}
 
 							htmSection.WriteLine("<p>");
+							docxMain.WriteLine("<p>");
 
 							int iListSchema = 0;
 							foreach (DocSchema schema in section.Schemas)
@@ -5710,10 +5744,12 @@ namespace IfcDoc
 								}
 							}
 							htmSection.WriteLine("</p>");
+							docxMain.WriteLine("</p>");
 
 							htmSection.WriteLinkTo(docPublication, "chapter-" + iSection, 1);
 
 							htmSection.WriteFooter(docPublication.Footer);
+							docxMain.WriteFooter(docPublication.Footer);
 						}
 
 						
@@ -5744,18 +5780,22 @@ namespace IfcDoc
 										htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + iSection.ToString() + "." + iSchema.ToString() + "\">" + iSection.ToString() + "." + iSchema.ToString() + "</a> <a class=\"listing-link\" href=\"" + schema.Name.ToLower() + "/content.html\" target=\"info\">" + schema.Name + "</a></td></tr>\r\n");
 
 										htmSchema.WriteHeader(schema.Name, iSection, iSchema, 0, 0, docPublication.Header);
+										docxMain.WriteHeader(schema.Name, iSection, iSchema, 0, 0, docPublication.Header);
 
 										htmSchema.WriteScript(iSection, iSchema, 0, 0);
 
 										htmSchema.WriteLine("<h2 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + " " + schema.Name + "</h2>");
+										docxMain.Write("<h2>" + iSection.ToString() + "." + iSchema.ToString() + " " + schema.Name + "</h2>");
 
 										int iSubSection = 1; // first subsection for schema semantic definition
 										htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition");
 										htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</td></tr>\r\n");
 										htmSchema.WriteLine("<h3 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
-
+										docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
+										// xxx continue
 										string documentation = UpdateNumbering(schema.DocumentationHtml(), listFigures, listTables, schema);
 										htmSchema.WriteDocumentationMarkup(documentation, schema, docPublication, path);
+										docxMain.WriteDocumentationMarkup(documentation, schema, docPublication, path);
 
 										// each type
 										if (schema.Types.Count > 0)
@@ -6551,15 +6591,20 @@ namespace IfcDoc
 						htmSection.WriteHeader(docannex.Name, iAnnex, 0, 0, 0, docPublication.Header);
 						htmSection.WriteScript(iAnnex, 0, 0, 0);
 						htmSection.WriteLine("<h1 class=\"annex\">Annex " + chAnnex.ToString() + "</h1>");
+						docxMain.Write("<h1> Annex " + chAnnex.ToString() + "</h1>");
+
 						if (chAnnex == 'A')
 						{
 							htmSection.WriteLine("<div align=\"center\">(normative)</div>");
+							docxMain.Write("<div>(normative)</div>");
 						}
 						else
 						{
 							htmSection.WriteLine("<div align=\"center\">(informative)</div>");
+							docxMain.Write("<div>(informative)</div>");
 						}
 						htmSection.WriteLine("<h1 class=\"annex\">" + docannex.Name + "</h1>");
+						docxMain.Write("<h1>" + docannex.Name + "</h1>");
 
 						if (chAnnex == 'A')// && String.IsNullOrEmpty(docannex.Documentation))
 						{
@@ -6570,6 +6615,9 @@ namespace IfcDoc
 							// now automatic -- specific text required by ISO
 							htmSection.WriteLine(
 								"<p>This annex contains a listing of the complete schema combining all definitions " +
+								"of clauses 5, 6, 7, and 8 without comments or other explanatory text. " +
+								"These listings are available in computer-interpretable form that may be parsed by computer.</p>");
+							docxMain.Write("<p>This annex contains a listing of the complete schema combining all definitions " +
 								"of clauses 5, 6, 7, and 8 without comments or other explanatory text. " +
 								"These listings are available in computer-interpretable form that may be parsed by computer.</p>");
 
@@ -7452,6 +7500,8 @@ namespace IfcDoc
 				htmTOC.WriteFooter(docPublication.Footer);
 			}
 
+			docxMain.Dispose();
+
 			worker.ReportProgress(++progressCurrent, "Index");
 			if (worker.CancellationPending)
 				return null;
@@ -7749,7 +7799,7 @@ namespace IfcDoc
 				htmIndex.WriteFooter(docPublication.Footer);
 
 				// DOCX: Update TOC and save a last time.
-				using (DocX docxDocument = DocX.Load(docPath + @"\Content.docx"))
+				using (DocX docxDocument = DocX.Load(DOCX_PATH))
 				{
 					// Update TOC
 					docxDocument.UpdateFields();

@@ -16,3 +16,4 @@
 /.vs
 /Ifc2Json/bin/Debug
 /packages
+app.config.local
