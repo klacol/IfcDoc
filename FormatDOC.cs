@@ -1578,7 +1578,7 @@ namespace IfcDoc.Format.DOC
 				return;
 
 			// target="SOURCE" -> target="info" (for transition; need to update vex)
-			content = content.Replace("target=\"SOURCE\"", "target=\"infoXXX\"");
+			content = content.Replace("target=\"SOURCE\"", "target=\"info\"");
 
 			int index = 0;
 

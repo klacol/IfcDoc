@@ -4690,13 +4690,13 @@ namespace IfcDoc
 			// TITLE
 			var formatTitle = new Formatting();
 			formatTitle.Bold = true;
-			formatTitle.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
+			//formatTitle.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
 			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatTitle.Size = 30;
 			// SUBTITLE
 			var formatVersion = new Formatting();
 			formatVersion.Bold = true;
-			formatVersion.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
+			//formatVersion.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
 			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatVersion.Size = 20;
 			// REGULAR TEXT
@@ -5099,10 +5099,7 @@ namespace IfcDoc
 			// DOCX: Insert cover image, title, copyright notice and TOC
 			using (DocX docxDocument = DocX.Load(DOCX_PATH))
 			{
-				var image = docxDocument.AddImage(pathPublication + @"\html\img\CoverPhoto.png");
-				var picture = image.CreatePicture(320.0f, 477.0f);
 				var pCover1 = docxDocument.InsertParagraph("");
-				pCover1.AppendPicture(picture);
 				pCover1.Append(docPublication.Name + "\n", formatTitle);
 				pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
 				pCover1.SpacingAfter(40);
@@ -5114,15 +5111,12 @@ namespace IfcDoc
 
 				pCover2.InsertPageBreakAfterSelf();
 
-				var pTOCHeader = docxDocument.InsertParagraph();
-				var pTOC = pTOCHeader.InsertParagraphAfterSelf(pTOCHeader);
-				ExtensionsHeadings.Heading(pTOCHeader, HeadingType.Heading1).Append("Contents");
 				var tocSwitches = new Dictionary<TableOfContentsSwitches, string>()
 					{
-					  { TableOfContentsSwitches.None, ""}
+					  { TableOfContentsSwitches.O, "1-3"},
+					  { TableOfContentsSwitches.U, ""},
 					};
-				docxDocument.InsertTableOfContents(pTOC, "", tocSwitches, "Heading5");
-				pTOC.InsertPageBreakAfterSelf();
+				docxDocument.InsertTableOfContents("Contents", tocSwitches);
 
 				docxDocument.Save();
 			}
@@ -5141,6 +5135,7 @@ namespace IfcDoc
 				using (DocX docxDocument = DocX.Load(DOCX_PATH))
 				{
 					var pForeword = docxDocument.InsertParagraph();
+					pForeword.InsertPageBreakBeforeSelf();
 					ExtensionsHeadings.Heading(pForeword, HeadingType.Heading1).Append("Foreword");
 					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pForeword);
 					docxDocument.Save();
@@ -5176,6 +5171,8 @@ namespace IfcDoc
 					pIntroduction.InsertPageBreakBeforeSelf();
 					ExtensionsHeadings.Heading(pIntroduction, HeadingType.Heading1).Append("Introduction");
 					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pIntroduction);
+					var pIntroduction2 = docxDocument.InsertParagraph();
+					pIntroduction2.InsertPageBreakAfterSelf();
 					docxDocument.Save();
 				}
 			}
@@ -5311,12 +5308,30 @@ namespace IfcDoc
 				{
 					iTemplate++;
 					int[] indexpath = new int[] { 4, iTemplate };
+					// DOCX: xxx todo -> add some container for template HTMLs
 					GenerateTemplate(docProject, docTemplate, mapEntity, mapSchema, included, indexpath, listFigures, listTables, docPublication, path);
 				}
 			}
 
 			// DOCX: Start FormatDOC for our own HTML text.
 			FormatDOC docxMain = new FormatDOC(mapEntity, mapSchema, included);
+			const string TABLE_STYLE = @"<style>
+table, td, th {
+  border: 1px solid black;
+}
+td, th {
+  text-align: left;
+}
+th {
+  background-color: lightgrey;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+</style>";
+			docxMain.WriteLine(TABLE_STYLE);
+
 
 			string pathTOC = path + @"\toc.html";
 			using (FormatHTM htmTOC = new FormatHTM(pathTOC, mapEntity, mapSchema, included))
@@ -5729,10 +5744,182 @@ namespace IfcDoc
 								htmSection.WriteSummaryFooter(docPublication);
 								docxMain.WriteLine("</table>");
 								docxMain.WriteSummaryFooter(docPublication);
+
+								// DOCX: xxx read all templates from HTML files
+								// OR - have the function write the HTML in a given StringBuilder
+								// order could be taken from above!
+
+								// xxx TEST
+								string testHTML = @"
+<h3 class='std'>4.8.2 Values</h3>
+<p> Properties may contain user - defined data, where data types are open - ended.</p>
+	 <p class='fig-ref'>Figure 33 illustrates an instance diagram.</p>
+<table><tr><td><img alt = 'Values' src= 'C:\Users\wschm\Desktop\klacol_buildingSmart\doc_generated\cod_1\html\schema\templates\diagrams\values.png' usemap= '#f33'>
+<map name= 'f33'>
+<area shape= 'rect' coords= '8,8,176,128' href= './schema/templates/../ifcpropertyresource/lexical/ifcsimpleproperty.html' alt= 'IfcSimpleProperty' />
+<area shape= 'rect' coords= '208,8,376,20' href= './schema/templates/../ifcmeasureresource/lexical/ifcidentifier.html' alt= 'IfcIdentifier' />
+<area shape= 'rect' coords= '208,40,376,52' href= './schema/templates/../ifcmeasureresource/lexical/ifctext.html' alt= 'IfcText' /></map>
+</td></tr><tr><td><p class='figure'>Figure 33 &mdash; Values</p></td></tr></table>
+
+<details><summary>mvdXML Specification</summary><div class='xsd'><code class='xsd'>
+&lt;?xml version = &quot;1.0&quot;?&gt;<br/>
+&lt;ConceptTemplate xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; uuid=&quot;88b4aaa9-0925-447c-b009-fe357b7c754e&quot; name=&quot;Values&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcsimpleproperty.html'>IfcSimpleProperty</a>&quot;&gt;<br/>
+&nbsp;&nbsp;&lt;Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&lt;/Rules&gt;<br/>
+&nbsp;&nbsp;&lt;SubTemplates&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;3d67a2d2-761d-44d9-a09e-b7fbb1fa5632&quot; name=&quot;Bounded Value&quot; owner=&quot;System&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertyboundedvalue.html'> IfcPropertyBoundedValue </a> &quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; UpperValue&quot; AttributeName=&quot;UpperBoundValue&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; LowerValue&quot; AttributeName=&quot;LowerBoundValue&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; SetValue&quot; AttributeName=&quot;SetPointValue&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot; c148a099-c351-43a8-9266-5f3de0b45a95&quot; name=&quot;Enumerated Value&quot; owner=&quot;System&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertyenumeratedvalue.html'> IfcPropertyEnumeratedValue </a> &quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;EnumerationValues&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; EnumerationReference&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcpropertyresource/lexical/ifcpropertyenumeration.html'> IfcPropertyEnumeration </a> &quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Reference&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifclabel.html'> IfcLabel </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;8e10b688-9179-4e3a-8db2-6abcaafe952d&quot; name=&quot;List Value&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertylistvalue.html'> IfcPropertyListValue </a> &quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;ListValues&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;6655f6d0-29a8-47b8-8f3d-c9fce9c9a620&quot; name=&quot;Single Value&quot; owner=&quot;System&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertysinglevalue.html'> IfcPropertySingleValue </a> &quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;NominalValue&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;35c947b0-6abc-4b13-8ec7-696ef2041721&quot; name=&quot;Table Value&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertytablevalue.html'> IfcPropertyTableValue </a> &quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;DefiningValues&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Reference&quot; AttributeName=&quot;DefinedValues&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Expression&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; CurveInterpolation&quot;&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcpropertyresource/lexical/ifccurveinterpolationenum.html'> IfcCurveInterpolationEnum </a> &quot; /&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
+&nbsp;&nbsp;&lt;/SubTemplates&gt;<br/>
+&lt;/ConceptTemplate&gt;<br/>
+</code></div>
+</details>
+</p>
+";
+								docxMain.WriteLine(testHTML);
 							}
 
 							htmSection.WriteLine("<p>");
-							docxMain.WriteLine("<p>");
 
 							int iListSchema = 0;
 							foreach (DocSchema schema in section.Schemas)
@@ -5744,7 +5931,6 @@ namespace IfcDoc
 								}
 							}
 							htmSection.WriteLine("</p>");
-							docxMain.WriteLine("</p>");
 
 							htmSection.WriteLinkTo(docPublication, "chapter-" + iSection, 1);
 
@@ -5792,7 +5978,7 @@ namespace IfcDoc
 										htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</td></tr>\r\n");
 										htmSchema.WriteLine("<h3 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
 										docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
-										// xxx continue
+										
 										string documentation = UpdateNumbering(schema.DocumentationHtml(), listFigures, listTables, schema);
 										htmSchema.WriteDocumentationMarkup(documentation, schema, docPublication, path);
 										docxMain.WriteDocumentationMarkup(documentation, schema, docPublication, path);
@@ -5804,6 +5990,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types</td></tr>\r\n");
+											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types</h3>\r\n");
 											int iType = 0;
 											foreach (DocType type in schema.Types)
 											{
@@ -5822,7 +6009,8 @@ namespace IfcDoc
 													mapNumber.Add(type, formatnum);
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[type.Name].ToLower() + "/lexical/" + type.Name.ToLower() + ".html\">" + formatnum.ToString() + " " + type.Name + "</a>");
-													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + "</a> <a class=\"listing-link\" href=\"" + mapSchema[type.Name].ToLower() + "/lexical/" + type.Name.ToLower() + ".html\" target=\"info\">" + type.Name + "</a><td></tr>\r\n");
+													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + "</a> <a class=\"listing-link\" href=\"" + mapSchema[type.Name].ToLower() + "/lexical/" + type.Name.ToLower() + ".html\" target=\"info\">" + type.Name + "</a></td></tr>\r\n");
+													docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + " " + type.Name + "</h4>\r\n");
 
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + type.Name.ToLower() + ".html", mapEntity, mapSchema, included))
@@ -5842,12 +6030,18 @@ namespace IfcDoc
 														htmDef.WriteChangeLog(type, listChangeSets, docPublication);
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the type</h5>");
+														docxMain.WriteChangeLog(type, listChangeSets, docPublication);
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + ".1 Semantic definitions at the type</h5>");
 
 														documentation = UpdateNumbering(type.DocumentationHtml(), listFigures, listTables, type);
 
 														htmDef.WriteSummaryHeader("Type definition", true, docPublication);
 														htmDef.WriteDocumentationMarkup(documentation, type, docPublication, path);
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteSummaryHeader("Type definition", true, docPublication);
+														docxMain.WriteDocumentationMarkup(documentation, type, docPublication, path);
+														docxMain.WriteSummaryFooter(docPublication);
 
 														if (type is DocEnumeration)
 														{
@@ -5856,6 +6050,9 @@ namespace IfcDoc
 															htmDef.WriteSummaryHeader("Enumeration definition", true, docPublication);
 															htmDef.WriteLine("<table class=\"attributes\">");
 															htmDef.WriteLine("<tr><th>Constant</th><th>Description</th></tr>");
+															docxMain.WriteSummaryHeader("Enumeration definition", true, docPublication);
+															docxMain.WriteLine("<table>");
+															docxMain.WriteLine("<tr><th>Constant</th><th>Description</th></tr>");
 															foreach (DocConstant docConstant in docEnumeration.Constants)
 															{
 																htmDef.Write("<tr><td>");
@@ -5863,9 +6060,16 @@ namespace IfcDoc
 																htmDef.Write("</td><td>");
 																htmDef.Write(docConstant.DocumentationHtmlNoParagraphs());
 																htmDef.Write("</td></tr>");
+																docxMain.Write("<tr><td>");
+																docxMain.Write(docConstant.Name);
+																docxMain.Write("</td><td>");
+																docxMain.Write(docConstant.DocumentationHtmlNoParagraphs());
+																docxMain.Write("</td></tr>");
 															}
 															htmDef.WriteLine("</table>");
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteLine("</table>");
+															docxMain.WriteSummaryFooter(docPublication);
 														}
 														else if (type is DocSelect)
 														{
@@ -5874,6 +6078,9 @@ namespace IfcDoc
 															htmDef.WriteSummaryHeader("Select definition", true, docPublication);
 															htmDef.WriteLine("<table class=\"attributes\">");
 															htmDef.WriteLine("<tr><th>Type</th><th>Description</th></tr>");
+															docxMain.WriteSummaryHeader("Select definition", true, docPublication);
+															docxMain.WriteLine("<table>");
+															docxMain.WriteLine("<tr><th>Type</th><th>Description</th></tr>");
 															foreach (DocSelectItem docSelectItem in docSelect.Selects)
 															{
 																DocObject docRef = null;
@@ -5887,14 +6094,23 @@ namespace IfcDoc
 																		htmDef.Write("</td><td>");
 																		htmDef.Write(docSelectItem.DocumentationHtmlNoParagraphs());
 																		htmDef.Write("</td></tr>");
+																		docxMain.Write("<tr><td>");
+																		docxMain.WriteDefinition(docSelectItem.Name);
+																		//docxMain.Write(docSelectItem.Name);
+																		docxMain.Write("</td><td>");
+																		docxMain.Write(docSelectItem.DocumentationHtmlNoParagraphs());
+																		docxMain.Write("</td></tr>");
 																	}
 																}
 															}
 															htmDef.WriteLine("</table>");
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteLine("</table>");
+															docxMain.WriteSummaryFooter(docPublication);
 														}
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 
 														// where rules (for defined types)
@@ -5905,29 +6121,41 @@ namespace IfcDoc
 
 															// formal propositions
 															htmDef.WriteSummaryHeader("Formal Propositions", true, docPublication);
+															docxMain.WriteSummaryHeader("Formal Propositions", true, docPublication);
 
 															htmDef.WriteLine("<table class=\"propositions\">");
 															htmDef.WriteLine("<tr><th>Rule</th><th>Description</th></tr>");
+															docxMain.WriteLine("<table>");
+															docxMain.WriteLine("<tr><th>Rule</th><th>Description</th></tr>");
 															foreach (DocWhereRule docAttr in entity.WhereRules)
 															{
 																htmDef.Write("<tr><td>");
 																htmDef.Write(docAttr.Name);
 																htmDef.Write("</td><td>");
+																docxMain.Write("<tr><td>");
+																docxMain.Write(docAttr.Name);
+																docxMain.Write("</td><td>");
 																if (docAttr.Documentation != null)
 																{
 																	htmDef.WriteDocumentationMarkup(docAttr.DocumentationHtmlNoParagraphs(), entity, docPublication, path);
+																	docxMain.WriteDocumentationMarkup(docAttr.DocumentationHtmlNoParagraphs(), entity, docPublication, path);
 																}
 																htmDef.WriteLine("</td></tr>");
+																docxMain.WriteLine("</td></tr>");
 															}
 															htmDef.WriteLine("</table>\r\n");
+															docxMain.WriteLine("</table>\r\n");
 
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteSummaryFooter(docPublication);
 														}
 
 
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>Formal representations</h5>");
 
 														foreach (DocFormat docFormat in docPublication.Formats)
 														{
@@ -5940,6 +6168,7 @@ namespace IfcDoc
 																{
 																	case DocFormatSchemaEnum.STEP:
 																		htmDef.WriteExpressTypeAndDocumentation(type, !docPublication.HideHistory, docPublication);
+																		docxMain.WriteExpressTypeAndDocumentation(type, !docPublication.HideHistory, docPublication);
 																		break;
 
 																	default:
@@ -5965,6 +6194,11 @@ namespace IfcDoc
 																				htmDef.WriteExpression(output, "../../");
 																				htmDef.Write("</code></div>");
 																				htmDef.WriteSummaryFooter(docPublication);
+																				docxMain.WriteSummaryHeader(docFormat.FormatType.ToString() + " Specification", false, docPublication);
+																				docxMain.Write("<div class=\"xsd\"><code class=\"xsd\">");
+																				docxMain.WriteExpression(output, "../../");
+																				docxMain.Write("</code></div>");
+																				docxMain.WriteSummaryFooter(docPublication);
 																			}
 																		}
 																		break;
@@ -5973,11 +6207,13 @@ namespace IfcDoc
 														}
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														// write url for incoming page link
 														htmDef.WriteLinkTo(docProject, docPublication, type);
 
 														htmDef.WriteFooter(docPublication.Footer);
+														docxMain.WriteFooter(docPublication.Footer);
 													}
 												}
 											}
@@ -5991,6 +6227,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities</td></tr>\r\n");
+											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities</h3>\r\n");
 											int iEntity = 0;
 											foreach (DocEntity entity in schema.Entities)
 											{
@@ -6006,6 +6243,7 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
+													docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</h4>\r\n");
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
@@ -6013,6 +6251,7 @@ namespace IfcDoc
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iEntity);
 
 														htmDef.WriteLine("<h4 class=\"num\">" + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4>" + entity.Name + "</h4>");
 
 														if (!docPublication.ISO)
 														{
@@ -6020,22 +6259,31 @@ namespace IfcDoc
 														}
 														htmDef.WriteLocalizationSection(entity, locales, docPublication);
 														htmDef.WriteChangeLog(entity, listChangeSets, docPublication);
+														docxMain.WriteChangeLog(entity, listChangeSets, docPublication);
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the entity</h5>");
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + ".1 Semantic definitions at the entity</h5>");
 
 														string entitydocumentation = FormatEntityDescription(docProject, entity, listFigures, listTables);
 
 														htmDef.WriteSummaryHeader("Entity definition", true, docPublication);
 														htmDef.WriteDocumentationMarkup(entitydocumentation, entity, docPublication, path);
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteSummaryHeader("Entity definition", true, docPublication);
+														docxMain.WriteDocumentationMarkup(entitydocumentation, entity, docPublication, path);
+														docxMain.WriteSummaryFooter(docPublication);
 
 														if (entity.Attributes != null && entity.Attributes.Count > 0)
 														{
 															htmDef.WriteSummaryHeader("Attribute definitions", true, docPublication);
+															docxMain.WriteSummaryHeader("Attribute definitions", true, docPublication);
 
 															htmDef.WriteLine("<table class=\"attributes\">");
 															htmDef.WriteLine("<tr><th>#</th><th>Attribute</th><th>Type</th><th>Cardinality</th><th>Description</th>");
+															docxMain.WriteLine("<table>");
+															docxMain.WriteLine("<tr><th>#</th><th>Attribute</th><th>Type</th><th>Cardinality</th><th>Description</th>");
 
 															if (views != null)
 															{
@@ -6044,9 +6292,13 @@ namespace IfcDoc
 																	htmDef.Write("<th>");
 																	htmDef.Write(docViewHeader.Name.Substring(0, 1));
 																	htmDef.Write("</th>");
+																	docxMain.Write("<th>");
+																	docxMain.Write(docViewHeader.Name.Substring(0, 1));
+																	docxMain.Write("</th>");
 																}
 															}
 															htmDef.WriteLine("</tr>");
+															docxMain.WriteLine("</tr>");
 
 															int sequence = 0;
 
@@ -6066,10 +6318,13 @@ namespace IfcDoc
 															}
 
 															htmDef.WriteEntityAttributes(entity, entity, views, dictionaryViews, docPublication, path, ref sequence);
+															docxMain.WriteEntityAttributes(entity, entity, views, dictionaryViews, docPublication, path, ref sequence);
 
 															htmDef.WriteLine("</table>");
+															docxMain.WriteLine("</table>");
 
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteSummaryFooter(docPublication);
 														}
 
 														if (entity.WhereRules != null && entity.WhereRules.Count > 0)
@@ -6088,32 +6343,45 @@ namespace IfcDoc
 															{
 																// formal propositions
 																htmDef.WriteSummaryHeader("Formal Propositions", true, docPublication);
+																docxMain.WriteSummaryHeader("Formal Propositions", true, docPublication);
 
 																htmDef.WriteLine("<table class=\"propositions\">");
 																htmDef.WriteLine("<tr><th>Rule</th><th>Description</th></tr>");
+																docxMain.WriteLine("<table>");
+																docxMain.WriteLine("<tr><th>Rule</th><th>Description</th></tr>");
 																foreach (DocWhereRule docAttr in entity.WhereRules)
 																{
 																	htmDef.Write("<tr><td>");
 																	htmDef.Write(docAttr.Name);
 																	htmDef.Write("</td><td>");
+																	docxMain.Write("<tr><td>");
+																	docxMain.Write(docAttr.Name);
+																	docxMain.Write("</td><td>");
 																	if (docAttr.Documentation != null)
 																	{
 																		htmDef.WriteDocumentationMarkup(docAttr.DocumentationHtmlNoParagraphs(), entity, docPublication, path);
+																		docxMain.WriteDocumentationMarkup(docAttr.DocumentationHtmlNoParagraphs(), entity, docPublication, path);
 																	}
 																	htmDef.WriteLine("</td></tr>");
+																	docxMain.WriteLine("</td></tr>");
 																}
 																htmDef.WriteLine("</table>\r\n");
+																docxMain.WriteLine("</table>\r\n");
 
 																htmDef.WriteSummaryFooter(docPublication);
+																docxMain.WriteSummaryFooter(docPublication);
 															}
 														}
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														if (!docPublication.ISO)
 														{
 															htmDef.WriteLine("<section>");
 															htmDef.WriteLine("<h5 class=\"num\">Inherited definitions from supertypes</h5>");
+															docxMain.WriteLine("<section>");
+															docxMain.WriteLine("<h5>Inherited definitions from supertypes</h5>");
 
 															Dictionary<Rectangle, DocEntity> map = new Dictionary<Rectangle, DocEntity>();
 															using (System.Drawing.Font font = new System.Drawing.Font(FontFamily.GenericSansSerif, 8.0f))
@@ -6133,6 +6401,8 @@ namespace IfcDoc
 
 															htmDef.WriteSummaryHeader("Entity inheritance", true, docPublication);
 															htmDef.WriteLine("<img src=\"../../../diagrams/" + entity.Name.ToLower() + ".png\" usemap=\"#f\"/>");
+															docxMain.WriteSummaryHeader("Entity inheritance", true, docPublication);
+															docxMain.WriteLine("<img src=\"../../../diagrams/" + entity.Name.ToLower() + ".png\"/>");
 
 															htmDef.WriteLine("<map name=\"f\">");
 															foreach (Rectangle rc in map.Keys)
@@ -6146,11 +6416,15 @@ namespace IfcDoc
 															htmDef.WriteLine("</map>");
 
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteSummaryFooter(docPublication);
 
 															htmDef.WriteSummaryHeader("Attribute inheritance", false, docPublication);
+															docxMain.WriteSummaryHeader("Attribute inheritance", false, docPublication);
 
 															htmDef.WriteLine("<table class=\"attributes\">");
 															htmDef.Write("<tr><th>#</th><th>Attribute</th><th>Type</th><th>Cardinality</th><th>Description</th>");
+															docxMain.WriteLine("<table>");
+															docxMain.Write("<tr><th>#</th><th>Attribute</th><th>Type</th><th>Cardinality</th><th>Description</th>");
 															if (views != null)
 															{
 																foreach (DocModelView docViewHeader in views)
@@ -6158,22 +6432,31 @@ namespace IfcDoc
 																	htmDef.Write("<th>");
 																	htmDef.Write(docViewHeader.Name.Substring(0, 1));
 																	htmDef.Write("</th>");
+																	docxMain.Write("<th>");
+																	docxMain.Write(docViewHeader.Name.Substring(0, 1));
+																	docxMain.Write("</th>");
 																}
 															}
 															htmDef.WriteLine("</tr>");
+															docxMain.WriteLine("</tr>");
 
 															int sequenceX = 0;
 															htmDef.WriteEntityInheritance(entity, entity, views, dictionaryViews, docPublication, path, ref sequenceX);
+															docxMain.WriteEntityInheritance(entity, entity, views, dictionaryViews, docPublication, path, ref sequenceX);
 
 															htmDef.WriteLine("</table>");
+															docxMain.WriteLine("</table>");
 
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteSummaryFooter(docPublication);
 															htmDef.WriteLine("</section>");
+															docxMain.WriteLine("</section>");
 														}
 
 														string conceptdocumentation = FormatEntityConcepts(docProject, entity, mapEntity, mapSchema, included, listFigures, listTables, path, docPublication);
 														//htmDef.WriteLine(conceptdocumentation);
 														htmDef.WriteDocumentationMarkup(conceptdocumentation, entity, docPublication, path);
+														docxMain.WriteDocumentationMarkup(conceptdocumentation, entity, docPublication, path);
 
 														if (docProject.Examples != null)
 														{
@@ -6187,6 +6470,9 @@ namespace IfcDoc
 																htmDef.WriteLine("<section>");
 																htmDef.WriteLine("<h5 class=\"num\">Examples</h5>");
 																htmDef.WriteLine("<ul>");
+																docxMain.WriteLine("<section>");
+																docxMain.WriteLine("<h5 class=\"num\">Examples</h5>");
+																docxMain.WriteLine("<ul>");
 																foreach (DocExample docExample in listExample)
 																{
 																	if (docExample.Name != null)
@@ -6197,15 +6483,26 @@ namespace IfcDoc
 																		htmDef.Write(docExample.Name);
 																		htmDef.Write("</a></li>");
 																		htmDef.WriteLine("");
+																		// DOCX: doesn't really make sense here....
+																		docxMain.Write("<li><a href=\"../../../annex/annex-e/");
+																		docxMain.Write(docExample.Name.Replace(' ', '-').ToLower());
+																		docxMain.Write(".html\">");
+																		docxMain.Write(docExample.Name);
+																		docxMain.Write("</a></li>");
+																		docxMain.WriteLine("");
 																	}
 																}
 																htmDef.WriteLine("</ul>");
 																htmDef.WriteLine("</section>");
+																docxMain.WriteLine("</ul>");
+																docxMain.WriteLine("</section>");
 															}
 														}
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>Formal representations</h5>");
 
 														foreach (DocFormat docFormat in docPublication.Formats)
 														{
@@ -6218,6 +6515,8 @@ namespace IfcDoc
 																{
 																	case DocFormatSchemaEnum.STEP:
 																		htmDef.WriteExpressEntitySpecification(entity, !docPublication.HideHistory, docPublication);
+																		// DOCX: Doesn't seem to make too much sense, either.....
+																		docxMain.WriteExpressEntitySpecification(entity, !docPublication.HideHistory, docPublication);
 																		break;
 
 																	default:
@@ -6231,6 +6530,11 @@ namespace IfcDoc
 																				htmDef.WriteExpression(output, "../../");
 																				htmDef.Write("</code></div>");
 																				htmDef.WriteSummaryFooter(docPublication);
+																				docxMain.WriteSummaryHeader(docFormat.FormatType.ToString() + " Specification", false, docPublication);
+																				docxMain.Write("<div><code class=\"xsd\">");
+																				docxMain.WriteExpression(output, "../../");
+																				docxMain.Write("</code></div>");
+																				docxMain.WriteSummaryFooter(docPublication);
 																			}
 																		}
 																		break;
@@ -6239,11 +6543,13 @@ namespace IfcDoc
 														}
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														// write url for incoming page link
 														htmDef.WriteLinkTo(docProject, docPublication, entity);
 
 														htmDef.WriteFooter(docPublication.Footer);
+														docxMain.WriteFooter(docPublication.Footer);
 													}
 												}
 											}
@@ -6256,6 +6562,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Functions");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Functions</td></tr>\r\n");
+											docxMain.WriteLine("<tr><td>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Functions</td></tr>\r\n");
 											int iEntity = 0;
 											foreach (DocFunction entity in schema.Functions)
 											{
@@ -6268,6 +6575,7 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
+													docxMain.WriteLine("<tr><td>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</td></tr>\r\n");
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
@@ -6275,35 +6583,53 @@ namespace IfcDoc
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iEntity);
 
 														htmDef.WriteLine("<h4 class=\"num\">" + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4 class=\"num\">" + entity.Name + "</h4>");
 
 														htmDef.WriteLocalizationSection(entity, locales, docPublication);
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the function</h5>");
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>Semantic definitions at the function</h5>");
 
 														htmDef.WriteSummaryHeader("Function Definition", true, docPublication);
 														htmDef.WriteLine("<p>");
 														htmDef.WriteDocumentationMarkup(entity.DocumentationHtml(), entity, docPublication, path);
 														htmDef.WriteLine("</p>");
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteSummaryHeader("Function Definition", true, docPublication);
+														docxMain.WriteLine("<p>");
+														docxMain.WriteDocumentationMarkup(entity.DocumentationHtml(), entity, docPublication, path);
+														docxMain.WriteLine("</p>");
+														docxMain.WriteSummaryFooter(docPublication);
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>Formal representations</h5>");
 
 														htmDef.WriteSummaryHeader("EXPRESS Specification", true, docPublication);
 														htmDef.Write("<div class=\"xsd\"><code class=\"xsd\">");
 														htmDef.WriteExpressFunction(entity);
 														htmDef.Write("</code></div>");
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteSummaryHeader("EXPRESS Specification", true, docPublication);
+														docxMain.Write("<div class=\"xsd\"><code class=\"xsd\">");
+														docxMain.WriteExpressFunction(entity);
+														docxMain.Write("</code></div>");
+														docxMain.WriteSummaryFooter(docPublication);
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														// write url for incoming page link
 														htmDef.WriteLinkTo(docProject, docPublication, entity);
 
 														htmDef.WriteFooter(docPublication.Footer);
+														docxMain.WriteFooter(docPublication.Footer);
 													}
 												}
 											}
@@ -6316,6 +6642,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules</td></tr>\r\n");
+											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules</h3>\r\n");
 											int iEntity = 0;
 											foreach (DocGlobalRule entity in schema.GlobalRules)
 											{
@@ -6328,42 +6655,61 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + "</a> <a href=\"" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
-
+													docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</h4>\r\n");
+													
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
 														htmDef.WriteHeader(entity.Name, iSection, iSchema, iSubSection, iEntity, docPublication.Header);
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iEntity);
 
 														htmDef.WriteLine("<h4 class=\"num\">" + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4>" + entity.Name + "</h4>");
 
 														htmDef.WriteLocalizationSection(entity, locales, docPublication);
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the global rule</h5>");
+														docxMain.WriteLine("<section>");
+														docxMain.WriteLine("<h5>Semantic definitions at the global rule</h5>");
 
 														htmDef.WriteSummaryHeader("Global Rule Definition", true, docPublication);
 														htmDef.WriteLine("<p>");
 														htmDef.WriteDocumentationMarkup(entity.DocumentationHtml(), entity, docPublication, path);
 														htmDef.WriteLine("</p>");
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteSummaryHeader("Global Rule Definition", true, docPublication);
+														docxMain.WriteLine("<p>");
+														docxMain.WriteDocumentationMarkup(entity.DocumentationHtml(), entity, docPublication, path);
+														docxMain.WriteLine("</p>");
+														docxMain.WriteSummaryFooter(docPublication);
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														htmDef.WriteLine("<section>");
+														docxMain.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
+														docxMain.WriteLine("<h5>Formal representations</h5>");
 
 														htmDef.WriteSummaryHeader("EXPRESS Specification", true, docPublication);
 														htmDef.WriteLine("<span class=\"express\">\r\n");
 														htmDef.WriteExpressGlobalRule(entity);
 														htmDef.WriteLine("</span>\r\n");
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteSummaryHeader("EXPRESS Specification", true, docPublication);
+														docxMain.WriteLine("<span class=\"express\">\r\n");
+														docxMain.WriteExpressGlobalRule(entity);
+														docxMain.WriteLine("</span>\r\n");
+														docxMain.WriteSummaryFooter(docPublication);
 
 														htmDef.WriteLine("</section>");
+														docxMain.WriteLine("</section>");
 
 														// write url for incoming page link
 														htmDef.WriteLinkTo(docProject, docPublication, entity);
 
 														htmDef.WriteFooter(docPublication.Footer);
+														docxMain.WriteFooter(docPublication.Footer);
 													}
 												}
 											}
@@ -6376,6 +6722,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets</td></tr>\r\n");
+											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets</h3>\r\n");
 											int iPset = 0;
 											foreach (DocPropertySet entity in schema.PropertySets)
 											{
@@ -6393,18 +6740,23 @@ namespace IfcDoc
 
 														htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/pset/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 														htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + formatnum + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/pset/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
+														docxMain.WriteLine("<h3>" + formatnum + " " + entity.Name + "</h3>\r\n");
 
 														using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\pset\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 														{
 															htmDef.WriteHeader(entity.Name, iSection, iSchema, iSubSection, iPset, docPublication.Header);
 															htmDef.WriteScript(iSection, iSchema, iSubSection, iPset);
 															htmDef.WriteLine("<h4 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
+															docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
 
 															if (!String.IsNullOrEmpty(entity.ApplicableType))
 															{
 																htmDef.Write("<p>");
 																htmDef.WriteDefinition(entity.PropertySetType);
 																htmDef.WriteLine("/");
+																docxMain.Write("<p>");
+																docxMain.WriteDefinition(entity.PropertySetType);
+																docxMain.WriteLine("/");
 
 																if (entity.ApplicableType != null && entity.ApplicableType.Contains("/"))
 																{
@@ -6417,20 +6769,25 @@ namespace IfcDoc
 																			htmDef.Write(" / ");
 																		}
 																		htmDef.WriteDefinition(applicableparts[iapppart]);
+																		docxMain.WriteDefinition(applicableparts[iapppart]);
 																	}
 																}
 																else
 																{
 																	htmDef.WriteDefinition(entity.ApplicableType);
+																	docxMain.WriteDefinition(entity.ApplicableType);
 																}
 																htmDef.Write("</p>");
+																docxMain.Write("</p>");
 															}
 
 															// english by default
 															htmDef.WriteLocalizationSection(entity, locales, docPublication);
 															htmDef.WriteChangeLog(entity, listChangeSets, docPublication);
+															docxMain.WriteChangeLog(entity, listChangeSets, docPublication);
 
 															htmDef.WriteSummaryHeader("Properties", true, docPublication);
+															docxMain.WriteSummaryHeader("Properties", true, docPublication);
 															if (!docPublication.ISO)//!Properties.Settings.Default.NoXml)
 															{
 																////htmDef.WriteLine("<p><a href=\"http://lookup.bsdd.buildingsmart.com/api/4.0/IfdPSet/search/" + entity.Name + "\" target=\"ifd\"><img src=\"../../../img/external.png\" title=\"Link to IFD\"/> buildingSMART Data Dictionary</a></p>\r\n");
@@ -6439,6 +6796,7 @@ namespace IfcDoc
 																// use guid
 																string guid = GlobalId.Format(entity.Uuid);
 																htmDef.WriteLine("<p><a href=\"http://lookup.bsdd.buildingsmart.com/api/4.0/IfdPSet/" + guid + "/ifcVersion/2x4\" target=\"ifd\"><img border=\"0\" src=\"../../../img/external.png\" title=\"Link to IFD\"/> buildingSMART Data Dictionary</a></p>\r\n");
+																docxMain.WriteLine("<p><a href=\"http://lookup.bsdd.buildingsmart.com/api/4.0/IfdPSet/" + guid + "/ifcVersion/2x4\" target=\"ifd\"><img border=\"0\" src=\"../../../img/external.png\" title=\"Link to IFD\"/> buildingSMART Data Dictionary</a></p>\r\n");
 
 																htmDef.WriteLine("<p><a href=\"../../../psd/" + entity.Name + ".xml\"><img border=\"0\" src=\"../../../img/diagram.png\" title=\"Link to PSD-XML\"/> PSD-XML</a></p>\r\n");
 															}
@@ -6454,11 +6812,15 @@ namespace IfcDoc
 															htmDef.WriteLine(FormatFigure(docProject, entity, null, entity.Name, listFigures, path));
 															htmDef.WriteProperties(entity.Properties, docProject, applicableentity, locales);
 															htmDef.WriteSummaryFooter(docPublication);
+															docxMain.WriteLine(FormatFigure(docProject, entity, null, entity.Name, listFigures, path));
+															docxMain.WriteProperties(entity.Properties, docProject, applicableentity, locales);
+															docxMain.WriteSummaryFooter(docPublication);
 
 															// write url for incoming page link
 															htmDef.WriteLinkTo(docProject, docPublication, entity);
 
 															htmDef.WriteFooter(docPublication.Footer);
+															docxMain.WriteFooter(docPublication.Footer);
 														}
 
 														// generate PSD listing
@@ -6480,6 +6842,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</td></tr>\r\n");
+											htmSectionTOC.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</h3>\r\n");
 											int iPset = 0;
 											foreach (DocQuantitySet entity in schema.QuantitySets)
 											{
@@ -6495,28 +6858,37 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/qset/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + formatnum + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/qset/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
+													docxMain.WriteLine("<h3>" + formatnum + " " + entity.Name + "</h3>\r\n");
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\qset\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
 														htmDef.WriteHeader(entity.Name, iSection, iSchema, iSubSection, iPset, docPublication.Header);
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iPset);
 														htmDef.WriteLine("<h4 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
 
 														if (!String.IsNullOrEmpty(entity.ApplicableType))
 														{
 															htmDef.Write("<p>");
+															docxMain.Write("<p>");
 
 															htmDef.WriteDefinition("QTO_TYPEDRIVENOVERRIDE");
 															htmDef.WriteLine("/");
 															htmDef.WriteDefinition(entity.ApplicableType);
 															htmDef.Write("</p>");
+															docxMain.WriteDefinition("QTO_TYPEDRIVENOVERRIDE");
+															docxMain.WriteLine("/");
+															docxMain.WriteDefinition(entity.ApplicableType);
+															docxMain.Write("</p>");
 														}
 
 														// english by default
 														htmDef.WriteLocalizationSection(entity, locales, docPublication);
 														htmDef.WriteChangeLog(entity, listChangeSets, docPublication);
+														docxMain.WriteChangeLog(entity, listChangeSets, docPublication);
 
 														htmDef.WriteSummaryHeader("Quantities", true, docPublication);
+														docxMain.WriteSummaryHeader("Quantities", true, docPublication);
 														if (!docPublication.ISO)//!Properties.Settings.Default.NoXml)
 														{
 															htmDef.WriteLine("<p><a href=\"../../../qto/" + entity.Name + ".xml\"><img border=\"0\" src=\"../../../img/diagram.png\" title=\"Link to QTO-XML\"/> QTO-XML</a></p>\r\n");
@@ -6525,23 +6897,32 @@ namespace IfcDoc
 														// write each quantity
 														htmDef.WriteLine("<table class=\"gridtable\">");
 														htmDef.WriteLine("<tr><th>Name</th><th>Type</th><th>Description</th>");
+														docxMain.WriteLine("<table>");
+														docxMain.WriteLine("<tr><th>Name</th><th>Type</th><th>Description</th>");
 														foreach (DocQuantity docprop in entity.Quantities)
 														{
 															htmDef.WriteLine("<tr><td>" + docprop.Name + "</td><td>");
 															htmDef.WriteDefinition(docprop.QuantityType.ToString());
 															htmDef.WriteLine("</td><td>");
+															docxMain.WriteLine("<tr><td>" + docprop.Name + "</td><td>");
+															docxMain.WriteDefinition(docprop.QuantityType.ToString());
+															docxMain.WriteLine("</td><td>");
 
 															htmDef.WriteLocalizationTable(docprop, locales);
 
 															htmDef.WriteLine("</td></tr>");
+															docxMain.WriteLine("</td></tr>");
 														}
 														htmDef.WriteLine("</table>");
 														htmDef.WriteSummaryFooter(docPublication);
+														docxMain.WriteLine("</table>");
+														docxMain.WriteSummaryFooter(docPublication);
 
 														// write url for incoming page link
 														htmDef.WriteLinkTo(docProject, docPublication, entity);
 
 														htmDef.WriteFooter(docPublication.Footer);
+														docxMain.WriteFooter(docPublication.Footer);
 													}
 
 													// generate PSD listing
@@ -6564,6 +6945,7 @@ namespace IfcDoc
 									htmSchema.WriteLinkTo(docProject, docPublication, schema);
 
 									htmSchema.WriteFooter(docPublication.Footer);
+									docxMain.WriteFooter(docPublication.Footer);
 								}
 							}
 						}
@@ -6624,9 +7006,12 @@ namespace IfcDoc
 							if (!docPublication.ISO)
 							{
 								htmSection.WriteLine("<p>Official schema publications for this release are at the following URLs:</p>");
+								docxMain.WriteLine("<p>Official schema publications for this release are at the following URLs:</p>");
 
 								htmSection.WriteLine("<table class=\"gridtable\">");
 								htmSection.WriteLine("<tr><th>Format</th><th>URL official</th></tr>");
+								docxMain.WriteLine("<table class=\"gridtable\">");
+								docxMain.WriteLine("<tr><th>Format</th><th>URL official</th></tr>");
 								foreach (DocFormat docFormat in docPublication.Formats)
 								{
 									if (docFormat.FormatOptions != DocFormatOptionEnum.None)
@@ -6651,26 +7036,32 @@ namespace IfcDoc
 										}
 
 										htmSection.WriteLine("<tr><td>" + formatdesc + "</td><td><a href=\"" + formatUri + "\" target=\"_blank\">" + formatName + "</a></td></tr>");
+										docxMain.WriteLine("<tr><td>" + formatdesc + "</td><td><a href=\"" + formatUri + "\" target=\"_blank\">" + formatName + "</a></td></tr>");
 									}
 								}
 								htmSection.WriteLine("</table>");
+								docxMain.WriteLine("</table>");
 							}
 
 							htmSection.WriteLine("</ul>");
+							docxMain.WriteLine("</ul>");
 						}
 						else
 						{
 							// no numbering for annex currently... docannex.Documentation = UpdateNumbering(section.Documentation, ref iFigure, ref iTable);
 							htmSection.WriteDocumentationMarkup(docannex.DocumentationHtml(), docannex, docPublication, path);
+							docxMain.WriteDocumentationMarkup(docannex.DocumentationHtml(), docannex, docPublication, path);
 						}
 
 						if (chAnnex == 'C')
 						{
 							htmSection.WriteInheritanceMapping(docProject, views, docPublication);
+							docxMain.WriteInheritanceMapping(docProject, views, docPublication);
 						}
 
 						htmSection.WriteLinkTo(docPublication, "annex-" + chAnnex.ToString().ToLower(), 1);
 						htmSection.WriteFooter(docPublication.Footer);
+						docxMain.WriteFooter(docPublication.Footer);
 					}
 
 					using (FormatHTM htmSectionTOC = new FormatHTM(path + @"\annex\toc-" + chAnnex.ToString().ToLower() + ".html", mapEntity, mapSchema, included))
