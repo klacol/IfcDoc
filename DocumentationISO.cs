@@ -2641,7 +2641,8 @@ namespace IfcDoc
 			FormatHTM htmSectionTOC,
 			Dictionary<DocFormatSchemaEnum, Serializer> mapFormats,
 			Dictionary<long, object> outerinstancemap, // instance data of parent example, if inherited
-			object outerinstanceroot
+			object outerinstanceroot,
+			FormatDOC docxMain
 			)
 		{
 			if (included == null || included.ContainsKey(docExample))
@@ -2677,6 +2678,7 @@ namespace IfcDoc
 					htmExample.WriteHeader(docExample.Name, 2, docPublication.Header);
 					htmExample.WriteScript(-5, indexpath[0], 0, 0);
 					htmExample.WriteLine("<h3 class=\"std\">" + indexpathstring + " " + docExample.Name + "</h3>");
+					docxMain.WriteLine("<h3>" + indexpathstring + " " + docExample.Name + "</h3>");
 
 					// extract file
 					byte[] filecontents = docExample.File;
@@ -2901,7 +2903,7 @@ namespace IfcDoc
 					{
 						try
 						{
-							GenerateExample(docProject, docPublication, docSub, listFormats, path, indexpath, included, mapEntity, mapSchema, listFigures, listTables, htmTOC, htmSectionTOC, mapFormats, outerinstancemap, outerinstanceroot);
+							GenerateExample(docProject, docPublication, docSub, listFormats, path, indexpath, included, mapEntity, mapSchema, listFigures, listTables, htmTOC, htmSectionTOC, mapFormats, outerinstancemap, outerinstanceroot, docxMain);
 						}
 						catch(Exception x)
 						{
@@ -4509,7 +4511,7 @@ namespace IfcDoc
 		public static void GenerateView(
 			DocProject docProject, DocPublication docPublication, DocModelView docProjectModelView,
 			Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema, Dictionary<DocObject, bool> included, int[] indexpath, string path,
-			FormatHTM htmTOC, FormatHTM htmSectionTOC)
+			FormatHTM htmTOC, FormatHTM htmSectionTOC, FormatDOC docxMain)
 		{
 			string indexer = "";
 			foreach (int part in indexpath)
@@ -4559,6 +4561,7 @@ namespace IfcDoc
 					string tag = "h3";
 					string id = docProjectModelView.Name.ToLower();
 					htmTemplate.WriteLine("<" + tag + "><a id=\"" + id + "\" name=\"" + id + "\">" + indexer + " " + docProjectModelView.Name + "</a></" + tag + ">");
+					docxMain.WriteLine("<" + tag + ">" + indexer + " " + docProjectModelView.Name + "</" + tag + ">");
 
 					// write table of status for MVD
 					if (!docPublication.ISO && !String.IsNullOrEmpty(docProjectModelView.Code))
@@ -4567,16 +4570,22 @@ namespace IfcDoc
 						htmTemplate.WriteLine("<tr><th>Code</th><th>Version</th><th>Status</th><th>Author</th><th>Copyright</th></tr>");
 						htmTemplate.WriteLine("<tr><td>" + docProjectModelView.Code + "</td><td>" + docProjectModelView.Version + "</td><td>" + docProjectModelView.Status + "</td><td>" + docProjectModelView.Author + "</td><td>" + docProjectModelView.Copyright + "</td></tr>");
 						htmTemplate.WriteLine("</table>");
+						docxMain.WriteLine("<table class=\"gridtable\">");
+						docxMain.WriteLine("<tr><th>Code</th><th>Version</th><th>Status</th><th>Author</th><th>Copyright</th></tr>");
+						docxMain.WriteLine("<tr><td>" + docProjectModelView.Code + "</td><td>" + docProjectModelView.Version + "</td><td>" + docProjectModelView.Status + "</td><td>" + docProjectModelView.Author + "</td><td>" + docProjectModelView.Copyright + "</td></tr>");
+						docxMain.WriteLine("</table>");
 					}
 
 					string viewtable = FormatView(docProject, docPublication, docProjectModelView, mapEntity, mapSchema, new StringBuilder());
 					htmTemplate.WriteDocumentationMarkup(viewtable, docProjectModelView, docPublication, path);
+					docxMain.WriteDocumentationMarkup(viewtable, docProjectModelView, docPublication, path);
 
 					// write tables within MVD
 
 				}
 
 				htmTemplate.WriteFooter(docPublication.Footer);
+				docxMain.WriteFooter(docPublication.Footer);
 			}
 
 			// icon for view
@@ -4623,10 +4632,14 @@ namespace IfcDoc
 
 						htmExchange.WriteLine("<" + tag + "><a id=\"" + id + "\" name=\"" + id + "\">" + exchangeindexer + " " + docExchange.Name + "</a></" + tag + ">");
 						htmExchange.WriteLine("<p class=\"std\">");
+						docxMain.WriteLine("<" + tag + ">" + exchangeindexer + " " + docExchange.Name + "</" + tag + ">");
+						docxMain.WriteLine("<p class=\"std\">");
 
 						string exchangedoc = FormatExchange(docProject, docProjectModelView, docExchange, mapEntity, mapSchema, docPublication);
 						htmExchange.WriteDocumentationMarkup(exchangedoc, docExchange, docPublication, path);
 						htmExchange.WriteLine("</p>");
+						docxMain.WriteDocumentationMarkup(exchangedoc, docExchange, docPublication, path);
+						docxMain.WriteLine("</p>");
 					}
 
 					// icons for each exchange
@@ -4660,7 +4673,7 @@ namespace IfcDoc
 					int[] subindexpath = new int[indexpath.Length + 1];
 					indexpath.CopyTo(subindexpath, 0);
 					subindexpath[subindexpath.Length - 1] = iTemplate;
-					GenerateView(docProject, docPublication, docSubView, mapEntity, mapSchema, included, subindexpath, path, htmTOC, htmSectionTOC);
+					GenerateView(docProject, docPublication, docSubView, mapEntity, mapSchema, included, subindexpath, path, htmTOC, htmSectionTOC, docxMain);
 				}
 			}
 
@@ -4718,20 +4731,18 @@ namespace IfcDoc
 			// TITLE
 			var formatTitle = new Formatting();
 			formatTitle.Bold = true;
-			//formatTitle.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
 			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatTitle.Size = 30;
 			// SUBTITLE
 			var formatVersion = new Formatting();
 			formatVersion.Bold = true;
-			//formatVersion.FontColor = Color.FromArgb(255, 23, 86, 158); // "ff 17 56 9e";
 			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
 			formatVersion.Size = 20;
 			// REGULAR TEXT
 			var formatRegular = new Formatting();
 			formatRegular.FontColor = Color.Black;
 			formatRegular.FontFamily = new Xceed.Document.NET.Font("Arial");
-			formatRegular.Size = 9; // 12px
+			formatRegular.Size = 9;
 
 			DiagramFormat diagramformat = DiagramFormat.ExpressG;
 			if (docPublication.UML)
@@ -5458,8 +5469,8 @@ table {
 
 							string documentation = UpdateNumbering(section.DocumentationHtml(), listFigures, listTables, section);
 							htmSection.WriteDocumentationMarkup(documentation, section, docPublication, path);
-							docxMain.Write(section.DocumentationHtml());
-
+							docxMain.WriteDocumentationMarkup(documentation, section, docPublication, path);
+							
 
 							if (iSection == 1)
 							{
@@ -5634,7 +5645,7 @@ table {
 
 										htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>"); // extra separation at top level
 
-										GenerateView(docProject, docPublication, docProjectModelView, mapEntity, mapSchema, included, indexpath, path, htmTOC, htmSectionTOC);
+										GenerateView(docProject, docPublication, docProjectModelView, mapEntity, mapSchema, included, indexpath, path, htmTOC, htmSectionTOC, docxMain);
 									}
 								}
 							}
@@ -6264,7 +6275,7 @@ table {
 															htmDef.WriteSummaryHeader("Entity inheritance", true, docPublication);
 															htmDef.WriteLine("<img src=\"../../../diagrams/" + entity.Name.ToLower() + ".png\" usemap=\"#f\"/>");
 															docxMain.WriteSummaryHeader("Entity inheritance", true, docPublication);
-															docxMain.WriteLine("<img src=\"../../../diagrams/" + entity.Name.ToLower() + ".png\"/>");
+															docxMain.WriteLine("<img src=\""+path+"\\diagrams\\" + entity.Name.ToLower() + ".png\"/>");
 
 															htmDef.WriteLine("<map name=\"f\">");
 															foreach (Rectangle rc in map.Keys)
@@ -6705,6 +6716,7 @@ table {
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</td></tr>\r\n");
 											htmSectionTOC.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</h3>\r\n");
+											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</h3>\r\n");
 											int iPset = 0;
 											foreach (DocQuantitySet entity in schema.QuantitySets)
 											{
@@ -7234,6 +7246,7 @@ table {
 								htmTOC.WriteTOC(1, "D.1 Schema diagrams");
 								htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">D.1 Schema diagrams</td></tr>");
+								docxMain.WriteLine("<h2>D.1 Schema diagrams</h2>");
 
 								for (int iSchemaSection = 5; iSchemaSection <= 8; iSchemaSection++)
 								{
@@ -7243,6 +7256,7 @@ table {
 
 									htmTOC.WriteTOC(2, "D.1." + iDiagramSection + " " + docSection.Name);
 									htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">D.1." + iDiagramSection + " " + docSection.Name + "</td></tr>");
+									docxMain.WriteLine("<h3>D.1." + iDiagramSection + " " + docSection.Name + "</h3>");
 
 
 									int iSchema = 0;
@@ -7271,8 +7285,10 @@ table {
 													htmSchemaDiagram.WriteHeader(docSection.Name, 3, docPublication.Header);
 													htmSchemaDiagram.WriteScript(iAnnex, iSub, iSection, 0);
 													htmSchemaDiagram.WriteLine("<h4 class=\"std\">D.1." + iDiagramSection + "." + iSchema + " " + docSchema.Name + "</h4>");
+													docxMain.WriteLine("<h4>D.1." + iDiagramSection + "." + iSchema + " " + docSchema.Name + "</h4>");
 
 													htmSchemaDiagram.WriteLine("<p>");
+													docxMain.WriteLine("<p>");
 
 													// write thumbnail links for each diagram
 													for (int iDiagram = 1; iDiagram <= iLastDiagram; iDiagram++)
@@ -7280,6 +7296,7 @@ table {
 														string formatnumber = iDiagram.ToString("D4"); // 0001
 														htmSchemaDiagram.WriteLine("<a href=\"diagram_" + formatnumber + ".html\">" +
 															"<img src=\"diagram_" + formatnumber + ".png\" width=\"300\" height=\"444\" /></a>"); // width=\"150\" height=\"222\"> 
+														docxMain.WriteLine("<img src=\"diagram_" + formatnumber + ".png\" width=\"300\" height=\"444\" />");
 
 														// generate EXPRESS-G diagram
 														if (docSchema.DiagramPagesHorz != 0)
@@ -7301,6 +7318,8 @@ table {
 
 													htmSchemaDiagram.WriteLine("</p>");
 													htmSchemaDiagram.WriteFooter(docPublication.Footer);
+													docxMain.WriteLine("</p>");
+													docxMain.WriteFooter(docPublication.Footer);
 												}
 
 
@@ -7317,6 +7336,7 @@ table {
 														htmSchema.WriteScript(iAnnex, 1, iDiagramSection, iDiagram);
 
 														htmSchema.WriteLine("<h4 class=\"std\">");
+														docxMain.WriteLine("<h4>");
 														if (iDiagram > 1)
 														{
 															htmSchema.Write("<a href=\"diagram_" + (iDiagram - 1).ToString("D4") + ".html\"><img src=\"../../../img/navleft.png\" style=\"border: 0px\" /></a>");
@@ -7337,8 +7357,11 @@ table {
 														}
 														htmSchema.Write(" " + docSchema.Name + " (" + iDiagram + "/" + iLastDiagram + ")");
 														htmSchema.WriteLine("</h4>");
+														docxMain.Write(" " + docSchema.Name + " (" + iDiagram + "/" + iLastDiagram + ")");
+														docxMain.WriteLine("</h4>");
 
 														htmSchema.WriteLine("<img src=\"diagram_" + formatnumber + ".png\" usemap=\"#diagram\" >");
+														docxMain.WriteLine("<img src=\"diagram_" + formatnumber + ".png\">");
 														htmSchema.WriteLine("  <map name=\"diagram\" >");
 														foreach (DocType docType in docSchema.Types)
 														{
@@ -7410,7 +7433,9 @@ table {
 														}
 														htmSchema.WriteLine("  </map>");
 														htmSchema.WriteLine("</img>");
+														docxMain.WriteLine("</img>");
 														htmSchema.WriteFooter(docPublication.Footer);
+														docxMain.WriteFooter(docPublication.Footer);
 													}
 												}
 											}
@@ -7422,6 +7447,7 @@ table {
 								htmTOC.WriteTOC(1, "D.2 Instance diagrams");
 								htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">D.2 Instance diagrams</td></tr>");
+								docxMain.WriteLine("<h2>D.2 Instance diagrams</h2>");
 
 								// D.1 -- schema diagrams - express-G
 								// D.1.1 -- core layer
@@ -7455,6 +7481,9 @@ table {
 												htmCover.WriteHeader(docView.Name, 3, docPublication.Header);
 												htmCover.WriteLine("<h3 class=\"std\">D.2." + iView + " " + docView.Name + " Diagrams</h3>");
 												htmCover.WriteFooter(String.Empty);
+												docxMain.WriteHeader(docView.Name, 3, docPublication.Header);
+												docxMain.WriteLine("<h3>D.2." + iView + " " + docView.Name + " Diagrams</h3>");
+												docxMain.WriteFooter(String.Empty);
 											}
 
 											// sort by entity name
@@ -7485,11 +7514,14 @@ table {
 													htmRoot.WriteHeader(docRoot.ApplicableEntity.Name, iAnnex, 2, 0, iView, docPublication.Header);
 													htmRoot.WriteScript(iAnnex, 2, iView, iRoot);
 													htmRoot.WriteLine("<h3 class=\"std\">D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
+													docxMain.WriteLine("<h3>D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
 
 													string diagram = FormatDiagram(docProject, docRoot.ApplicableEntity, docView, listFigures, mapEntity, mapSchema, path);
 													htmRoot.WriteLine(diagram);
+													docxMain.WriteLine(diagram);
 
 													htmRoot.WriteFooter(docPublication.Footer);
+													docxMain.WriteFooter(docPublication.Footer);
 												}
 
 											}
@@ -7515,7 +7547,7 @@ table {
 									indexpath.Add(0);
 									foreach (DocExample docExample in docProject.Examples)
 									{
-										GenerateExample(docProject, docPublication, docExample, listFormats, path, indexpath, included, mapEntity, mapSchema, listFigures, listTables, htmTOC, htmSectionTOC, mapFormatData, null, null);
+										GenerateExample(docProject, docPublication, docExample, listFormats, path, indexpath, included, mapEntity, mapSchema, listFigures, listTables, htmTOC, htmSectionTOC, mapFormatData, null, null, docxMain);
 									}
 								}
 								break;

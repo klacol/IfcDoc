@@ -709,6 +709,8 @@ namespace IfcDoc.Format.DOC
 
 		public void WriteSummaryHeader(string caption, bool expanded, DocPublication docPublication)
 		{
+			this.m_writer.AppendLine("<br/>");
+
 			if (docPublication.ISO)
 			{
 				this.m_writer.AppendLine("<p><b><u>" + caption + "</u></b></p>");
@@ -721,7 +723,7 @@ namespace IfcDoc.Format.DOC
 			this.m_writer.Append("><summary>");
 			this.m_writer.Append(caption);
 			this.m_writer.Append("</summary>");
-			//this.m_writer.AppendLine("<br/>");
+			this.m_writer.AppendLine("<br/>");
 		}
 
 		public void WriteSummaryFooter(DocPublication docPublication)
@@ -1711,24 +1713,11 @@ namespace IfcDoc.Format.DOC
 								string schema = null;
 								if (def.StartsWith(prefix) && this.m_mapSchema.TryGetValue(def, out schema))
 								{
-									// only 1 level up
-									string hyperlink = schema.ToLower() + @"/lexical/" + def.ToLower() + ".html";
-									if (!(current is DocSection))
-									{
-										hyperlink = "../" + hyperlink;
-									}
-									string format = "<a href=\"" + hyperlink + "\">" + def + "</a>";
-									content = content.Substring(0, index) + format + content.Substring(end + 4);
+									content = content.Substring(0, index) + def + content.Substring(end + 4);
 								}
 								else if (docDef is DocTemplateDefinition)
 								{
-									string hyperlink = def.ToLower().Replace(' ', '-') + ".html";
-									if (current is DocSection)
-									{
-										hyperlink = "templates/" + hyperlink;
-									}
-									string format = "<a href=\"" + hyperlink + "\">" + def + "</a>";
-									content = content.Substring(0, index) + format + content.Substring(end + 4);
+									content = content.Substring(0, index) + def + content.Substring(end + 4);
 								}
 								else
 								{
@@ -1741,9 +1730,7 @@ namespace IfcDoc.Format.DOC
 								string schema = null;
 								if (def.StartsWith(prefix) && this.m_mapSchema.TryGetValue(def, out schema))
 								{
-									string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + def.ToLower() + ".html";
-									string format = "<a href=\"" + hyperlink + "\">" + def + "</a>";
-									content = content.Substring(0, index) + format + content.Substring(end + 4);
+									content = content.Substring(0, index) + def + content.Substring(end + 4);
 								}
 							}
 							else if (current is DocExample)
@@ -1751,9 +1738,7 @@ namespace IfcDoc.Format.DOC
 								string schema = null;
 								if (def.StartsWith(prefix) && this.m_mapSchema.TryGetValue(def, out schema))
 								{
-									string hyperlink = @"../../schema/" + schema.ToLower() + @"/lexical/" + def.ToLower() + ".html";
-									string format = "<a href=\"" + hyperlink + "\">" + def + "</a>";
-									content = content.Substring(0, index) + format + content.Substring(end + 4);
+									content = content.Substring(0, index) + def + content.Substring(end + 4);
 								}
 							}
 							else if (docDef != current)
@@ -1789,13 +1774,15 @@ namespace IfcDoc.Format.DOC
 			if (current is DocTemplateDefinition || current is DocExchangeDefinition)
 			{
 				// skip diagrams
+				content = Regex.Replace(content, "./diagrams", htmlPath + "\\schema\\templates\\diagrams");
 			}
 			else
 			{
-				string relativePath = "../../../";
+				string relativePath = htmlPath;
 				if (current is DocPropertyEnumeration)
-					relativePath = "../";
-				content = Regex.Replace(content, "../(../)+figures", relativePath + "figures");
+					relativePath = htmlPath;
+				content = Regex.Replace(content, "../(../)+figures", relativePath + "\\figures");
+				content = Regex.Replace(content, "../(../)+img", relativePath + "\\img");
 				int i = content.Length - 1;
 				while (i > 0)
 				{
