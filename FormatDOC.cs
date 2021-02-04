@@ -68,6 +68,10 @@ namespace IfcDoc.Format.DOC
 				docxDocument.Save();
 			}
 		}
+		public string GetContent()
+		{
+			return this.m_writer.ToString();
+		}
 		#endregion
 
 		public void WriteHeader(string title, int level, string pageheader)

@@ -3774,7 +3774,8 @@ namespace IfcDoc
 			List<ContentRef> listFigures,
 			List<ContentRef> listTables,
 			DocPublication docPublication,
-			string path)
+			string path,
+			Dictionary<string, FormatDOC> docxHtmlBuilderDict)
 		{
 			string pathTemplate = path + @"\schema\templates\" + MakeLinkName(docTemplate) + ".html";
 			using (FormatHTM htmTemplate = new FormatHTM(pathTemplate, mapEntity, mapSchema, included))
@@ -3799,12 +3800,16 @@ namespace IfcDoc
 					 "//-->\r\n" +
 					 "</script>\r\n");
 
+				FormatDOC docxTemplate = new FormatDOC(mapEntity, mapSchema, included);
+
 				string tag = "h" + indexpath.Length.ToString(); // e.g. <h3>
 				string id = MakeLinkName(docTemplate);
 				htmTemplate.WriteLine("<" + tag + " class=\"std\">" + indexer + " " + docTemplate.Name + "</" + tag + ">");
+				docxTemplate.WriteLine("<" + tag + ">" + indexer + " " + docTemplate.Name + "</" + tag + ">");
 
 				string doc = FormatTemplate(docProject, docPublication, docTemplate, listFigures, listTables, mapEntity, mapSchema, included, path);
 				htmTemplate.WriteDocumentationMarkup(doc, docTemplate, docPublication, path);
+				docxTemplate.WriteDocumentationMarkup(doc, docTemplate, docPublication, path);
 
 				// write formatted mvdXML
 				//htmTemplate.WriteLine("<details open=\"open\">");
@@ -3845,6 +3850,11 @@ namespace IfcDoc
 					htmTemplate.WriteExpression(mvdOutput.ToString(), "../../"); //... need to use tabs...
 					htmTemplate.WriteLine("</code></div>");
 					htmTemplate.WriteSummaryFooter(docPublication);
+					docxTemplate.WriteSummaryHeader("mvdXML Specification", false, docPublication);
+					docxTemplate.WriteLine("<div class=\"xsd\"><code class=\"xsd\">");
+					docxTemplate.WriteExpression(mvdOutput.ToString(), "../../"); //... need to use tabs...
+					docxTemplate.WriteLine("</code></div>");
+					docxTemplate.WriteSummaryFooter(docPublication);
 				}
 
 				if (docProject.Examples != null)
@@ -3858,6 +3868,8 @@ namespace IfcDoc
 					{
 						htmTemplate.WriteLine("<p class=\"spec-head\">Examples:</p>");
 						htmTemplate.WriteLine("<ul>");
+						docxTemplate.WriteLine("<p class=\"spec-head\">Examples:</p>");
+						docxTemplate.WriteLine("<ul>");
 						foreach (DocExample docExample in listExample)
 						{
 							if (docExample.Name != null)
@@ -3868,9 +3880,16 @@ namespace IfcDoc
 								htmTemplate.Write(docExample.Name);
 								htmTemplate.Write("</a></li>");
 								htmTemplate.WriteLine("");
+								docxTemplate.Write("<li><a href=\"../../annex/annex-e/");
+								docxTemplate.Write(MakeLinkName(docExample));
+								docxTemplate.Write(".html\">");
+								docxTemplate.Write(docExample.Name);
+								docxTemplate.Write("</a></li>");
+								docxTemplate.WriteLine("");
 							}
 						}
 						htmTemplate.WriteLine("</ul>");
+						docxTemplate.WriteLine("</ul>");
 					}
 				}
 
@@ -3878,6 +3897,9 @@ namespace IfcDoc
 				htmTemplate.WriteLinkTo(docProject, docPublication, docTemplate);
 
 				htmTemplate.WriteFooter(docPublication.Footer);
+				docxTemplate.WriteFooter(docPublication.Footer);
+
+				docxHtmlBuilderDict.Add(indexer + " " + docTemplate.Name, docxTemplate);
 			}
 
 			// recurse
@@ -3890,7 +3912,7 @@ namespace IfcDoc
 					int[] subindexpath = new int[indexpath.Length + 1];
 					indexpath.CopyTo(subindexpath, 0);
 					subindexpath[subindexpath.Length - 1] = iTemplate;
-					GenerateTemplate(docProject, docSubTemplate, mapEntity, mapSchema, included, subindexpath, listFigures, listTables, docPublication, path);
+					GenerateTemplate(docProject, docSubTemplate, mapEntity, mapSchema, included, subindexpath, listFigures, listTables, docPublication, path, docxHtmlBuilderDict);
 				}
 			}
 		}
@@ -4681,9 +4703,15 @@ namespace IfcDoc
 			// DOCX: Create Document and save for later loading.
 			DOCX_PATH = path + @"\Content.docx";
 			Xceed.Words.NET.Licenser.LicenseKey = Properties.Settings.Default.XceedLicense;
-			using (DocX docxDocument = DocX.Create(DOCX_PATH))
+			try
 			{
-				docxDocument.Save();
+				using (DocX docxDocument = DocX.Create(DOCX_PATH))
+				{
+					docxDocument.Save();
+				}
+			} catch(Exception e)
+			{
+				// ignore
 			}
 
 			// DOCX: Format Definitions
@@ -5302,14 +5330,15 @@ namespace IfcDoc
 
 			// NEW: section 4 templates
 			int iTemplate = 0;
+			Dictionary<string, FormatDOC> docxSection4Templates = new Dictionary<string, FormatDOC>();
 			foreach (DocTemplateDefinition docTemplate in docProject.Templates)
 			{
 				if (included == null || included.ContainsKey(docTemplate))
 				{
 					iTemplate++;
 					int[] indexpath = new int[] { 4, iTemplate };
-					// DOCX: xxx todo -> add some container for template HTMLs
-					GenerateTemplate(docProject, docTemplate, mapEntity, mapSchema, included, indexpath, listFigures, listTables, docPublication, path);
+					// DOCX: Adding a container for template HTMLs
+					GenerateTemplate(docProject, docTemplate, mapEntity, mapSchema, included, indexpath, listFigures, listTables, docPublication, path, docxSection4Templates);
 				}
 			}
 
@@ -5745,178 +5774,11 @@ table {
 								docxMain.WriteLine("</table>");
 								docxMain.WriteSummaryFooter(docPublication);
 
-								// DOCX: xxx read all templates from HTML files
-								// OR - have the function write the HTML in a given StringBuilder
-								// order could be taken from above!
-
-								// xxx TEST
-								string testHTML = @"
-<h3 class='std'>4.8.2 Values</h3>
-<p> Properties may contain user - defined data, where data types are open - ended.</p>
-	 <p class='fig-ref'>Figure 33 illustrates an instance diagram.</p>
-<table><tr><td><img alt = 'Values' src= 'C:\Users\wschm\Desktop\klacol_buildingSmart\doc_generated\cod_1\html\schema\templates\diagrams\values.png' usemap= '#f33'>
-<map name= 'f33'>
-<area shape= 'rect' coords= '8,8,176,128' href= './schema/templates/../ifcpropertyresource/lexical/ifcsimpleproperty.html' alt= 'IfcSimpleProperty' />
-<area shape= 'rect' coords= '208,8,376,20' href= './schema/templates/../ifcmeasureresource/lexical/ifcidentifier.html' alt= 'IfcIdentifier' />
-<area shape= 'rect' coords= '208,40,376,52' href= './schema/templates/../ifcmeasureresource/lexical/ifctext.html' alt= 'IfcText' /></map>
-</td></tr><tr><td><p class='figure'>Figure 33 &mdash; Values</p></td></tr></table>
-
-<details><summary>mvdXML Specification</summary><div class='xsd'><code class='xsd'>
-&lt;?xml version = &quot;1.0&quot;?&gt;<br/>
-&lt;ConceptTemplate xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; uuid=&quot;88b4aaa9-0925-447c-b009-fe357b7c754e&quot; name=&quot;Values&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcsimpleproperty.html'>IfcSimpleProperty</a>&quot;&gt;<br/>
-&nbsp;&nbsp;&lt;Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&lt;/Rules&gt;<br/>
-&nbsp;&nbsp;&lt;SubTemplates&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;3d67a2d2-761d-44d9-a09e-b7fbb1fa5632&quot; name=&quot;Bounded Value&quot; owner=&quot;System&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertyboundedvalue.html'> IfcPropertyBoundedValue </a> &quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; UpperValue&quot; AttributeName=&quot;UpperBoundValue&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; LowerValue&quot; AttributeName=&quot;LowerBoundValue&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; SetValue&quot; AttributeName=&quot;SetPointValue&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot; c148a099-c351-43a8-9266-5f3de0b45a95&quot; name=&quot;Enumerated Value&quot; owner=&quot;System&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertyenumeratedvalue.html'> IfcPropertyEnumeratedValue </a> &quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;EnumerationValues&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; EnumerationReference&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcpropertyresource/lexical/ifcpropertyenumeration.html'> IfcPropertyEnumeration </a> &quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Reference&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifclabel.html'> IfcLabel </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;8e10b688-9179-4e3a-8db2-6abcaafe952d&quot; name=&quot;List Value&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertylistvalue.html'> IfcPropertyListValue </a> &quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;ListValues&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;6655f6d0-29a8-47b8-8f3d-c9fce9c9a620&quot; name=&quot;Single Value&quot; owner=&quot;System&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertysinglevalue.html'> IfcPropertySingleValue </a> &quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;NominalValue&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;ConceptTemplate uuid = &quot;35c947b0-6abc-4b13-8ec7-696ef2041721&quot; name=&quot;Table Value&quot; applicableSchema=&quot;IFC4&quot; applicableEntity=&quot;<a href='../ifcpropertyresource/lexical/ifcpropertytablevalue.html'> IfcPropertyTableValue </a> &quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; PropertyName&quot; AttributeName=&quot;Name&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcidentifier.html'> IfcIdentifier </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Description&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Value&quot; AttributeName=&quot;DefiningValues&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule RuleID = &quot; Reference&quot; AttributeName=&quot;DefinedValues&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifcvalue.html'> IfcValue </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; Expression&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcmeasureresource/lexical/ifctext.html'> IfcText </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AttributeRule AttributeName = &quot; CurveInterpolation&quot;&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;EntityRule EntityName = &quot;<a href='../ifcpropertyresource/lexical/ifccurveinterpolationenum.html'> IfcCurveInterpolationEnum </a> &quot; /&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/EntityRules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/AttributeRule&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Rules&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ConceptTemplate&gt;<br/>
-&nbsp;&nbsp;&lt;/SubTemplates&gt;<br/>
-&lt;/ConceptTemplate&gt;<br/>
-</code></div>
-</details>
-</p>
-";
-								docxMain.WriteLine(testHTML);
+								// DOCX: Writing all templates from section 4 HTML
+								foreach (KeyValuePair<string, FormatDOC> kvp in docxSection4Templates)
+								{
+									docxMain.WriteLine(kvp.Value.GetContent());
+								}
 							}
 
 							htmSection.WriteLine("<p>");
