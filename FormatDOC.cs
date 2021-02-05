@@ -321,29 +321,34 @@ namespace IfcDoc.Format.DOC
 				{
 					if (this.m_anchors)
 					{
-						return "<a href=\"#" + definition.ToLower() + "\">" + definition + "</a>";
+						//return "<a href=\"#" + definition.ToLower() + "\">" + definition + "</a>";
+						return definition;
 					}
 					else
 					{
 						if (ent is DocPropertyEnumeration)
 						{
-							string hyperlink = urlprefix + @"/penum/" + definition.ToLower() + ".html";
-							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							//string hyperlink = urlprefix + @"/penum/" + definition.ToLower() + ".html";
+							//return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							return definition;
 						}
 						else if (ent is DocPropertySet)
 						{
-							string hyperlink = urlprefix + schema.ToLower() + @"/pset/" + definition.ToLower() + ".html";
-							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							//string hyperlink = urlprefix + schema.ToLower() + @"/pset/" + definition.ToLower() + ".html";
+							//return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							return definition;
 						}
 						else if (ent is DocQuantitySet)
 						{
-							string hyperlink = urlprefix + schema.ToLower() + @"/qset/" + definition.ToLower() + ".html";
-							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							//string hyperlink = urlprefix + schema.ToLower() + @"/qset/" + definition.ToLower() + ".html";
+							//return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							return definition;
 						}
 						else //if (ent is DocDefinition)
 						{
-							string hyperlink = urlprefix + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".html";
-							return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							//string hyperlink = urlprefix + schema.ToLower() + @"/lexical/" + definition.ToLower() + ".html";
+							//return "<a href=\"" + hyperlink + "\">" + definition + "</a>";
+							return definition;
 						}
 					}
 				}
@@ -757,7 +762,7 @@ namespace IfcDoc.Format.DOC
 			}
 
 			// link to EXPRESS-G
-			WriteExpressDiagram(entity);
+			//WriteExpressDiagram(entity);
 
 			this.m_writer.AppendLine("</code></div>");
 
@@ -979,7 +984,7 @@ namespace IfcDoc.Format.DOC
 			this.m_writer.AppendLine("</p>");
 
 			// link to EXPRESS-G
-			WriteExpressDiagram(type);
+			//WriteExpressDiagram(type);
 
 			this.m_writer.AppendLine("</code></div>");
 			this.WriteSummaryFooter(docPublication);
@@ -1230,8 +1235,8 @@ namespace IfcDoc.Format.DOC
 			}
 
 			this.WriteHeader(localeheader, 3, docPublication.Header);
-			this.WriteLine("<h2 class=\"annex\">" + caption + " (" + alphaEntity.Count.ToString() + " translations out of " + count + ")</h2>");
-			this.WriteLine("<ul class=\"std\">");
+			this.WriteLine("<h3>" + caption + " (" + alphaEntity.Count.ToString() + " translations out of " + count + ")</h3>");
+			this.WriteLine("<ul>");
 
 			foreach (string key in alphaEntity.Keys)
 			{
@@ -1252,7 +1257,7 @@ namespace IfcDoc.Format.DOC
 				{
 					hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 				}
-				this.WriteLine("<li><a class=\"listing-link\" href=\"" + hyperlink + "\">" + key + "</a></li>\r\n");
+				this.WriteLine("<li>" + key + "</li>\r\n");
 			}
 
 			this.WriteLine("</ul>");
@@ -1268,14 +1273,14 @@ namespace IfcDoc.Format.DOC
 			}
 
 			string linkid = locale.Substring(0, 2) + "-alphabeticalorder-" + caption.ToLower().Replace(' ', '-');
-			this.WriteLinkTo(docPublication, linkid, 3);
+			//this.WriteLinkTo(docPublication, linkid, 3);
 
 
 			this.WriteFooter(docPublication.Footer);
 
 			using (FormatDOC htmLink = new FormatDOC(this.m_mapEntity, this.m_mapSchema, this.m_included))
 			{
-				htmLink.WriteLinkPage("../annex/annex-b/" + locale.Substring(0, 2).ToLower() + "/alphabeticalorder_" + name + ".html", docPublication);
+				//htmLink.WriteLinkPage("../annex/annex-b/" + locale.Substring(0, 2).ToLower() + "/alphabeticalorder_" + name + ".html", docPublication);
 			}
 		}
 
@@ -1306,8 +1311,8 @@ namespace IfcDoc.Format.DOC
 			}
 
 			this.WriteHeader("Alphabetical Listing", -2, -1, -1, -1, docPublication.Header);
-			this.WriteLine("<h2 class=\"annex\">" + caption + " (" + alphaEntity.Count.ToString() + ")</h2>");
-			this.WriteLine("<ul class=\"std\">");
+			this.WriteLine("<h3>" + caption + " (" + alphaEntity.Count.ToString() + ")</h3>");
+			this.WriteLine("<ul>");
 
 			foreach (string key in alphaEntity.Keys)
 			{
@@ -1335,18 +1340,18 @@ namespace IfcDoc.Format.DOC
 						hyperlink = @"../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 					}
 				}
-				this.WriteLine("<li><a class=\"listing-link\" href=\"" + hyperlink + "\">" + entity.Name + "</a></li>\r\n");
+				this.WriteLine("<li>" + entity.Name + "</li>\r\n");
 			}
 
 			this.WriteLine("</ul>");
 
 			string linkid = "alphabeticalorder-" + caption.ToLower().Replace(' ', '-');
-			this.WriteLinkTo(docPublication, linkid, 2);
+			//this.WriteLinkTo(docPublication, linkid, 2);
 			this.WriteFooter(docPublication.Footer);
 
 			using (FormatDOC htmLink = new FormatDOC(this.m_mapEntity, this.m_mapSchema, this.m_included))
 			{
-				htmLink.WriteLinkPage("../annex/annex-b/alphabeticalorder_" + name.ToLower() + ".html", docPublication);
+				//htmLink.WriteLinkPage("../annex/annex-b/alphabeticalorder_" + name.ToLower() + ".html", docPublication);
 			}
 		}
 
@@ -1517,12 +1522,12 @@ namespace IfcDoc.Format.DOC
 			this.WriteLine("</ul>");
 
 			string linkid = "inheritance-" + DocumentationISO.MakeLinkName(docView) + "-" + caption.ToLower();
-			this.WriteLinkTo(docPublication, linkid, 3);
+			//this.WriteLinkTo(docPublication, linkid, 3);
 			this.WriteFooter(docPublication.Footer);
 
 			using (FormatDOC htmLink = new FormatDOC(this.m_mapEntity, this.m_mapSchema, this.m_included))
 			{
-				htmLink.WriteLinkPage("../annex/annex-c/" + DocumentationISO.MakeLinkName(docView) + "/" + filename + ".html", docPublication);
+				//htmLink.WriteLinkPage("../annex/annex-c/" + DocumentationISO.MakeLinkName(docView) + "/" + filename + ".html", docPublication);
 			}
 		}
 
@@ -2603,7 +2608,7 @@ namespace IfcDoc.Format.DOC
 			}
 			this.WriteLine("</p>");
 
-			this.WriteLinkTo(docPublication, DocumentationISO.MakeLinkName(type), levels);
+			//this.WriteLinkTo(docPublication, DocumentationISO.MakeLinkName(type), levels);
 		}
 
 		internal void WriteLinkTo(DocPublication docPublication, string identifier, int levels)
@@ -2698,8 +2703,8 @@ namespace IfcDoc.Format.DOC
 			}
 
 
-			this.WriteHeader(name, iAnnex, indexpath[0], 0, 0, docPublication.Header);
-			this.WriteScript(iAnnex, indexpath[0], 0, 0);
+			//this.WriteHeader(name, iAnnex, indexpath[0], 0, 0, docPublication.Header);
+			//this.WriteScript(iAnnex, indexpath[0], 0, 0);
 			this.WriteLine("<h3 class=\"std\">A." + indexer + " " + name + "</h3>");
 
 			if (!String.IsNullOrEmpty(code))
@@ -2834,7 +2839,7 @@ namespace IfcDoc.Format.DOC
 
 			if (code != null)
 			{
-				WriteLinkTo(docPublication, "listing-" + code.ToLower(), 3);
+				//WriteLinkTo(docPublication, "listing-" + code.ToLower(), 3);
 			}
 
 			this.WriteFooter(docPublication.Footer);

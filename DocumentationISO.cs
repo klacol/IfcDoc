@@ -931,7 +931,7 @@ namespace IfcDoc
 		}
 
 
-		private static string FormatDiagram(DocProject docProject, DocObject def, DocModelView docView, List<ContentRef> listFigures, Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema, string path)
+		private static string FormatDiagram(DocProject docProject, DocObject def, DocModelView docView, List<ContentRef> listFigures, Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema, string path, StringBuilder sbDocxDiagram)
 		{
 			// return if nothing to generate
 			if (def is DocTemplateDefinition)
@@ -991,23 +991,35 @@ namespace IfcDoc
 				sb.Append("<p class=\"fig-ref\">Figure ");
 				sb.Append(listFigures.Count);
 				sb.Append(" illustrates an instance diagram.</p>\r\n");
+				sbDocxDiagram.Append("<p class=\"fig-ref\">Figure ");
+				sbDocxDiagram.Append(listFigures.Count);
+				sbDocxDiagram.Append(" illustrates an instance diagram.</p>\r\n");
 			}
 
 			// include the figure with formatting below per ISO
 			sb.Append("<table><tr><td><img alt=\"");
 			sb.Append(def.Name);
+			sbDocxDiagram.Append("<table><tr><td><img alt=\"");
+			sbDocxDiagram.Append(def.Name);
 
 			if (def is DocTemplateDefinition)
 			{
 				sb.Append("\" src=\"./diagrams/");
+				sbDocxDiagram.Append("\" src=\"" + path + "\\schema\\templates\\diagrams\\");
 			}
 			else
 			{
 				sb.Append("\" src=\"../../../diagrams/");
 				sb.Append(MakeLinkName(docView));
 				sb.Append("/");
+				sbDocxDiagram.Append("\" src=\"" + path + "\\diagrams\\");
+				sbDocxDiagram.Append(MakeLinkName(docView));
+				sbDocxDiagram.Append("\\");
 			}
 			sb.Append(filename);
+			sbDocxDiagram.Append(filename);
+			sbDocxDiagram.Append("\">");
+
 			sb.Append("\" usemap=\"#f");
 			sb.Append(listFigures.Count.ToString());
 			sb.Append("\">");
@@ -1095,9 +1107,16 @@ namespace IfcDoc
 				sb.Append(" &mdash; ");
 				sb.Append(def.Name);
 				sb.Append("</p></td></tr>");
+				sbDocxDiagram.Append("</td></tr>");
+				sbDocxDiagram.Append("<tr><td><p class=\"figure\">Figure ");
+				sbDocxDiagram.Append(listFigures.Count);
+				sbDocxDiagram.Append(" &mdash; ");
+				sbDocxDiagram.Append(def.Name);
+				sbDocxDiagram.Append("</p></td></tr>");
 			}
 
 			sb.Append("</table>\r\n");
+			sbDocxDiagram.Append("</table>\r\n");
 			sb.AppendLine();
 
 			return sb.ToString();
@@ -1117,12 +1136,13 @@ namespace IfcDoc
 		{
 			// format content
 			StringBuilder sb = new StringBuilder();
+			StringBuilder sbDocxDiagram = new StringBuilder(); // DOCX: in this case, this is just a dummy
 
 			// 1. manual content
 			sb.Append(def.DocumentationHtml());
 
 			// 2. instance diagram
-			sb.Append(FormatDiagram(docProject, def, null, listFigures, mapEntity, mapSchema, path));
+			sb.Append(FormatDiagram(docProject, def, null, listFigures, mapEntity, mapSchema, path, sbDocxDiagram));
 
 			// 3. entity list                
 			{
@@ -4365,7 +4385,7 @@ namespace IfcDoc
 			Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema, Dictionary<DocObject, bool> included,
 			string[] locales, Dictionary<DocFormatSchemaEnum, IFormatExtension> mapFormatSchema,
 			int[] indexpath, string pathPublication,
-			FormatHTM htmTOC, FormatHTM htmSectionTOC)
+			FormatHTM htmTOC, FormatHTM htmSectionTOC, FormatDOC docxMain)
 		{
 			string path = pathPublication + @"\html";
 
@@ -4395,6 +4415,7 @@ namespace IfcDoc
 			using (FormatHTM htmRoot = new FormatHTM(pathRoot, mapEntity, mapSchema, included))
 			{
 				htmRoot.WriteComputerListing(docModelView.Name, docModelView.Code, indexpath, docPublication);
+				docxMain.WriteComputerListing(docModelView.Name, docModelView.Code, indexpath, docPublication);
 			}
 
 			if (!String.IsNullOrEmpty(docModelView.Code))
@@ -4418,6 +4439,9 @@ namespace IfcDoc
 						htmExpress.WriteHeader("EXPRESS", 3, docPublication.Header);
 						htmExpress.WriteExpressSchema(docProject);
 						htmExpress.WriteFooter("");
+					/*	docxMain.WriteHeader("EXPRESS", 3, docPublication.Header);
+						docxMain.WriteExpressSchema(docProject);
+						docxMain.WriteFooter("");*/
 					}
 
 					// copy over to main directory
@@ -4464,6 +4488,9 @@ namespace IfcDoc
 							htmFormat.WriteHeader(docFormat.ExtensionSchema, 3, docPublication.Header);
 							htmFormat.WriteExpression(content, "../../schema/");
 							htmFormat.WriteFooter("");
+							/*docxMain.WriteHeader(docFormat.ExtensionSchema, 3, docPublication.Header);
+							docxMain.WriteExpression(content, "../../schema/");
+							docxMain.WriteFooter("");*/
 						}
 
 						// copy to main directory
@@ -4493,7 +4520,7 @@ namespace IfcDoc
 				subindexpath[subindexpath.Length - 1] = iTemplate;
 
 				GenerateListings(docProject, docPublication, docSub, mapEntity, mapSchema, included,
-					locales, mapFormatSchema, subindexpath, pathPublication, htmTOC, htmSectionTOC);
+					locales, mapFormatSchema, subindexpath, pathPublication, htmTOC, htmSectionTOC, docxMain);
 			}
 		}
 
@@ -4714,7 +4741,8 @@ namespace IfcDoc
 			System.IO.Directory.CreateDirectory(path); // ensure directory exists
 
 			// DOCX: Create Document and save for later loading.
-			DOCX_PATH = path + @"\Content.docx";
+			DOCX_PATH = path + @"\" + docPublication.Name.Split(' ')[0] + "_Version " + docPublication.Version + ".docx";
+
 			Xceed.Words.NET.Licenser.LicenseKey = Properties.Settings.Default.XceedLicense;
 			try
 			{
@@ -5175,7 +5203,7 @@ namespace IfcDoc
 				{
 					var pForeword = docxDocument.InsertParagraph();
 					pForeword.InsertPageBreakBeforeSelf();
-					ExtensionsHeadings.Heading(pForeword, HeadingType.Heading1).Append("Foreword");
+					ExtensionsHeadings.Heading(pForeword, HeadingType.Heading1).Append("European Foreword");
 					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pForeword);
 					docxDocument.Save();
 				}
@@ -6971,7 +6999,7 @@ table {
 											GenerateListings(docProject, docPublication, docModelView,
 												mapEntity, mapSchema, included, locales, mapFormatSchema,
 												indexpath, pathPublication,
-												htmTOC, htmSectionTOC);
+												htmTOC, htmSectionTOC, docxMain);
 										}
 									}
 								}
@@ -6982,6 +7010,7 @@ table {
 								htmTOC.WriteTOC(1, "B.1 Definitions");
 								htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">B.1 Definitions</td></tr>");
+								docxMain.WriteLine("<h2>B.1 Definitions</h2>");
 
 								htmTOC.WriteTOC(2, "<a class=\"listing-link\" href=\"annex/annex-b/alphabeticalorder_definedtypes.html\" >B.1.1 Defined types</a>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">B.1.1 <a href=\"annex-b/alphabeticalorder_definedtypes.html\" target=\"info\" >Defined types</a></td></tr>");
@@ -7009,39 +7038,49 @@ table {
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_definedtypes.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocDefined>("Defined Types", path, "definedtypes", docPublication);
+									docxMain.WriteAlphabeticalListing<DocDefined>("B.1.1 Defined Types", path, "definedtypes", docPublication);
 								}
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_enumtypes.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocEnumeration>("Enumeration Types", path, "enumtypes", docPublication);
+									docxMain.WriteAlphabeticalListing<DocEnumeration>("B.1.2 Enumeration Types", path, "enumtypes", docPublication);
 								}
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_selecttypes.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocSelect>("Select Types", path, "selecttypes", docPublication);
+									docxMain.WriteAlphabeticalListing<DocSelect>("B.1.3 Select Types", path, "selecttypes", docPublication);
 								}
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_entities.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocEntity>("Entities", path, "entities", docPublication);
+									docxMain.WriteAlphabeticalListing<DocEntity>("B.1.4 Entities", path, "entities", docPublication);
 								}
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_functions.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocFunction>("Functions", path, "functions", docPublication);
+									docxMain.WriteAlphabeticalListing<DocFunction>("B.1.5 Functions", path, "functions", docPublication);
 								}
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_rules.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocGlobalRule>("Rules", path, "rules", docPublication);
+									docxMain.WriteAlphabeticalListing<DocGlobalRule>("B.1.6 Rules", path, "rules", docPublication);
 								}
 								// no translations currently -- enable in future
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_psets.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocPropertySet>("Property Sets", path, "psets", docPublication);
-								}
-								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_propertyenums.html", mapEntity, mapSchema, included))
-								{
-									htmAlpha1.WriteAlphabeticalListing<DocPropertyEnumeration>("Property Enumerations", path, "propertyenums", docPublication);
+									docxMain.WriteAlphabeticalListing<DocPropertySet>("B.1.7 Property Sets", path, "psets", docPublication);
 								}
 								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_qsets.html", mapEntity, mapSchema, included))
 								{
 									htmAlpha1.WriteAlphabeticalListing<DocQuantitySet>("Quantity Sets", path, "qsets", docPublication);
+									docxMain.WriteAlphabeticalListing<DocQuantitySet>("B.1.8 Quantity Sets", path, "qsets", docPublication);
+								}
+								// DOCX: xxx B.1.9 missing, Individual Properties (seem unused)
+								using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/alphabeticalorder_propertyenums.html", mapEntity, mapSchema, included))
+								{
+									htmAlpha1.WriteAlphabeticalListing<DocPropertyEnumeration>("Property Enumerations", path, "propertyenums", docPublication);
+									docxMain.WriteAlphabeticalListing<DocPropertyEnumeration>("B.1.10 Property Enumerations", path, "propertyenums", docPublication);
 								}
 
 
@@ -7109,34 +7148,42 @@ table {
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_definedtypes.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocDefined>("Defined Types", code, path, "definedtypes", docPublication);
+											docxMain.WriteLocalizedListing<DocDefined>("B." + indexb.ToString() + ".1 Defined Types", code, path, "definedtypes", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_enumtypes.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocEnumeration>("Enumeration Types", code, path, "enumtypes", docPublication);
+											docxMain.WriteLocalizedListing<DocEnumeration>("B." + indexb.ToString() + ".2 Enumeration Types", code, path, "enumtypes", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_selecttypes.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocSelect>("Select Types", code, path, "selecttypes", docPublication);
+											docxMain.WriteLocalizedListing<DocSelect>("B." + indexb.ToString() + ".3 Select Types", code, path, "selecttypes", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_entities.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocEntity>("Entities", code, path, "entities", docPublication);
+											docxMain.WriteLocalizedListing<DocEntity>("B." + indexb.ToString() + ".4 Entities", code, path, "entities", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_functions.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocFunction>("Functions", code, path, "functions", docPublication);
+											docxMain.WriteLocalizedListing<DocFunction>("B." + indexb.ToString() + ".5 Functions", code, path, "functions", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_rules.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocGlobalRule>("Rules", code, path, "rules", docPublication);
+											docxMain.WriteLocalizedListing<DocGlobalRule>("B." + indexb.ToString() + ".6 Rules", code, path, "rules", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_psets.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocPropertySet>("Property Sets", code, path, "psets", docPublication);
+											docxMain.WriteLocalizedListing<DocPropertySet>("B." + indexb.ToString() + ".7 Property Sets", code, path, "psets", docPublication);
 										}
 										using (FormatHTM htmAlpha1 = new FormatHTM(path + "/annex/annex-b/" + locale + "/alphabeticalorder_qsets.html", mapEntity, mapSchema, included))
 										{
 											htmAlpha1.WriteLocalizedListing<DocQuantitySet>("Quantity Sets", code, path, "qsets", docPublication);
+											docxMain.WriteLocalizedListing<DocQuantitySet>("B." + indexb.ToString() + ".8 Quantity Sets", code, path, "qsets", docPublication);
 										}
 
 									}
@@ -7176,6 +7223,8 @@ table {
 														htmCover.WriteLine("<h2 class=\"std\">C." + iView + " " + docView.Name + " Inheritance</h2>");
 														htmCover.WriteLine("<img src=\"cover.png\" usemap=\"#f\"/>");
 														htmCover.WriteLine("<map name=\"f\">");
+														docxMain.WriteLine("<h2>C." + iView + " " + docView.Name + " Inheritance</h2>");
+														docxMain.WriteLine("<img src=\"" + path + "\\annex\\annex-c\\" + MakeLinkName(docView) + "\\cover.png\"/>");
 
 														foreach (Rectangle rc in mapRectangle.Keys)
 														{
@@ -7188,6 +7237,7 @@ table {
 														htmCover.WriteLine("</map>");
 														htmCover.WriteLinkTo(docPublication, "inheritance-" + MakeLinkName(docView), 3);
 														htmCover.WriteFooter(String.Empty);
+														docxMain.WriteFooter(String.Empty);
 
 														using (FormatHTM htmLink = new FormatHTM(path + "/link/inheritance-" + MakeLinkName(docView) + ".html", mapEntity, mapSchema, included))
 														{
@@ -7215,6 +7265,7 @@ table {
 											using (FormatHTM htmInheritAll = new FormatHTM(path + "/annex/annex-c/" + MakeLinkName(docView) + "/all.html", mapEntity, mapSchema, included))
 											{
 												htmInheritAll.WriteInheritanceListing(null, false, "All entities", docView, path, "all", docPublication);
+												docxMain.WriteInheritanceListing(null, false, "All entities", docView, path, "all", docPublication);
 											}
 
 											// specific inheritance
@@ -7223,6 +7274,7 @@ table {
 											using (FormatHTM htmInheritAll = new FormatHTM(path + "/annex/annex-c/" + MakeLinkName(docView) + "/roots.html", mapEntity, mapSchema, included))
 											{
 												htmInheritAll.WriteInheritanceListing("IfcRoot", false, "Rooted entities", docView, path, "roots", docPublication);
+												docxMain.WriteInheritanceListing("IfcRoot", false, "Rooted entities", docView, path, "roots", docPublication);
 											}
 
 											htmTOC.WriteTOC(1, "<a class=\"listing-link\" href=\"annex/annex-c/" + MakeLinkName(docView) + "/types.html\" >C." + iView + ".3 Object types</a>");
@@ -7230,10 +7282,10 @@ table {
 											using (FormatHTM htmInheritAll = new FormatHTM(path + "/annex/annex-c/" + MakeLinkName(docView) + "/types.html", mapEntity, mapSchema, included))
 											{
 												htmInheritAll.WriteInheritanceListing("IfcObject", true, "Object types", docView, path, "types", docPublication);
+												docxMain.WriteInheritanceListing("IfcObject", true, "Object types", docView, path, "types", docPublication);
 											}
 
 											htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
-
 										}
 									}
 								}
@@ -7296,7 +7348,6 @@ table {
 														string formatnumber = iDiagram.ToString("D4"); // 0001
 														htmSchemaDiagram.WriteLine("<a href=\"diagram_" + formatnumber + ".html\">" +
 															"<img src=\"diagram_" + formatnumber + ".png\" width=\"300\" height=\"444\" /></a>"); // width=\"150\" height=\"222\"> 
-														docxMain.WriteLine("<img src=\"diagram_" + formatnumber + ".png\" width=\"300\" height=\"444\" />");
 
 														// generate EXPRESS-G diagram
 														if (docSchema.DiagramPagesHorz != 0)
@@ -7516,9 +7567,10 @@ table {
 													htmRoot.WriteLine("<h3 class=\"std\">D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
 													docxMain.WriteLine("<h3>D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
 
-													string diagram = FormatDiagram(docProject, docRoot.ApplicableEntity, docView, listFigures, mapEntity, mapSchema, path);
+													StringBuilder sbDocxDiagram = new StringBuilder();
+													string diagram = FormatDiagram(docProject, docRoot.ApplicableEntity, docView, listFigures, mapEntity, mapSchema, path, sbDocxDiagram);
 													htmRoot.WriteLine(diagram);
-													docxMain.WriteLine(diagram);
+													docxMain.WriteLine(sbDocxDiagram.ToString());
 
 													htmRoot.WriteFooter(docPublication.Footer);
 													docxMain.WriteFooter(docPublication.Footer);
@@ -7570,6 +7622,9 @@ table {
 											htmWhatsnew.WriteDocumentationMarkup(docChangeSet.DocumentationHtml(), docChangeSet, docPublication, path);
 											htmWhatsnew.WriteLinkTo(docPublication, MakeLinkName(docChangeSet), 3);
 											htmWhatsnew.WriteFooter(docPublication.Footer);
+											docxMain.WriteLine("<h4 class=\"std\">F." + iChangeset + " " + docChangeSet.Name + "</h4>");
+											docxMain.WriteDocumentationMarkup(docChangeSet.DocumentationHtml(), docChangeSet, docPublication, path);
+											docxMain.WriteFooter(docPublication.Footer);
 										}
 
 										// change log for entities
@@ -7581,9 +7636,18 @@ table {
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".1 Entities</h4>");
+											docxMain.WriteLine("<h4>F." + iChangeset + ".1 Entities</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
+												"<th>Item</th>" +
+												"<th>SPF</th>" +
+												"<th>XML</th>" +
+												"<th>Change</th>" +
+												"<th>Description</th>" +
+												"</tr>");
+											docxMain.WriteLine("<table class=\"gridtable\">");
+											docxMain.WriteLine("<tr>" +
 												"<th>Item</th>" +
 												"<th>SPF</th>" +
 												"<th>XML</th>" +
@@ -7594,11 +7658,14 @@ table {
 											foreach (DocChangeAction docChangeItem in docChangeSet.ChangesEntities)
 											{
 												htmChange.WriteChangeItem(docChangeItem, 0);
+												docxMain.WriteChangeItem(docChangeItem, 0);
 											}
 
 											htmChange.WriteLine("</table>");
+											docxMain.WriteLine("</table>");
 											htmChange.WriteLinkTo(docPublication, MakeLinkName(docChangeSet) + "-changelog", 3);
 											htmChange.WriteFooter(docPublication.Footer);
+											docxMain.WriteFooter(docPublication.Footer);
 										}
 
 										// change log for properties
@@ -7610,9 +7677,18 @@ table {
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".2 Properties</h4>");
+											docxMain.WriteLine("<h4>F." + iChangeset + ".2 Properties</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
+												"<th>Item</th>" +
+												"<th>SPF</th>" +
+												"<th>XML</th>" +
+												"<th>Change</th>" +
+												"<th>Description</th>" +
+												"</tr>");
+											docxMain.WriteLine("<table class=\"gridtable\">");
+											docxMain.WriteLine("<tr>" +
 												"<th>Item</th>" +
 												"<th>SPF</th>" +
 												"<th>XML</th>" +
@@ -7625,12 +7701,15 @@ table {
 												foreach (DocChangeAction docChangeItem in docChangeSet.ChangesProperties)
 												{
 													htmChange.WriteChangeItem(docChangeItem, 0);
+													docxMain.WriteChangeItem(docChangeItem, 0);
 												}
 											}
 
 											htmChange.WriteLine("</table>");
+											docxMain.WriteLine("</table>");
 											htmChange.WriteLinkTo(docPublication, MakeLinkName(docChangeSet) + "-properties", 3);
 											htmChange.WriteFooter(docPublication.Footer);
+											docxMain.WriteFooter(docPublication.Footer);
 										}
 
 
@@ -7643,9 +7722,18 @@ table {
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".3 Quantities</h4>");
+											docxMain.WriteLine("<h4>F." + iChangeset + ".3 Quantities</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
+												"<th>Item</th>" +
+												"<th>SPF</th>" +
+												"<th>XML</th>" +
+												"<th>Change</th>" +
+												"<th>Description</th>" +
+												"</tr>");
+											docxMain.WriteLine("<table class=\"gridtable\">");
+											docxMain.WriteLine("<tr>" +
 												"<th>Item</th>" +
 												"<th>SPF</th>" +
 												"<th>XML</th>" +
@@ -7658,12 +7746,15 @@ table {
 												foreach (DocChangeAction docChangeItem in docChangeSet.ChangesQuantities)
 												{
 													htmChange.WriteChangeItem(docChangeItem, 0);
+													docxMain.WriteChangeItem(docChangeItem, 0);
 												}
 											}
 
 											htmChange.WriteLine("</table>");
+											docxMain.WriteLine("</table>");
 											htmChange.WriteLinkTo(docPublication, MakeLinkName(docChangeSet) + "-quantities", 3);
 											htmChange.WriteFooter(docPublication.Footer);
+											docxMain.WriteFooter(docPublication.Footer);
 										}
 
 										// change log for model views
@@ -7675,9 +7766,18 @@ table {
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".3 Model Views</h4>");
+											docxMain.WriteLine("<h4>F." + iChangeset + ".3 Model Views</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
+												"<th>Item</th>" +
+												"<th>SPF</th>" +
+												"<th>XML</th>" +
+												"<th>Change</th>" +
+												"<th>Description</th>" +
+												"</tr>");
+											docxMain.WriteLine("<table class=\"gridtable\">");
+											docxMain.WriteLine("<tr>" +
 												"<th>Item</th>" +
 												"<th>SPF</th>" +
 												"<th>XML</th>" +
@@ -7706,13 +7806,16 @@ table {
 													if (includeview)
 													{
 														htmChange.WriteChangeItem(docChangeItem, 0);
+														docxMain.WriteChangeItem(docChangeItem, 0);
 													}
 												}
 											}
 
 											htmChange.WriteLine("</table>");
+											docxMain.WriteLine("</table>");
 											htmChange.WriteLinkTo(docPublication, MakeLinkName(docChangeSet) + "-modelviews", 3);
 											htmChange.WriteFooter(docPublication.Footer);
+											docxMain.WriteFooter(docPublication.Footer);
 										}
 									}
 								}
@@ -7745,19 +7848,25 @@ table {
 							"</script>\r\n");
 
 						htmSection.WriteLine("<h1>Bibliography</h1>");
+						docxMain.WriteLine("<h1>Bibliography</h1>");
 
 						htmSection.WriteLine("<dl>");
+						docxMain.WriteLine("<dl>");
 						if (docProject.InformativeReferences != null)
 						{
 							foreach (DocReference docRef in docProject.InformativeReferences)
 							{
 								htmSection.WriteLine("<dt class=\"bibliographyreference\"><a id=\"" + MakeLinkName(docRef) + "\" id=\"" + MakeLinkName(docRef) + "\">" + docRef.Name + "</a>, <i>" + docRef.DocumentationHtml() + "</i></dt>");
 								htmSection.WriteLine("<dd>&nbsp;</dd>");
+								docxMain.WriteLine("<dt>" + docRef.Name + ", <i>" + docRef.DocumentationHtml() + "</i></dt>");
+								docxMain.WriteLine("<dd>&nbsp;</dd>");
 							}
 						}
 						htmSection.WriteLine("</dl>");
+						docxMain.WriteLine("</dl>");
 
 						htmSection.WriteFooter(docPublication.Footer);
+						docxMain.WriteFooter(docPublication.Footer);
 					}
 				}
 				catch
