@@ -33,7 +33,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="XceedLicense" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">WDN18-K1WHB-AAZED-EXEA</Value>
+    </Setting>
+    <Setting Name="BasePathWeb" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://buildingsmart.github.io/ProductData/</Value>
     </Setting>
   </Settings>
 </SettingsFile>

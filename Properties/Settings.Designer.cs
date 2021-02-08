@@ -145,13 +145,25 @@ namespace IfcDoc.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("WDN18-K1WHB-AAZED-EXEA")]
         public string XceedLicense {
             get {
                 return ((string)(this["XceedLicense"]));
             }
             set {
                 this["XceedLicense"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://buildingsmart.github.io/ProductData/")]
+        public string BasePathWeb {
+            get {
+                return ((string)(this["BasePathWeb"]));
+            }
+            set {
+                this["BasePathWeb"] = value;
             }
         }
     }

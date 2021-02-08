@@ -49,6 +49,7 @@ namespace IfcDoc
 	public static class DocumentationISO
 	{
 		public static string DOCX_PATH;
+		public static string BASE_PATH_WEB;
 		/// <summary>
 		/// Capture link to table or figure
 		/// </summary>
@@ -3902,11 +3903,9 @@ namespace IfcDoc
 								htmTemplate.Write(docExample.Name);
 								htmTemplate.Write("</a></li>");
 								htmTemplate.WriteLine("");
-								docxTemplate.Write("<li><a href=\"../../annex/annex-e/");
-								docxTemplate.Write(MakeLinkName(docExample));
-								docxTemplate.Write(".html\">");
+								docxTemplate.Write("<li>");
 								docxTemplate.Write(docExample.Name);
-								docxTemplate.Write("</a></li>");
+								docxTemplate.Write("</li>");
 								docxTemplate.WriteLine("");
 							}
 						}
@@ -4415,7 +4414,7 @@ namespace IfcDoc
 			using (FormatHTM htmRoot = new FormatHTM(pathRoot, mapEntity, mapSchema, included))
 			{
 				htmRoot.WriteComputerListing(docModelView.Name, docModelView.Code, indexpath, docPublication);
-				docxMain.WriteComputerListing(docModelView.Name, docModelView.Code, indexpath, docPublication);
+				docxMain.WriteComputerListing(docModelView.Name, docModelView.Code, indexpath, docPublication, BASE_PATH_WEB);
 			}
 
 			if (!String.IsNullOrEmpty(docModelView.Code))
@@ -4742,6 +4741,7 @@ namespace IfcDoc
 
 			// DOCX: Create Document and save for later loading.
 			DOCX_PATH = path + @"\" + docPublication.Name.Split(' ')[0] + "_Version " + docPublication.Version + ".docx";
+			BASE_PATH_WEB = Properties.Settings.Default.BasePathWeb;
 
 			Xceed.Words.NET.Licenser.LicenseKey = Properties.Settings.Default.XceedLicense;
 			try
@@ -5169,6 +5169,7 @@ namespace IfcDoc
 				var pCover1 = docxDocument.InsertParagraph("");
 				pCover1.Append(docPublication.Name + "\n", formatTitle);
 				pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
+				//pCover1.Append("umlauttest üöäß\n", formatVersion);
 				pCover1.SpacingAfter(40);
 				var pCover2 = docxDocument.InsertParagraph("");
 				var copyright = $"© buildingSMART 1996-{DateTime.Now.Year} - This docxDocument is owned and copyrighted by {docPublication.Owner}\n" +
@@ -5510,7 +5511,7 @@ table {
 									htmSection.Write("</table>");
 									docxMain.Write("<table>");
 									docxMain.Write("<tr><th>Format</th><th>Description</th></tr>");
-									docxMain.Write("<tr><td>Tab-delimited</th><td><a href=\"infobase.csv\">infobase.csv</a></td></tr>");
+									docxMain.Write("<tr><td>Tab-delimited</th><td><a href=\"" + BASE_PATH_WEB + "/infobase.csv\">infobase.csv</a></td></tr>");
 									docxMain.Write("</table>");
 								}
 
@@ -6385,11 +6386,9 @@ table {
 																		htmDef.Write("</a></li>");
 																		htmDef.WriteLine("");
 																		// DOCX: doesn't really make sense here....
-																		docxMain.Write("<li><a href=\"../../../annex/annex-e/");
-																		docxMain.Write(docExample.Name.Replace(' ', '-').ToLower());
-																		docxMain.Write(".html\">");
+																		docxMain.Write("<li>");
 																		docxMain.Write(docExample.Name);
-																		docxMain.Write("</a></li>");
+																		docxMain.Write("</li>");
 																		docxMain.WriteLine("");
 																	}
 																}
@@ -6938,7 +6937,7 @@ table {
 										}
 
 										htmSection.WriteLine("<tr><td>" + formatdesc + "</td><td><a href=\"" + formatUri + "\" target=\"_blank\">" + formatName + "</a></td></tr>");
-										docxMain.WriteLine("<tr><td>" + formatdesc + "</td><td><a href=\"" + formatUri + "\" target=\"_blank\">" + formatName + "</a></td></tr>");
+										docxMain.WriteLine("<tr><td>" + formatdesc + "</td><td>" + formatName + "</td></tr>");
 									}
 								}
 								htmSection.WriteLine("</table>");

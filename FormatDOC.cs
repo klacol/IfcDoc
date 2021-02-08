@@ -64,7 +64,13 @@ namespace IfcDoc.Format.DOC
 			using (Xceed.Words.NET.DocX docxDocument = Xceed.Words.NET.DocX.Load(DocumentationISO.DOCX_PATH))
 			{
 				var pSection = docxDocument.InsertParagraph();
-				docxDocument.InsertContent(this.m_writer.ToString(), Xceed.Document.NET.ContentType.Html, pSection);
+				docxDocument.InsertContent(
+					//Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(this.m_writer.ToString())),
+					//Encoding.UTF8.GetString(Encoding.ASCII.GetBytes(this.m_writer.ToString())),
+					this.m_writer.ToString(),
+					Xceed.Document.NET.ContentType.Html,
+					pSection
+					);
 				docxDocument.Save();
 			}
 		}
@@ -1465,15 +1471,7 @@ namespace IfcDoc.Format.DOC
                     }
 #endif
 
-					if (includeitem)
-					{
-						this.Write("<a class=\"listing-link\" href=\"" + hyperlink + "\">");
-					}
 					this.Write(entity.Name);
-					if (includeitem)
-					{
-						this.Write("</a>");
-					}
 					this.Write("</td>");
 
 					for (int iView = 0; iView < maps.Length; iView++)
@@ -1540,14 +1538,14 @@ namespace IfcDoc.Format.DOC
 					string schema = this.m_mapSchema[entity.Name];
 					string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 
-					this.Write("<li><a class=\"listing-link\" href=\"" + hyperlink + "\">" + entity.Name + "</a>");
+					this.Write("<li>" + entity.Name);
 
 					if (predefined && !baseclass.EndsWith("Type") && this.m_mapEntity.ContainsKey(entity.Name + "Type"))
 					{
 						DocEntity entType = this.m_mapEntity[entity.Name + "Type"] as DocEntity;
 						if (entType != null && list.Contains(entType))
 						{
-							this.Write(" - <a class=\"listing-link\" href=\"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + "type.html\">" + entity.Name + "Type</a>");
+							this.Write(" - " + entity.Name + "Type");
 						}
 					}
 
@@ -2060,7 +2058,7 @@ namespace IfcDoc.Format.DOC
 					link = "annex/annex-e/" + DocumentationISO.MakeLinkName(target) + ".html";
 				}
 
-				this.m_writer.AppendLine("<a class=\"listing-link\" href=\"" + link + "\">" + prefix + " " + (iFigure + 1).ToString() + " &mdash; " + figurename + "</a><br />");
+				this.m_writer.AppendLine(prefix + " " + (iFigure + 1).ToString() + " &mdash; " + figurename + "<br />");
 			}
 		}
 
@@ -2102,17 +2100,17 @@ namespace IfcDoc.Format.DOC
 					if (docChange.Name.StartsWith("Pset_") || docChange.Name.StartsWith("PEnum_"))
 					{
 						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/pset/" + docChange.Name.ToLower() + ".html";
-						sb.Append("<a href=\"" + hyperlink + "\">" + docChange.Name + "</a>");
+						sb.Append(docChange.Name);
 					}
 					else if (docChange.Name.StartsWith("Qto_"))
 					{
 						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/qset/" + docChange.Name.ToLower() + ".html";
-						sb.Append("<a href=\"" + hyperlink + "\">" + docChange.Name + "</a>");
+						sb.Append(docChange.Name);
 					}
 					else
 					{
 						string hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + docChange.Name.ToLower() + ".html";
-						sb.Append("<a href=\"" + hyperlink + "\">" + docChange.Name + "</a>");
+						sb.Append(docChange.Name);
 					}
 				}
 				else if (docChange.Action == DocChangeActionEnum.DELETED)
@@ -2209,13 +2207,13 @@ namespace IfcDoc.Format.DOC
 					iTemplateDef++;
 
 					string rellink = DocumentationISO.MakeLinkName(docTemplateDef) + ".html";
-					htmTOC.WriteTOC(level, "<a href=\"schema/templates/" + rellink + "\">" + prefix + "." + iTemplateDef.ToString() + " " + docTemplateDef.Name + "</a>");
+					htmTOC.WriteTOC(level, prefix + "." + iTemplateDef.ToString() + " " + docTemplateDef.Name);
 
 					if (level == 1)
 					{
 						htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 					}
-					htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + prefix + "." + iTemplateDef.ToString() + " <a name=\"" + prefix + "." + iTemplateDef.ToString() + "\" /><a class=\"listing-link\" target=\"info\" href=\"templates/" + rellink + "\" >" + docTemplateDef.Name + "</a></td></tr>");
+					htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + prefix + "." + iTemplateDef.ToString() + " " + docTemplateDef.Name + "</td></tr>");
 
 					// recurse                    
 					WriteTOCforTemplates(docTemplateDef.Templates, level + 1, prefix + "." + iTemplateDef.ToString(), htmTOC, htmSectionTOC, included);
@@ -2225,7 +2223,7 @@ namespace IfcDoc.Format.DOC
 
 		public void WriteAnchor(DocObject docobj)
 		{
-			this.WriteLine("<a name=\"" + docobj.Name.ToLower() + "\" />");
+			this.WriteLine(" ");
 		}
 
 		/// <summary>
@@ -2436,7 +2434,7 @@ namespace IfcDoc.Format.DOC
 				{
 					this.WriteLine("/");
 
-					this.Write(" <a href=\"../../../penum/" + docprop.Enumeration.Name.ToLower() + ".html\">" + docprop.Enumeration.Name + "</a>");
+					this.Write(" " + docprop.Enumeration.Name);
 				}
 				else if (!String.IsNullOrEmpty(docprop.SecondaryDataType))
 				{
@@ -2686,7 +2684,7 @@ namespace IfcDoc.Format.DOC
 
 		}
 
-		internal void WriteComputerListing(string name, string code, int[] indexpath, DocPublication docPublication)
+		internal void WriteComputerListing(string name, string code, int[] indexpath, DocPublication docPublication, string basePathWeb)
 		{
 			int iAnnex = -1;
 
@@ -2767,7 +2765,7 @@ namespace IfcDoc.Format.DOC
 #endif
 
 				this.Write(
-					"<h4 class=\"annex\"><a>" + key2 + " Property and quantity templates</a></h4>" +
+					"<h4 class=\"annex\">" + key2 + " Property and quantity templates</h4>" +
 					"<p>Property sets and quantity sets are defined according to formats as follows.</p>" +
 					"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
 					"<col width=\"60%\">" +
@@ -2781,13 +2779,13 @@ namespace IfcDoc.Format.DOC
 
 					"<tr>" +
 					"<td>IFC-SPF property and quantity templates</td>" +
-					"<td><a href=\"" + linkprefix + ".ifc\">" + code + ".ifc</a></td>" +
+					"<td><a href=\""+ basePathWeb+"/" + linkprefix + ".ifc\">" + code + ".ifc</a></td>" +
 					"<td>&nbsp;</td>" +
 					"</tr>" +
 
 					"<tr>" +
 					"<td>IFC-XML property and quantity templates</td>" +
-					"<td><a href=\"" + linkprefix + ".ifcxml\">" + code + ".ifcxml</a></td>" +
+					"<td><a href=\"" + basePathWeb + "/" + linkprefix + ".ifcxml\">" + code + ".ifcxml</a></td>" +
 					"<td>&nbsp;</td>" +
 					"</tr>");
 
@@ -2795,13 +2793,13 @@ namespace IfcDoc.Format.DOC
 				{
 					this.Write("<tr>" +
 						"<td>PSD-XML property templates in ZIP file</td>" +
-						"<td><a href=\"" + linkprefix + "-psd.zip_\">" + code + "-psd.zip</a></td>" +
+						"<td><a href=\"" + basePathWeb + "/" + linkprefix + "-psd.zip_\">" + code + "-psd.zip</a></td>" +
 						"<td>&nbsp;</td>" +
 						"</tr>" +
 
 						"<tr>" +
 						"<td>QTO-XML quantity templates in ZIP file</td>" +
-						"<td><a href=\"" + linkprefix + "-qto.zip_\">" + code + "-qto.zip</a></td>" +
+						"<td><a href=\"" + basePathWeb + "/" + linkprefix + "-qto.zip_\">" + code + "-qto.zip</a></td>" +
 						"<td>&nbsp;</td>" +
 						"</tr>");
 				}
@@ -2812,7 +2810,7 @@ namespace IfcDoc.Format.DOC
 				if (!docPublication.ISO) // don't provide mvdXML for ISO
 				{
 					this.Write(
-						"<h4 class=\"annex\"><a>" + key3 + " Model view definition</a></h4>" +
+						"<h4 class=\"annex\">" + key3 + " Model view definition</h4>" +
 						"<p>Model view definitions are defined according to formats as follows.</p>" +
 						"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
 						"<col width=\"60%\">" +
@@ -2825,12 +2823,12 @@ namespace IfcDoc.Format.DOC
 						"</tr>" +
 						"<tr>" +
 						"<td>MVD-XML model view definitions</td>" +
-						"<td><a href=\"" + linkprefix + ".mvdxml\" target=\"_blank\">" + code + ".mvdxml</a></td>" +
+						"<td><a href=\"" + basePathWeb + "/" + linkprefix + ".mvdxml\" target=\"_blank\">" + code + ".mvdxml</a></td>" +
 						"<td>&nbsp;</td>" +
 						"</tr>" +
 						"<tr>" +
 						"<td>EXPRESS XSD configuration</td>" +
-						"<td><a href=\"" + linkprefix + ".xml\" target=\"_blank\">" + code + ".xml</a></td>" +
+						"<td><a href=\"" + basePathWeb + "/" + linkprefix + ".xml\" target=\"_blank\">" + code + ".xml</a></td>" +
 						"<td>&nbsp;</td>" +
 						"</tr>" +
 						"</table>");
@@ -2874,8 +2872,8 @@ namespace IfcDoc.Format.DOC
 				for (int iDiagram = 1; iDiagram <= iLastDiagram; iDiagram++)
 				{
 					string formatnumber = iDiagram.ToString("D4"); // 0001
-					this.WriteLine("<a href=\"" + docSchema.Name.ToLower() + "/diagram_" + formatnumber + ".html\">" +
-						"<img src=\"" + docSchema.Name.ToLower() + "/small_diagram_" + formatnumber + ".png\" width=\"100\" height=\"148\" /></a>"); // width=\"150\" height=\"222\"> 
+					//this.WriteLine("<a href=\"" + docSchema.Name.ToLower() + "/diagram_" + formatnumber + ".html\">" +
+					//	"<img src=\"" + docSchema.Name.ToLower() + "/small_diagram_" + formatnumber + ".png\" width=\"100\" height=\"148\" /></a>"); // width=\"150\" height=\"222\"> 
 				}
 
 				this.WriteLine("</p>");
@@ -3409,7 +3407,7 @@ namespace IfcDoc.Format.DOC
 
 				foreach (DocChangeSet docChangeSet in mapChange.Keys)
 				{
-					this.WriteLine("<td colspan=5><b><a href=\"../../../annex/annex-f/" + DocumentationISO.MakeLinkName(docChangeSet) + "/index.html\">" + docChangeSet.Name + "</a></b></td>");
+					this.WriteLine("<td colspan=5><b>" + docChangeSet.Name + "</b></td>");
 					DocChangeAction docChangeAction = mapChange[docChangeSet];
 					this.WriteChangeItem(docChangeAction, 2);
 				}
