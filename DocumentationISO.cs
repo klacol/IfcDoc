@@ -3873,10 +3873,7 @@ namespace IfcDoc
 					htmTemplate.WriteExpression(mvdOutput.ToString(), "../../"); //... need to use tabs...
 					htmTemplate.WriteLine("</code></div>");
 					htmTemplate.WriteSummaryFooter(docPublication);
-					docxTemplate.WriteSummaryHeader("mvdXML Specification", false, docPublication);
-					docxTemplate.WriteLine("<div class=\"xsd\"><code class=\"xsd\">");
-					docxTemplate.WriteExpression(mvdOutput.ToString(), "../../"); //... need to use tabs...
-					docxTemplate.WriteLine("</code></div>");
+					docxTemplate.WriteSummaryHeader("mvdXML Specification: Is part of the formal digital appendix.", false, docPublication);
 					docxTemplate.WriteSummaryFooter(docPublication);
 				}
 
@@ -4755,23 +4752,6 @@ namespace IfcDoc
 				// ignore
 			}
 
-			// DOCX: Format Definitions
-			// TITLE
-			var formatTitle = new Formatting();
-			formatTitle.Bold = true;
-			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
-			formatTitle.Size = 30;
-			// SUBTITLE
-			var formatVersion = new Formatting();
-			formatVersion.Bold = true;
-			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
-			formatVersion.Size = 20;
-			// REGULAR TEXT
-			var formatRegular = new Formatting();
-			formatRegular.FontColor = Color.Black;
-			formatRegular.FontFamily = new Xceed.Document.NET.Font("Arial");
-			formatRegular.Size = 9;
-
 			DiagramFormat diagramformat = DiagramFormat.ExpressG;
 			if (docPublication.UML)
 			{
@@ -5166,6 +5146,10 @@ namespace IfcDoc
 			// DOCX: Insert cover image, title, copyright notice and TOC
 			using (DocX docxDocument = DocX.Load(DOCX_PATH))
 			{
+				var formatTitle = FormatDOC.GetFormatTitle();
+				var formatVersion = FormatDOC.GetFormatVersion();
+				var formatRegular = FormatDOC.GetFormatRegular();
+
 				var pCover1 = docxDocument.InsertParagraph("");
 				pCover1.Append(docPublication.Name + "\n", formatTitle);
 				pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
@@ -5377,29 +5361,14 @@ namespace IfcDoc
 				{
 					iTemplate++;
 					int[] indexpath = new int[] { 4, iTemplate };
-					// DOCX: Adding a container for template HTMLs
+					// DOCX: Adding a container for template HTMLs -> docxSection4Templates
 					GenerateTemplate(docProject, docTemplate, mapEntity, mapSchema, included, indexpath, listFigures, listTables, docPublication, path, docxSection4Templates);
 				}
 			}
 
 			// DOCX: Start FormatDOC for our own HTML text.
 			FormatDOC docxMain = new FormatDOC(mapEntity, mapSchema, included);
-			const string TABLE_STYLE = @"<style>
-table, td, th {
-  border: 1px solid black;
-}
-td, th {
-  text-align: left;
-}
-th {
-  background-color: lightgrey;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-</style>";
-			docxMain.WriteLine(TABLE_STYLE);
+			docxMain.WriteLine(FormatDOC.TABLE_STYLE);
 
 
 			string pathTOC = path + @"\toc.html";

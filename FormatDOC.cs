@@ -29,6 +29,23 @@ namespace IfcDoc.Format.DOC
 		const string BEGIN_KEYWORD = "<span>";
 		const string END_KEYWORD = "</span>";
 
+		// DOCX: Format / CSS Styles for HTML Text
+		public const string TABLE_STYLE = @"<style>
+table, td, th {
+  border: 1px solid black;
+}
+td, th {
+  text-align: left;
+}
+th {
+  background-color: lightgrey;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+</style>";
+
 		public FormatDOC(Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema, Dictionary<DocObject, bool> included)
 		{
 			this.m_writer = new StringBuilder();
@@ -79,6 +96,35 @@ namespace IfcDoc.Format.DOC
 			return this.m_writer.ToString();
 		}
 		#endregion
+
+		// DOCX: Format Definitions - TITLE
+		public static Xceed.Document.NET.Formatting GetFormatTitle()
+		{
+			var formatTitle = new Xceed.Document.NET.Formatting();
+			formatTitle.Bold = true;
+			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatTitle.Size = 30;
+			return formatTitle;
+		}
+
+		// DOCX: Format Definitions - SUBTITLE
+		public static Xceed.Document.NET.Formatting GetFormatVersion()
+		{
+			var formatVersion = new Xceed.Document.NET.Formatting();
+			formatVersion.Bold = true;
+			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatVersion.Size = 20;
+			return formatVersion;
+		}
+
+		// DOCX: Format Definitions - REGULAR TEXT
+		public static Xceed.Document.NET.Formatting GetFormatRegular()
+		{
+			var formatRegular = new Xceed.Document.NET.Formatting();
+			formatRegular.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatRegular.Size = 9;
+			return formatRegular;
+		}
 
 		public void WriteHeader(string title, int level, string pageheader)
 		{
