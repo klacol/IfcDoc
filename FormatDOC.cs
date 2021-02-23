@@ -82,8 +82,6 @@ table {
 			{
 				var pSection = docxDocument.InsertParagraph();
 				docxDocument.InsertContent(
-					//Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(this.m_writer.ToString())),
-					//Encoding.UTF8.GetString(Encoding.ASCII.GetBytes(this.m_writer.ToString())),
 					this.m_writer.ToString(),
 					Xceed.Document.NET.ContentType.Html,
 					pSection
@@ -1309,7 +1307,7 @@ table {
 				{
 					hyperlink = @"../../../schema/" + schema.ToLower() + @"/lexical/" + entity.Name.ToLower() + ".html";
 				}
-				this.WriteLine("<li>" + key + "</li>\r\n");
+				this.WriteLine("<li>" + System.Web.HttpUtility.HtmlEncode(key) + "</li>\r\n");
 			}
 
 			this.WriteLine("</ul>");
