@@ -1,0 +1,28 @@
+.h1, .h2, .h3, .h4, .h5 {
+    font-family: Cambria;
+    font-weight: bold;
+    color: black;
+    text-align: justify;
+}
+.h1 {
+    font-size: 13pt;
+}
+.h2 {
+    font-size: 12pt;
+}
+.h3, .h4, .h5 {
+    font-size: 11pt;
+}
+table, td, th {
+  border: 1px solid black;
+}
+td, th {
+  text-align: left;
+}
+th {
+  background-color: lightgrey;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}

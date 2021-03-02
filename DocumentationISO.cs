@@ -2699,7 +2699,7 @@ namespace IfcDoc
 					htmExample.WriteHeader(docExample.Name, 2, docPublication.Header);
 					htmExample.WriteScript(-5, indexpath[0], 0, 0);
 					htmExample.WriteLine("<h3 class=\"std\">" + indexpathstring + " " + docExample.Name + "</h3>");
-					docxMain.WriteLine("<h3>" + indexpathstring + " " + docExample.Name + "</h3>");
+					docxMain.WriteLine("<h3 class='h3'>" + indexpathstring + " " + docExample.Name + "</h3>");
 
 					// extract file
 					byte[] filecontents = docExample.File;
@@ -4747,7 +4747,8 @@ namespace IfcDoc
 				{
 					docxDocument.Save();
 				}
-			} catch(Exception e)
+			}
+			catch (Exception e)
 			{
 				// ignore
 			}
@@ -5146,11 +5147,11 @@ namespace IfcDoc
 			// DOCX: Insert cover image, title, copyright notice and TOC
 			using (DocX docxDocument = DocX.Load(DOCX_PATH))
 			{
-				var formatTitle = FormatDOC.GetFormatTitle();
+				//var formatTitle = FormatDOC.GetFormatTitle();
 				var formatVersion = FormatDOC.GetFormatVersion();
 				var formatRegular = FormatDOC.GetFormatRegular();
 
-				var pCover1 = docxDocument.InsertParagraph("");
+				/*var pCover1 = docxDocument.InsertParagraph("");
 				pCover1.Append(docPublication.Name + "\n", formatTitle);
 				pCover1.Append("Version " + docPublication.Version + "\n", formatVersion);
 				//pCover1.Append("umlauttest üöäß\n", formatVersion);
@@ -5162,6 +5163,7 @@ namespace IfcDoc
 				//pCover2.Append(docPublication.Copyright + "\n", formatRegular); // xxx -> "CEN - European Committee for Standardization"
 
 				pCover2.InsertPageBreakAfterSelf();
+				*/
 
 				var tocSwitches = new Dictionary<TableOfContentsSwitches, string>()
 					{
@@ -5188,7 +5190,8 @@ namespace IfcDoc
 				{
 					var pForeword = docxDocument.InsertParagraph();
 					pForeword.InsertPageBreakBeforeSelf();
-					ExtensionsHeadings.Heading(pForeword, HeadingType.Heading1).Append("European Foreword");
+					var formatForewordIntro = FormatDOC.GetFormatIntro();
+					pForeword.Append("European Foreword", formatForewordIntro);
 					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pForeword);
 					docxDocument.Save();
 				}
@@ -5221,7 +5224,8 @@ namespace IfcDoc
 				{
 					var pIntroduction = docxDocument.InsertParagraph();
 					pIntroduction.InsertPageBreakBeforeSelf();
-					ExtensionsHeadings.Heading(pIntroduction, HeadingType.Heading1).Append("Introduction");
+					var formatForewordIntro = FormatDOC.GetFormatIntro();
+					pIntroduction.Append("Introduction", formatForewordIntro);
 					docxDocument.InsertContent(docAnnotation.DocumentationHtml(), ContentType.Html, pIntroduction);
 					var pIntroduction2 = docxDocument.InsertParagraph();
 					pIntroduction2.InsertPageBreakAfterSelf();
@@ -5368,7 +5372,7 @@ namespace IfcDoc
 
 			// DOCX: Start FormatDOC for our own HTML text.
 			FormatDOC docxMain = new FormatDOC(mapEntity, mapSchema, included);
-			docxMain.WriteLine(FormatDOC.TABLE_STYLE);
+			docxMain.WriteLine(docxMain.CSS_STYLES);
 
 
 			string pathTOC = path + @"\toc.html";
@@ -5463,7 +5467,7 @@ namespace IfcDoc
 							htmSection.WriteScript(iSection, 0, 0, 0);
 							htmSection.WriteLine("<h1 class=\"num\" id=\"scope\">" + section.Name + "</h1>");
 
-							docxMain.Write("<h1>" + iSection + ". " + section.Name + "</h1>");
+							docxMain.Write("<h1 class='h1'>" + iSection + ". " + section.Name + "</h1>");
 
 							string documentation = UpdateNumbering(section.DocumentationHtml(), listFigures, listTables, section);
 							htmSection.WriteDocumentationMarkup(documentation, section, docPublication, path);
@@ -5674,7 +5678,7 @@ namespace IfcDoc
 
 								htmSection.WriteLine("<a id=\"terms\"/>");
 								htmSection.WriteLine("<h2>3.1 Terms and definitions</h2>");
-								docxMain.Write("<h2>3.1 Terms and definitions</h2>");
+								docxMain.Write("<h2 class='h2'>3.1 Terms and definitions</h2>");
 								htmSection.WriteLine("<dl>");
 								docxMain.Write("<dl>");
 								if (docProject.Terms != null)
@@ -5691,7 +5695,7 @@ namespace IfcDoc
 								docxMain.Write("</dl>");
 								htmSection.WriteLine("<a id=\"abbreviated\"/>");
 								htmSection.WriteLine("<h2>3.2 Abbreviated terms</h2>");
-								docxMain.Write("<h2>3.2 Abbreviated terms</h2>");
+								docxMain.Write("<h2 class='h2'>3.2 Abbreviated terms</h2>");
 								htmSection.WriteLine("<table class=\"abbreviatedterms\">");
 								docxMain.Write("<table>");
 								if (docProject.Abbreviations != null)
@@ -5842,13 +5846,13 @@ namespace IfcDoc
 										htmSchema.WriteScript(iSection, iSchema, 0, 0);
 
 										htmSchema.WriteLine("<h2 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + " " + schema.Name + "</h2>");
-										docxMain.Write("<h2>" + iSection.ToString() + "." + iSchema.ToString() + " " + schema.Name + "</h2>");
+										docxMain.Write("<h2 class='h2'>" + iSection.ToString() + "." + iSchema.ToString() + " " + schema.Name + "</h2>");
 
 										int iSubSection = 1; // first subsection for schema semantic definition
 										htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition");
 										htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</td></tr>\r\n");
 										htmSchema.WriteLine("<h3 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
-										docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
+										docxMain.WriteLine("<h3 class='h3'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Schema Definition</h3>");
 										
 										string documentation = UpdateNumbering(schema.DocumentationHtml(), listFigures, listTables, schema);
 										htmSchema.WriteDocumentationMarkup(documentation, schema, docPublication, path);
@@ -5861,7 +5865,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types</td></tr>\r\n");
-											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types</h3>\r\n");
+											docxMain.WriteLine("<h3 class='h3'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Types</h3>\r\n");
 											int iType = 0;
 											foreach (DocType type in schema.Types)
 											{
@@ -5881,7 +5885,7 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[type.Name].ToLower() + "/lexical/" + type.Name.ToLower() + ".html\">" + formatnum.ToString() + " " + type.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + "</a> <a class=\"listing-link\" href=\"" + mapSchema[type.Name].ToLower() + "/lexical/" + type.Name.ToLower() + ".html\" target=\"info\">" + type.Name + "</a></td></tr>\r\n");
-													docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + " " + type.Name + "</h4>\r\n");
+													docxMain.WriteLine("<h4 class='h4'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + " " + type.Name + "</h4>\r\n");
 
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + type.Name.ToLower() + ".html", mapEntity, mapSchema, included))
@@ -5903,7 +5907,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the type</h5>");
 														docxMain.WriteChangeLog(type, listChangeSets, docPublication);
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + ".1 Semantic definitions at the type</h5>");
+														docxMain.WriteLine("<h5 class='h5'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iType.ToString() + ".1 Semantic definitions at the type</h5>");
 
 														documentation = UpdateNumbering(type.DocumentationHtml(), listFigures, listTables, type);
 
@@ -6026,7 +6030,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>Formal representations</h5>");
+														docxMain.WriteLine("<h5 class='h5'>Formal representations</h5>");
 
 														foreach (DocFormat docFormat in docPublication.Formats)
 														{
@@ -6098,7 +6102,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities</td></tr>\r\n");
-											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities</h3>\r\n");
+											docxMain.WriteLine("<h3 class='h3'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Entities</h3>\r\n");
 											int iEntity = 0;
 											foreach (DocEntity entity in schema.Entities)
 											{
@@ -6114,7 +6118,7 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
-													docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</h4>\r\n");
+													docxMain.WriteLine("<h4 class='h4'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</h4>\r\n");
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
@@ -6122,7 +6126,7 @@ namespace IfcDoc
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iEntity);
 
 														htmDef.WriteLine("<h4 class=\"num\">" + entity.Name + "</h4>");
-														docxMain.WriteLine("<h4>" + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4 class='h4'>" + entity.Name + "</h4>");
 
 														if (!docPublication.ISO)
 														{
@@ -6135,7 +6139,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the entity</h5>");
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + ".1 Semantic definitions at the entity</h5>");
+														docxMain.WriteLine("<h5 class='h5'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + ".1 Semantic definitions at the entity</h5>");
 
 														string entitydocumentation = FormatEntityDescription(docProject, entity, listFigures, listTables);
 
@@ -6252,7 +6256,7 @@ namespace IfcDoc
 															htmDef.WriteLine("<section>");
 															htmDef.WriteLine("<h5 class=\"num\">Inherited definitions from supertypes</h5>");
 															docxMain.WriteLine("<section>");
-															docxMain.WriteLine("<h5>Inherited definitions from supertypes</h5>");
+															docxMain.WriteLine("<h5 class='h5'>Inherited definitions from supertypes</h5>");
 
 															Dictionary<Rectangle, DocEntity> map = new Dictionary<Rectangle, DocEntity>();
 															using (System.Drawing.Font font = new System.Drawing.Font(FontFamily.GenericSansSerif, 8.0f))
@@ -6371,7 +6375,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>Formal representations</h5>");
+														docxMain.WriteLine("<h5 class='h5'>Formal representations</h5>");
 
 														foreach (DocFormat docFormat in docPublication.Formats)
 														{
@@ -6459,7 +6463,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the function</h5>");
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>Semantic definitions at the function</h5>");
+														docxMain.WriteLine("<h5 class='h5'>Semantic definitions at the function</h5>");
 
 														htmDef.WriteSummaryHeader("Function Definition", true, docPublication);
 														htmDef.WriteLine("<p>");
@@ -6478,7 +6482,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>Formal representations</h5>");
+														docxMain.WriteLine("<h5 class='h5'>Formal representations</h5>");
 
 														htmDef.WriteSummaryHeader("EXPRESS Specification", true, docPublication);
 														htmDef.Write("<div class=\"xsd\"><code class=\"xsd\">");
@@ -6511,7 +6515,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules</td></tr>\r\n");
-											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules</h3>\r\n");
+											docxMain.WriteLine("<h3 class='h3'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Rules</h3>\r\n");
 											int iEntity = 0;
 											foreach (DocGlobalRule entity in schema.GlobalRules)
 											{
@@ -6524,7 +6528,7 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + "</a> <a href=\"" + mapSchema[entity.Name].ToLower() + "/lexical/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
-													docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</h4>\r\n");
+													docxMain.WriteLine("<h4 class='h4'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iEntity.ToString() + " " + entity.Name + "</h4>\r\n");
 													
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\lexical\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
@@ -6532,14 +6536,14 @@ namespace IfcDoc
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iEntity);
 
 														htmDef.WriteLine("<h4 class=\"num\">" + entity.Name + "</h4>");
-														docxMain.WriteLine("<h4>" + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4 class='h4'>" + entity.Name + "</h4>");
 
 														htmDef.WriteLocalizationSection(entity, locales, docPublication);
 
 														htmDef.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Semantic definitions at the global rule</h5>");
 														docxMain.WriteLine("<section>");
-														docxMain.WriteLine("<h5>Semantic definitions at the global rule</h5>");
+														docxMain.WriteLine("<h5 class='h5'>Semantic definitions at the global rule</h5>");
 
 														htmDef.WriteSummaryHeader("Global Rule Definition", true, docPublication);
 														htmDef.WriteLine("<p>");
@@ -6558,7 +6562,7 @@ namespace IfcDoc
 														htmDef.WriteLine("<section>");
 														docxMain.WriteLine("<section>");
 														htmDef.WriteLine("<h5 class=\"num\">Formal representations</h5>");
-														docxMain.WriteLine("<h5>Formal representations</h5>");
+														docxMain.WriteLine("<h5 class='h5'>Formal representations</h5>");
 
 														htmDef.WriteSummaryHeader("EXPRESS Specification", true, docPublication);
 														htmDef.WriteLine("<span class=\"express\">\r\n");
@@ -6591,7 +6595,7 @@ namespace IfcDoc
 
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets</td></tr>\r\n");
-											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets</h3>\r\n");
+											docxMain.WriteLine("<h3 class='h3'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Property Sets</h3>\r\n");
 											int iPset = 0;
 											foreach (DocPropertySet entity in schema.PropertySets)
 											{
@@ -6609,14 +6613,14 @@ namespace IfcDoc
 
 														htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/pset/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 														htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + formatnum + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/pset/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
-														docxMain.WriteLine("<h3>" + formatnum + " " + entity.Name + "</h3>\r\n");
+														docxMain.WriteLine("<h3 class='h3'>" + formatnum + " " + entity.Name + "</h3>\r\n");
 
 														using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\pset\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 														{
 															htmDef.WriteHeader(entity.Name, iSection, iSchema, iSubSection, iPset, docPublication.Header);
 															htmDef.WriteScript(iSection, iSchema, iSubSection, iPset);
 															htmDef.WriteLine("<h4 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
-															docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
+															docxMain.WriteLine("<h4 class='h4'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
 
 															if (!String.IsNullOrEmpty(entity.ApplicableType))
 															{
@@ -6712,7 +6716,7 @@ namespace IfcDoc
 											htmTOC.WriteTOC(2, iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets");
 											htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</td></tr>\r\n");
 											htmSectionTOC.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</h3>\r\n");
-											docxMain.WriteLine("<h3>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</h3>\r\n");
+											docxMain.WriteLine("<h3 class='h3'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + " Quantity Sets</h3>\r\n");
 											int iPset = 0;
 											foreach (DocQuantitySet entity in schema.QuantitySets)
 											{
@@ -6728,14 +6732,14 @@ namespace IfcDoc
 
 													htmTOC.WriteTOC(3, "<a class=\"listing-link\" href=\"schema/" + mapSchema[entity.Name].ToLower() + "/qset/" + entity.Name.ToLower() + ".html\">" + formatnum + " " + entity.Name + "</a>");
 													htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\"><a id=\"" + formatnum + "\">" + formatnum + "</a> <a class=\"listing-link\" href=\"" + mapSchema[entity.Name].ToLower() + "/qset/" + entity.Name.ToLower() + ".html\" target=\"info\">" + entity.Name + "</a></td></tr>\r\n");
-													docxMain.WriteLine("<h3>" + formatnum + " " + entity.Name + "</h3>\r\n");
+													docxMain.WriteLine("<h3 class='h3'>" + formatnum + " " + entity.Name + "</h3>\r\n");
 
 													using (FormatHTM htmDef = new FormatHTM(pathSchema + @"\" + schema.Name.ToLower() + "\\qset\\" + entity.Name.ToLower() + ".html", mapEntity, mapSchema, included))
 													{
 														htmDef.WriteHeader(entity.Name, iSection, iSchema, iSubSection, iPset, docPublication.Header);
 														htmDef.WriteScript(iSection, iSchema, iSubSection, iPset);
 														htmDef.WriteLine("<h4 class=\"std\">" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
-														docxMain.WriteLine("<h4>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
+														docxMain.WriteLine("<h4 class='h4'>" + iSection.ToString() + "." + iSchema.ToString() + "." + iSubSection.ToString() + "." + iPset.ToString() + " " + entity.Name + "</h4>");
 
 														if (!String.IsNullOrEmpty(entity.ApplicableType))
 														{
@@ -6843,7 +6847,7 @@ namespace IfcDoc
 						htmSection.WriteHeader(docannex.Name, iAnnex, 0, 0, 0, docPublication.Header);
 						htmSection.WriteScript(iAnnex, 0, 0, 0);
 						htmSection.WriteLine("<h1 class=\"annex\">Annex " + chAnnex.ToString() + "</h1>");
-						docxMain.Write("<h1> Annex " + chAnnex.ToString() + "</h1>");
+						docxMain.Write("<h1 class='h1'> Annex " + chAnnex.ToString() + "</h1>");
 
 						if (chAnnex == 'A')
 						{
@@ -6856,7 +6860,7 @@ namespace IfcDoc
 							docxMain.Write("<div>(informative)</div>");
 						}
 						htmSection.WriteLine("<h1 class=\"annex\">" + docannex.Name + "</h1>");
-						docxMain.Write("<h1>" + docannex.Name + "</h1>");
+						docxMain.Write("<h1 class='h1'>" + docannex.Name + "</h1>");
 
 						if (chAnnex == 'A')// && String.IsNullOrEmpty(docannex.Documentation))
 						{
@@ -6978,7 +6982,7 @@ namespace IfcDoc
 								htmTOC.WriteTOC(1, "B.1 Definitions");
 								htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">B.1 Definitions</td></tr>");
-								docxMain.WriteLine("<h2>B.1 Definitions</h2>");
+								docxMain.WriteLine("<h2 class='h2'>B.1 Definitions</h2>");
 
 								htmTOC.WriteTOC(2, "<a class=\"listing-link\" href=\"annex/annex-b/alphabeticalorder_definedtypes.html\" >B.1.1 Defined types</a>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">B.1.1 <a href=\"annex-b/alphabeticalorder_definedtypes.html\" target=\"info\" >Defined types</a></td></tr>");
@@ -7191,7 +7195,7 @@ namespace IfcDoc
 														htmCover.WriteLine("<h2 class=\"std\">C." + iView + " " + docView.Name + " Inheritance</h2>");
 														htmCover.WriteLine("<img src=\"cover.png\" usemap=\"#f\"/>");
 														htmCover.WriteLine("<map name=\"f\">");
-														docxMain.WriteLine("<h2>C." + iView + " " + docView.Name + " Inheritance</h2>");
+														docxMain.WriteLine("<h2 class='h2'>C." + iView + " " + docView.Name + " Inheritance</h2>");
 														docxMain.WriteLine("<img src=\"" + path + "\\annex\\annex-c\\" + MakeLinkName(docView) + "\\cover.png\"/>");
 
 														foreach (Rectangle rc in mapRectangle.Keys)
@@ -7266,7 +7270,7 @@ namespace IfcDoc
 								htmTOC.WriteTOC(1, "D.1 Schema diagrams");
 								htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">D.1 Schema diagrams</td></tr>");
-								docxMain.WriteLine("<h2>D.1 Schema diagrams</h2>");
+								docxMain.WriteLine("<h2 class='h2'>D.1 Schema diagrams</h2>");
 
 								for (int iSchemaSection = 5; iSchemaSection <= 8; iSchemaSection++)
 								{
@@ -7276,7 +7280,7 @@ namespace IfcDoc
 
 									htmTOC.WriteTOC(2, "D.1." + iDiagramSection + " " + docSection.Name);
 									htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">D.1." + iDiagramSection + " " + docSection.Name + "</td></tr>");
-									docxMain.WriteLine("<h3>D.1." + iDiagramSection + " " + docSection.Name + "</h3>");
+									docxMain.WriteLine("<h3 class='h3'>D.1." + iDiagramSection + " " + docSection.Name + "</h3>");
 
 
 									int iSchema = 0;
@@ -7305,7 +7309,7 @@ namespace IfcDoc
 													htmSchemaDiagram.WriteHeader(docSection.Name, 3, docPublication.Header);
 													htmSchemaDiagram.WriteScript(iAnnex, iSub, iSection, 0);
 													htmSchemaDiagram.WriteLine("<h4 class=\"std\">D.1." + iDiagramSection + "." + iSchema + " " + docSchema.Name + "</h4>");
-													docxMain.WriteLine("<h4>D.1." + iDiagramSection + "." + iSchema + " " + docSchema.Name + "</h4>");
+													docxMain.WriteLine("<h4 class='h4'>D.1." + iDiagramSection + "." + iSchema + " " + docSchema.Name + "</h4>");
 
 													htmSchemaDiagram.WriteLine("<p>");
 													docxMain.WriteLine("<p>");
@@ -7355,7 +7359,7 @@ namespace IfcDoc
 														htmSchema.WriteScript(iAnnex, 1, iDiagramSection, iDiagram);
 
 														htmSchema.WriteLine("<h4 class=\"std\">");
-														docxMain.WriteLine("<h4>");
+														docxMain.WriteLine("<h4 class='h4'>");
 														if (iDiagram > 1)
 														{
 															htmSchema.Write("<a href=\"diagram_" + (iDiagram - 1).ToString("D4") + ".html\"><img src=\"../../../img/navleft.png\" style=\"border: 0px\" /></a>");
@@ -7466,7 +7470,7 @@ namespace IfcDoc
 								htmTOC.WriteTOC(1, "D.2 Instance diagrams");
 								htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
 								htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">D.2 Instance diagrams</td></tr>");
-								docxMain.WriteLine("<h2>D.2 Instance diagrams</h2>");
+								docxMain.WriteLine("<h2 class='h2'>D.2 Instance diagrams</h2>");
 
 								// D.1 -- schema diagrams - express-G
 								// D.1.1 -- core layer
@@ -7501,7 +7505,7 @@ namespace IfcDoc
 												htmCover.WriteLine("<h3 class=\"std\">D.2." + iView + " " + docView.Name + " Diagrams</h3>");
 												htmCover.WriteFooter(String.Empty);
 												docxMain.WriteHeader(docView.Name, 3, docPublication.Header);
-												docxMain.WriteLine("<h3>D.2." + iView + " " + docView.Name + " Diagrams</h3>");
+												docxMain.WriteLine("<h3 class='h3'>D.2." + iView + " " + docView.Name + " Diagrams</h3>");
 												docxMain.WriteFooter(String.Empty);
 											}
 
@@ -7533,7 +7537,7 @@ namespace IfcDoc
 													htmRoot.WriteHeader(docRoot.ApplicableEntity.Name, iAnnex, 2, 0, iView, docPublication.Header);
 													htmRoot.WriteScript(iAnnex, 2, iView, iRoot);
 													htmRoot.WriteLine("<h3 class=\"std\">D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
-													docxMain.WriteLine("<h3>D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
+													docxMain.WriteLine("<h3 class='h3'>D.2." + iView.ToString() + "." + iRoot.ToString() + " " + docRoot.ApplicableEntity.Name + "</h3>");
 
 													StringBuilder sbDocxDiagram = new StringBuilder();
 													string diagram = FormatDiagram(docProject, docRoot.ApplicableEntity, docView, listFigures, mapEntity, mapSchema, path, sbDocxDiagram);
@@ -7604,7 +7608,7 @@ namespace IfcDoc
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".1 Entities</h4>");
-											docxMain.WriteLine("<h4>F." + iChangeset + ".1 Entities</h4>");
+											docxMain.WriteLine("<h4 class='h4'>F." + iChangeset + ".1 Entities</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
@@ -7645,7 +7649,7 @@ namespace IfcDoc
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".2 Properties</h4>");
-											docxMain.WriteLine("<h4>F." + iChangeset + ".2 Properties</h4>");
+											docxMain.WriteLine("<h4 class='h4'>F." + iChangeset + ".2 Properties</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
@@ -7690,7 +7694,7 @@ namespace IfcDoc
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".3 Quantities</h4>");
-											docxMain.WriteLine("<h4>F." + iChangeset + ".3 Quantities</h4>");
+											docxMain.WriteLine("<h4 class='h4'>F." + iChangeset + ".3 Quantities</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
@@ -7734,7 +7738,7 @@ namespace IfcDoc
 											htmChange.WriteHeader(docChangeSet.Name, 3, docPublication.Header);
 											htmChange.WriteScript(iAnnex, iChangeset, 1, 0);
 											htmChange.WriteLine("<h4 class=\"std\">F." + iChangeset + ".3 Model Views</h4>");
-											docxMain.WriteLine("<h4>F." + iChangeset + ".3 Model Views</h4>");
+											docxMain.WriteLine("<h4 class='h4'>F." + iChangeset + ".3 Model Views</h4>");
 
 											htmChange.WriteLine("<table class=\"gridtable\">");
 											htmChange.WriteLine("<tr>" +
@@ -7816,7 +7820,7 @@ namespace IfcDoc
 							"</script>\r\n");
 
 						htmSection.WriteLine("<h1>Bibliography</h1>");
-						docxMain.WriteLine("<h1>Bibliography</h1>");
+						docxMain.WriteLine("<h1 class='h1'>Bibliography</h1>");
 
 						htmSection.WriteLine("<dl>");
 						docxMain.WriteLine("<dl>");

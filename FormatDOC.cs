@@ -6,6 +6,7 @@
 // License:     https://standards.buildingsmart.org/legal
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -30,21 +31,7 @@ namespace IfcDoc.Format.DOC
 		const string END_KEYWORD = "</span>";
 
 		// DOCX: Format / CSS Styles for HTML Text
-		public const string TABLE_STYLE = @"<style>
-table, td, th {
-  border: 1px solid black;
-}
-td, th {
-  text-align: left;
-}
-th {
-  background-color: lightgrey;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-</style>";
+		public string CSS_STYLES = "";
 
 		public FormatDOC(Dictionary<string, DocObject> mapEntity, Dictionary<string, string> mapSchema, Dictionary<DocObject, bool> included)
 		{
@@ -52,6 +39,13 @@ table {
 			this.m_mapEntity = mapEntity;
 			this.m_mapSchema = mapSchema;
 			this.m_included = included;
+			using (StreamReader file = new StreamReader(@".\Resources\css_styles.txt"))
+			{
+				this.CSS_STYLES = @"<style>";
+				this.CSS_STYLES += file.ReadToEnd();
+				this.CSS_STYLES += @"</style>";
+			}
+				
 		}
 
 		public bool UseAnchors
@@ -80,9 +74,16 @@ table {
 		{
 			using (Xceed.Words.NET.DocX docxDocument = Xceed.Words.NET.DocX.Load(DocumentationISO.DOCX_PATH))
 			{
+				var allText = this.m_writer.ToString();
+				// Write to text file! For debugging purposes.
+				using (StreamWriter file = new StreamWriter(Path.GetTempPath()+Path.DirectorySeparatorChar+"debug_ifcdoc.txt", append: false))
+				{
+					file.Write(allText);
+				}
+
 				var pSection = docxDocument.InsertParagraph();
 				docxDocument.InsertContent(
-					this.m_writer.ToString(),
+					allText,
 					Xceed.Document.NET.ContentType.Html,
 					pSection
 					);
@@ -95,14 +96,24 @@ table {
 		}
 		#endregion
 
-		// DOCX: Format Definitions - TITLE
+		// DOCX: Format Definitions - COVER TITLE (unused - no cover page)
 		public static Xceed.Document.NET.Formatting GetFormatTitle()
 		{
 			var formatTitle = new Xceed.Document.NET.Formatting();
 			formatTitle.Bold = true;
-			formatTitle.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatTitle.FontFamily = new Xceed.Document.NET.Font("Cambria");
 			formatTitle.Size = 30;
 			return formatTitle;
+		}
+
+		// DOCX: Format Definitions - COVER TITLE (unused - no cover page)
+		public static Xceed.Document.NET.Formatting GetFormatIntro()
+		{
+			var format  = new Xceed.Document.NET.Formatting();
+			format.Bold = true;
+			format.FontFamily = new Xceed.Document.NET.Font("Cambria");
+			format.Size = 14;
+			return format;
 		}
 
 		// DOCX: Format Definitions - SUBTITLE
@@ -110,7 +121,7 @@ table {
 		{
 			var formatVersion = new Xceed.Document.NET.Formatting();
 			formatVersion.Bold = true;
-			formatVersion.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatVersion.FontFamily = new Xceed.Document.NET.Font("Cambria");
 			formatVersion.Size = 20;
 			return formatVersion;
 		}
@@ -119,9 +130,16 @@ table {
 		public static Xceed.Document.NET.Formatting GetFormatRegular()
 		{
 			var formatRegular = new Xceed.Document.NET.Formatting();
-			formatRegular.FontFamily = new Xceed.Document.NET.Font("Arial");
+			formatRegular.FontFamily = new Xceed.Document.NET.Font("Cambria");
 			formatRegular.Size = 9;
 			return formatRegular;
+		}
+
+		// DOCX: Format Definitions - Set Default Font for Document
+		public static void SetDefaultFont(Xceed.Words.NET.DocX docxDocument)
+		{
+			var font = new Xceed.Document.NET.Font("Cambria");
+			docxDocument.SetDefaultFont(font, 11.0);
 		}
 
 		public void WriteHeader(string title, int level, string pageheader)
@@ -279,7 +297,7 @@ table {
 
 			string html = System.Web.HttpUtility.HtmlEncode(rawtext.ToString());
 			html = html.Replace("\r\n", "<br/>\r\n");
-			html = html.Replace("\t", "&nbsp;");
+			html = html.Replace("\t", " &nbsp;");
 
 			html = FormatExpression(html, urlprefix);
 			this.Write(html);
@@ -411,19 +429,6 @@ table {
 			{
 				return "<span class=\"self-ref\">" + definition + "</span>";
 			}
-		}
-
-		public void WriteTOC(int indent, string content)
-		{
-			for (int i = 0; i < indent; i++)
-			{
-				// ISO document is incorrect - there is no such "&sp5;" symbol
-				this.m_writer.Append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-			}
-
-			this.m_writer.Append(content);
-			this.m_writer.Append("<br />");
-			this.m_writer.AppendLine();
 		}
 
 		private void WriteExpressHeader(int indent)
@@ -2238,33 +2243,6 @@ table {
 			}
 		}
 
-		public static void WriteTOCforTemplates(List<DocTemplateDefinition> list, int level, string prefix, FormatDOC htmTOC, FormatDOC htmSectionTOC, Dictionary<DocObject, bool> included)
-		{
-			if (list == null)
-				return;
-
-			int iTemplateDef = 0;
-			foreach (DocTemplateDefinition docTemplateDef in list)
-			{
-				if (included == null || included.ContainsKey(docTemplateDef))
-				{
-					iTemplateDef++;
-
-					string rellink = DocumentationISO.MakeLinkName(docTemplateDef) + ".html";
-					htmTOC.WriteTOC(level, prefix + "." + iTemplateDef.ToString() + " " + docTemplateDef.Name);
-
-					if (level == 1)
-					{
-						htmSectionTOC.WriteLine("<tr><td>&nbsp;</td></tr>");
-					}
-					htmSectionTOC.WriteLine("<tr class=\"std\"><td class=\"menu\">" + prefix + "." + iTemplateDef.ToString() + " " + docTemplateDef.Name + "</td></tr>");
-
-					// recurse                    
-					WriteTOCforTemplates(docTemplateDef.Templates, level + 1, prefix + "." + iTemplateDef.ToString(), htmTOC, htmSectionTOC, included);
-				}
-			}
-		}
-
 		public void WriteAnchor(DocObject docobj)
 		{
 			this.WriteLine(" ");
@@ -2687,45 +2665,6 @@ table {
 					}
 				}
 			}
-		}
-
-		internal void WriteLinkPage(string linkurl, DocPublication docPublication)
-		{
-			this.WriteLine(
-			"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"" +
-			   "\"http://www.w3.org/TR/html4/frameset.dtd\">" +
-			"<html lang=\"en\">" +
-			"<head>" +
-			"	<meta content=\"text/html; charset=utf-8\" http-equiv=\"content-type\">" +
-			"	<link rel=\"STYLESHEET\" href=\"../ifc-styles.css\">" +
-			"	<title>" + docPublication.Header + "</title>" +
-			"	<style type=\"text/css\">" +
-			"	<!--" +
-			"	frameset {" +
-			"	  border-width: 1px;" +
-			"	  border-color: rgb(255,255,255);" +
-			"	  border-style: solid;" +
-			"	}" +
-			"	-->" +
-			"   </style>" +
-			"</head>" +
-
-			"<frameset rows=\"110px,*\">" +
-			"    <frame src=\"../content.html\" name=\"menu\" frameborder=\"0\">" +
-			"	<frameset cols=\"15%,*\">" +
-			"		<frame src=\"../blank.html\" name=\"index\" frameborder=\"0\">" +
-			"		<frame src=\"" + linkurl + "\" name=\"info\" frameborder=\"0\">" +
-			"	</frameset>" +
-			"	<noframes>" +
-			"		<body>" +
-			"			<p>Industry Foundation Classes (IFC) for Data Sharing in the Construction and Facility Management Industries </p>" +
-			"			<p>&nbsp;</p>" +
-			"		</body>" +
-			"	</noframes>" +
-			"</frameset>" +
-
-			"</html>");
-
 		}
 
 		internal void WriteComputerListing(string name, string code, int[] indexpath, DocPublication docPublication, string basePathWeb)
@@ -3464,97 +3403,6 @@ table {
 
 		}
 
-		public static HtmlNode MarkdownToHtml(string markdown, bool removeParagraphs)
-		{
-			if (string.IsNullOrEmpty(markdown))
-				return null;
-			Markdig.MarkdownPipelineBuilder builder = new Markdig.MarkdownPipelineBuilder();
-			builder.Extensions.Add(new Markdig.Extensions.GenericAttributes.GenericAttributesExtension());
-			builder.Extensions.Add(new Markdig.Extensions.Tables.PipeTableExtension());
-			builder.Extensions.Add(new Markdig.Extensions.EmphasisExtras.EmphasisExtraExtension());
-			Markdig.MarkdownPipeline pipeline = builder.Build();
-			return MarkdownToHtml(markdown, removeParagraphs, pipeline);
-
-		}
-		private static HtmlNode MarkdownToHtml(string markdown, bool removeParagraphs, Markdig.MarkdownPipeline pipeline)
-		{
-			string html = Markdig.Markdown.ToHtml(markdown, pipeline);
-			HtmlDocument document = new HtmlDocument();
-			document.LoadHtml(html);
-			if (removeParagraphs)
-			{
-				List<HtmlNode> nodes = new List<HtmlNode>(document.DocumentNode.ChildNodes), processed = new List<HtmlNode>();
-				foreach (HtmlNode node in nodes)
-				{
-					processed.AddRange(RemoveParagraphs(node));
-				}
-				document.DocumentNode.ChildNodes.Clear();
-				foreach (HtmlNode n in processed)
-					document.DocumentNode.ChildNodes.Add(n);
-			}
-			AdjustFromMarkdown(document.DocumentNode, pipeline);
-			return document.DocumentNode;
-		}
-
-		private static void AdjustFromMarkdown(HtmlNode node, Markdig.MarkdownPipeline pipeline)
-		{
-			if (string.Compare(node.Name, "blockquote", true) == 0)
-			{
-				Dictionary<string, HtmlAttribute> attributes = new Dictionary<string, HtmlAttribute>();
-				foreach (HtmlAttribute att in node.Attributes)
-					attributes[att.Name] = att;
-				string innerText = node.InnerText.Trim();
-				if (innerText.StartsWith("EXAMPLE", StringComparison.CurrentCultureIgnoreCase))
-				{
-					if (!attributes.ContainsKey("class"))
-						node.SetAttributeValue("class", "example");
-				}
-				else if (innerText.StartsWith("NOTE", StringComparison.CurrentCultureIgnoreCase))
-				{
-					if (!attributes.ContainsKey("class"))
-						node.SetAttributeValue("class", "note");
-				}
-				else if (innerText.StartsWith("HISTORY", StringComparison.CurrentCultureIgnoreCase))
-				{
-					if (!attributes.ContainsKey("class"))
-						node.SetAttributeValue("class", "history");
-				}
-			}
-			else if (string.Compare(node.Name, "img", true) == 0)
-			{
-				foreach (HtmlAttribute att in node.Attributes)
-				{
-					if (string.Compare(att.Name, "title", true) == 0)
-					{
-						string title = att.Value;
-						if (title.StartsWith("figure", StringComparison.CurrentCultureIgnoreCase))
-						{
-							HtmlNode table = node.OwnerDocument.CreateElement("table");
-							node.ParentNode.ReplaceChild(table, node);
-							HtmlNode tableRow = node.OwnerDocument.CreateElement("tr");
-							table.ChildNodes.Add(tableRow);
-							HtmlNode tableData = node.OwnerDocument.CreateElement("td");
-							tableRow.ChildNodes.Add(tableData);
-							tableData.Attributes.Add("style", "width: 600px");
-							tableData.ChildNodes.Add(node);
-							node.SetAttributeValue("title", title.Replace("_", ""));
-							tableRow = node.OwnerDocument.CreateElement("tr");
-							table.ChildNodes.Add(tableRow);
-							tableData = node.OwnerDocument.CreateElement("td");
-							tableRow.ChildNodes.Add(tableData);
-							HtmlNode paragraph = node.OwnerDocument.CreateElement("p");
-							tableData.ChildNodes.Add(paragraph);
-							HtmlNode text = node.OwnerDocument.CreateTextNode(MarkdownToHtml(title, true, pipeline).InnerHtml.Trim());
-							paragraph.ChildNodes.Add(text);
-							paragraph.SetAttributeValue("class", "figure");
-						}
-					}
-				}
-			}
-			List<HtmlNode> nodes = new List<HtmlNode>(node.ChildNodes);
-			foreach (HtmlNode n in nodes)
-				AdjustFromMarkdown(n, pipeline);
-		}
 
 		public static List<HtmlNode> RemoveParagraphs(HtmlNode node)
 		{
