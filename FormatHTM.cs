@@ -1753,6 +1753,9 @@ namespace IfcDoc.Format.HTM
 			content = content.Replace("<em>", "<i>");
 			content = content.Replace("</em>", "</i>");
 
+			// let's not have nbsp's interpreted too early
+			content = content.Replace("#NBSP#", "&nbsp;");
+
 			// links
 			index = 0;
 			while (index >= 0)
