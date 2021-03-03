@@ -96,52 +96,6 @@ namespace IfcDoc.Format.DOC
 		}
 		#endregion
 
-		// DOCX: Format Definitions - COVER TITLE (unused - no cover page)
-		public static Xceed.Document.NET.Formatting GetFormatTitle()
-		{
-			var formatTitle = new Xceed.Document.NET.Formatting();
-			formatTitle.Bold = true;
-			formatTitle.FontFamily = new Xceed.Document.NET.Font("Cambria");
-			formatTitle.Size = 30;
-			return formatTitle;
-		}
-
-		// DOCX: Format Definitions - COVER TITLE (unused - no cover page)
-		public static Xceed.Document.NET.Formatting GetFormatIntro()
-		{
-			var format  = new Xceed.Document.NET.Formatting();
-			format.Bold = true;
-			format.FontFamily = new Xceed.Document.NET.Font("Cambria");
-			format.Size = 14;
-			return format;
-		}
-
-		// DOCX: Format Definitions - SUBTITLE
-		public static Xceed.Document.NET.Formatting GetFormatVersion()
-		{
-			var formatVersion = new Xceed.Document.NET.Formatting();
-			formatVersion.Bold = true;
-			formatVersion.FontFamily = new Xceed.Document.NET.Font("Cambria");
-			formatVersion.Size = 20;
-			return formatVersion;
-		}
-
-		// DOCX: Format Definitions - REGULAR TEXT
-		public static Xceed.Document.NET.Formatting GetFormatRegular()
-		{
-			var formatRegular = new Xceed.Document.NET.Formatting();
-			formatRegular.FontFamily = new Xceed.Document.NET.Font("Cambria");
-			formatRegular.Size = 9;
-			return formatRegular;
-		}
-
-		// DOCX: Format Definitions - Set Default Font for Document
-		public static void SetDefaultFont(Xceed.Words.NET.DocX docxDocument)
-		{
-			var font = new Xceed.Document.NET.Font("Cambria");
-			docxDocument.SetDefaultFont(font, 11.0);
-		}
-
 		public void WriteHeader(string title, int level, string pageheader)
 		{
 			WriteHeader(title, level, 0, 0, 0, 0, pageheader);
@@ -1638,6 +1592,13 @@ namespace IfcDoc.Format.DOC
 			// target="SOURCE" -> target="info" (for transition; need to update vex)
 			content = content.Replace("target=\"SOURCE\"", "target=\"info\"");
 
+			// HEADERS
+			content = content.Replace("<h1>", "<h1 class='h1'>");
+			content = content.Replace("<h2>", "<h2 class='h2'>");
+			content = content.Replace("<h3>", "<h3 class='h3'>");
+			content = content.Replace("<h4>", "<h4 class='h4'>");
+			content = content.Replace("<h5>", "<h5 class='h5'>");
+
 			int index = 0;
 
 			// force pset and qset links to lowercase (for Linux servers)
@@ -1899,7 +1860,7 @@ namespace IfcDoc.Format.DOC
 				}
 			}
 
-			this.m_writer.Append(content);
+			this.m_writer.Append("XXX "+content+ " XXX");
 		}
 
 		/// <summary>
@@ -2689,7 +2650,7 @@ namespace IfcDoc.Format.DOC
 
 			//this.WriteHeader(name, iAnnex, indexpath[0], 0, 0, docPublication.Header);
 			//this.WriteScript(iAnnex, indexpath[0], 0, 0);
-			this.WriteLine("<h3 class=\"std\">A." + indexer + " " + name + "</h3>");
+			this.WriteLine("<h3 class=\"std\">A." + indexer + "&#9;" + name + "</h3>");
 
 			if (!String.IsNullOrEmpty(code))
 			{
@@ -2751,7 +2712,7 @@ namespace IfcDoc.Format.DOC
 #endif
 
 				this.Write(
-					"<h4 class=\"annex\">" + key2 + " Property and quantity templates</h4>" +
+					"<h4 class=\"annex\">" + key2 + "&#9;Property and quantity templates</h4>" +
 					"<p>Property sets and quantity sets are defined according to formats as follows.</p>" +
 					"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
 					"<col width=\"60%\">" +
@@ -2796,7 +2757,7 @@ namespace IfcDoc.Format.DOC
 				if (!docPublication.ISO) // don't provide mvdXML for ISO
 				{
 					this.Write(
-						"<h4 class=\"annex\">" + key3 + " Model view definition</h4>" +
+						"<h4 class=\"annex\">" + key3 + "&#9;Model view definition</h4>" +
 						"<p>Model view definitions are defined according to formats as follows.</p>" +
 						"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
 						"<col width=\"60%\">" +
@@ -2841,13 +2802,13 @@ namespace IfcDoc.Format.DOC
 
 			this.WriteHeader(docSection.Name, 2, docPublication.Header);
 			this.WriteScript(iAnnex, iSub, iSection, 0);
-			this.WriteLine("<h3 class=\"std\">D.1." + iSection.ToString() + " " + docSection.Name + "</h3>");
+			this.WriteLine("<h3 class=\"std\">D.1." + iSection.ToString() + "&#9;" + docSection.Name + "</h3>");
 
 			int iSchema = 0;
 			foreach (DocSchema docSchema in docSection.Schemas)
 			{
 				iSchema++;
-				this.WriteLine("<h4 class=\"std\">D.1." + iSection + "." + iSchema + " " + docSchema.Name + "</h4>");
+				this.WriteLine("<h4 class=\"std\">D.1." + iSection + "." + iSchema + "&#9;" + docSchema.Name + "</h4>");
 
 				this.WriteLine("<p>");
 

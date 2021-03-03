@@ -1,8 +1,13 @@
-.h1, .h2, .h3, .h4, .h5 {
+.foreword, .intro, .h1, .h2, .h3, .h4, .h5 {
     font-family: Cambria;
     font-weight: bold;
     color: black;
     text-align: justify;
+}
+.foreword, .intro {
+    font-size: 14pt;
+	line-height: 15.5pt;
+	margin: 15.5pt 0;
 }
 .h1 {
     font-size: 13pt;
@@ -14,15 +19,22 @@
     font-size: 11pt;
 }
 table, td, th {
-  border: 1px solid black;
+    border: 1px solid black;
 }
 td, th {
-  text-align: left;
+    font-family: Cambria;
+    text-align: left;
 }
 th {
-  background-color: lightgrey;
+    font-weight: bold;
+    background-color: lightgrey;
 }
 table {
   width: 100%;
   border-collapse: collapse;
+}
+p, ul, ol {
+    font-family: Cambria;
+	font-size: 11pt;
+    text-align: justify;
 }
