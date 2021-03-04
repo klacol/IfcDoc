@@ -1320,7 +1320,7 @@ namespace IfcDoc.Format.DOC
 			}
 
 			this.WriteHeader("Alphabetical Listing", -2, -1, -1, -1, docPublication.Header);
-			this.WriteLine("<h3>" + caption + " (" + alphaEntity.Count.ToString() + ")</h3>");
+			this.WriteLine("<h3 class='h3'>" + caption + " (" + alphaEntity.Count.ToString() + ")</h3>");
 			this.WriteLine("<ul>");
 
 			foreach (string key in alphaEntity.Keys)
@@ -1378,7 +1378,7 @@ namespace IfcDoc.Format.DOC
 
 
 			this.WriteHeader("Inheritance Listing", 3, docPublication.Header);
-			this.WriteLine("<h2 class=\"annex\">" + "Mappings" + "</h2>");
+			this.WriteLine("<h2 class=\"h2\">" + "Mappings" + "</h2>");
 			this.WriteLine("<table class=\"gridtable\">");
 
 			this.WriteLine("<tr>");
@@ -1515,7 +1515,7 @@ namespace IfcDoc.Format.DOC
 			}
 
 			this.WriteHeader("Inheritance Listing", 3, docPublication.Header);
-			this.WriteLine("<h2 class=\"annex\">" + caption + "</h2>");
+			this.WriteLine("<h2 class=\"h2\">" + caption + "</h2>");
 			this.WriteLine("<ul class=\"std\">");
 
 			WriteInheritanceLevel(baseclass, alphaEntity.Values, predefined);
@@ -1800,6 +1800,8 @@ namespace IfcDoc.Format.DOC
 			{
 				// skip diagrams
 				content = Regex.Replace(content, "./diagrams", htmlPath + "\\schema\\templates\\diagrams");
+				content = Regex.Replace(content, "../(../)?img", htmlPath + "\\img");
+				content = Regex.Replace(content, "../(../)?views", htmlPath + "\\schema\\views");
 			}
 			else
 			{
@@ -2629,7 +2631,7 @@ namespace IfcDoc.Format.DOC
 
 			//this.WriteHeader(name, iAnnex, indexpath[0], 0, 0, docPublication.Header);
 			//this.WriteScript(iAnnex, indexpath[0], 0, 0);
-			this.WriteLine("<h3 class=\"std\">A." + indexer + "&#9;" + name + "</h3>");
+			this.WriteLine("<h3 class=\"h3\">A." + indexer + "&#9;" + name + "</h3>");
 
 			if (!String.IsNullOrEmpty(code))
 			{
@@ -2691,7 +2693,7 @@ namespace IfcDoc.Format.DOC
 #endif
 
 				this.Write(
-					"<h4 class=\"annex\">" + key2 + "&#9;Property and quantity templates</h4>" +
+					"<h4 class=\"h4\">" + key2 + "&#9;Property and quantity templates</h4>" +
 					"<p>Property sets and quantity sets are defined according to formats as follows.</p>" +
 					"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
 					"<col width=\"60%\">" +
@@ -2736,7 +2738,7 @@ namespace IfcDoc.Format.DOC
 				if (!docPublication.ISO) // don't provide mvdXML for ISO
 				{
 					this.Write(
-						"<h4 class=\"annex\">" + key3 + "&#9;Model view definition</h4>" +
+						"<h4 class=\"h4\">" + key3 + "&#9;Model view definition</h4>" +
 						"<p>Model view definitions are defined according to formats as follows.</p>" +
 						"<table class=\"gridtable\" summary=\"listings\" width=\"80%\">" +
 						"<col width=\"60%\">" +
@@ -2781,13 +2783,13 @@ namespace IfcDoc.Format.DOC
 
 			this.WriteHeader(docSection.Name, 2, docPublication.Header);
 			this.WriteScript(iAnnex, iSub, iSection, 0);
-			this.WriteLine("<h3 class=\"std\">D.1." + iSection.ToString() + "&#9;" + docSection.Name + "</h3>");
+			this.WriteLine("<h3 class=\"h3\">D.1." + iSection.ToString() + "&#9;" + docSection.Name + "</h3>");
 
 			int iSchema = 0;
 			foreach (DocSchema docSchema in docSection.Schemas)
 			{
 				iSchema++;
-				this.WriteLine("<h4 class=\"std\">D.1." + iSection + "." + iSchema + "&#9;" + docSchema.Name + "</h4>");
+				this.WriteLine("<h4 class=\"h4\">D.1." + iSection + "." + iSchema + "&#9;" + docSchema.Name + "</h4>");
 
 				this.WriteLine("<p>");
 

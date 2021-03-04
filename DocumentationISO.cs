@@ -7581,7 +7581,7 @@ namespace IfcDoc
 											htmWhatsnew.WriteDocumentationMarkup(docChangeSet.DocumentationHtml(), docChangeSet, docPublication, path);
 											htmWhatsnew.WriteLinkTo(docPublication, MakeLinkName(docChangeSet), 3);
 											htmWhatsnew.WriteFooter(docPublication.Footer);
-											docxMain.WriteLine("<h4 class=\"std\">F." + iChangeset + "&#9;" + docChangeSet.Name + "</h4>");
+											docxMain.WriteLine("<h4 class=\"h4\">F." + iChangeset + "&#9;" + docChangeSet.Name + "</h4>");
 											docxMain.WriteDocumentationMarkup(docChangeSet.DocumentationHtml(), docChangeSet, docPublication, path);
 											docxMain.WriteFooter(docPublication.Footer);
 										}
