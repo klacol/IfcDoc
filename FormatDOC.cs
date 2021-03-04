@@ -732,7 +732,7 @@ namespace IfcDoc.Format.DOC
 			}
 
 			//this.m_writer.Append("<hr />");
-			this.m_writer.Append("<details");
+			this.m_writer.Append("<details class='details'");
 			this.m_writer.Append(expanded ? " open=\"open\"" : "");
 			this.m_writer.Append("><summary>");
 			this.m_writer.Append(caption);
@@ -1580,6 +1580,25 @@ namespace IfcDoc.Format.DOC
 			}
 		}
 
+
+		public string PostProcessHTML(string content)
+		{
+			// For some reason the nbsp is interpreted too early
+			// (via Markdown to HTML conversion), that's why we've removed it
+			// from the XML sources and replaced with the string "#NBSP#".
+			content = content.Replace("#NBSP#", "&nbsp;");
+
+			// HEADERS
+			content = content.Replace("<h1>", "<h1 class='h1'>");
+			content = content.Replace("<h2>", "<h2 class='h2'>");
+			content = content.Replace("<h3>", "<h3 class='h3'>");
+			content = content.Replace("<h4>", "<h4 class='h4'>");
+			content = content.Replace("<h5>", "<h5 class='h5'>");
+
+			content = content.Replace("<figcaption>", "<figcaption class='figcaption'>");
+
+			return content;
+		}
 		/// <summary>
 		/// Writes ISO documentation by formatting hyperlinks and removing blocks starting with "HISTORY" and "IFC2X4 CHANGE"
 		/// </summary>
@@ -1591,13 +1610,6 @@ namespace IfcDoc.Format.DOC
 
 			// target="SOURCE" -> target="info" (for transition; need to update vex)
 			content = content.Replace("target=\"SOURCE\"", "target=\"info\"");
-
-			// HEADERS
-			content = content.Replace("<h1>", "<h1 class='h1'>");
-			content = content.Replace("<h2>", "<h2 class='h2'>");
-			content = content.Replace("<h3>", "<h3 class='h3'>");
-			content = content.Replace("<h4>", "<h4 class='h4'>");
-			content = content.Replace("<h5>", "<h5 class='h5'>");
 
 			int index = 0;
 
@@ -1700,9 +1712,6 @@ namespace IfcDoc.Format.DOC
 			// convert <em> to <i> -- prepare for links
 			content = content.Replace("<em>", "<i>");
 			content = content.Replace("</em>", "</i>");
-
-			// let's not have nbsp's interpreted too early
-			content = content.Replace("#NBSP#", "&nbsp;");
 
 			// links
 			index = 0;
@@ -1860,7 +1869,7 @@ namespace IfcDoc.Format.DOC
 				}
 			}
 
-			this.m_writer.Append("XXX "+content+ " XXX");
+			this.m_writer.Append(this.PostProcessHTML(content));
 		}
 
 		/// <summary>
@@ -2042,36 +2051,6 @@ namespace IfcDoc.Format.DOC
 					"    parent.index.location.replace(\"" + linkprefix + "../toc-" + iSection.ToString() + ".html#" + iSection.ToString() + "." + iSchema.ToString() + "\");\r\n" +
 					"//-->\r\n" +
 					"</script>\r\n");
-			}
-		}
-
-		internal void WriteContentRefs(List<IfcDoc.DocumentationISO.ContentRef> listFigures, string prefix)
-		{
-			for (int iFigure = 0; iFigure < listFigures.Count; iFigure++)
-			{
-				DocObject target = listFigures[iFigure].Page;
-				string figurename = listFigures[iFigure].Caption;
-
-				string link = "";
-				if (target is DocTemplateDefinition)
-				{
-					link = "schema/templates/" + DocumentationISO.MakeLinkName(target) + ".html";
-				}
-				else if (target is DocEntity || target is DocType)
-				{
-					string schema = this.m_mapSchema[target.Name];
-					link = "schema/" + schema.ToLower() + "/lexical/" + DocumentationISO.MakeLinkName(target) + ".html";
-				}
-				else if (target is DocSchema)
-				{
-					link = "schema/" + target.Name.ToLower() + "/content.html";
-				}
-				else if (target is DocExample)
-				{
-					link = "annex/annex-e/" + DocumentationISO.MakeLinkName(target) + ".html";
-				}
-
-				this.m_writer.AppendLine(prefix + " " + (iFigure + 1).ToString() + " &mdash; " + figurename + "<br />");
 			}
 		}
 
@@ -3261,7 +3240,7 @@ namespace IfcDoc.Format.DOC
 			}
 
 			this.WriteLine("<dt><strong>" + sbIndex.ToString() + " " + docRef.Name + "</strong></dt>");
-			this.WriteLine("<dd>" + docRef.DocumentationHtml());
+			this.WriteLine("<dd>" + this.PostProcessHTML(docRef.DocumentationHtml()));
 
 			if (docRef.Terms?.Count > 0)
 			{

@@ -5176,7 +5176,8 @@ namespace IfcDoc
 					pForeword.InsertPageBreakBeforeSelf();
 					docxDocument.InsertContent(
 						docxMain.CSS_STYLES +
-						"<h1 class='foreword'>European Foreword</h1>" +docAnnotation.DocumentationHtml(),
+						"<h1 class='foreword'>European Foreword</h1>" +
+						docxMain.PostProcessHTML(docAnnotation.DocumentationHtml()),
 						ContentType.Html,
 						pForeword
 						);
@@ -5213,7 +5214,8 @@ namespace IfcDoc
 					pIntroduction.InsertPageBreakBeforeSelf();
 					docxDocument.InsertContent(
 						docxMain.CSS_STYLES +
-						"<h1 class='intro'>Introduction</h1>" + docAnnotation.DocumentationHtml(),
+						"<h1 class='intro'>Introduction</h1>" +
+						docxMain.PostProcessHTML(docAnnotation.DocumentationHtml()),
 						ContentType.Html,
 						pIntroduction
 						);
@@ -5646,7 +5648,7 @@ namespace IfcDoc
 									{
 										htmSection.WriteLine("<dt class=\"normativereference\"><a id=\"" + MakeLinkName(docRef) + "\">" + docRef.Name + "</a>, <i>" + docRef.DocumentationHtml() + "</i></dt>");
 										htmSection.WriteLine("<dd>&nbsp;</dd>");
-										docxMain.Write("<dt>" + docRef.Name + ", <i>" + docRef.DocumentationHtml() + "</i></dt>");
+										docxMain.Write("<dt>" + docxMain.PostProcessHTML(docRef.Name) + ", <i>" + docxMain.PostProcessHTML(docRef.DocumentationHtml()) + "</i></dt>");
 										docxMain.Write("<dd>&nbsp;</dd>");
 									}
 								}
@@ -5697,7 +5699,7 @@ namespace IfcDoc
 										htmSection.WriteLine("<tr><td class=\"abbreviatedterm\" id=\"" + MakeLinkName(docRef) + "\">" + docRef.Name + "</td>");
 										htmSection.WriteLine("<td class=\"abbreviatedterm\">" + docRef.DocumentationHtmlNoParagraphs() + "</td></tr>");
 										docxMain.Write("<tr><td>" + docRef.Name + "</td>");
-										docxMain.Write("<td>" + docRef.DocumentationHtmlNoParagraphs() + "</td></tr>");
+										docxMain.Write("<td>" + docxMain.PostProcessHTML(docRef.DocumentationHtmlNoParagraphs()) + "</td></tr>");
 									}
 								}
 								htmSection.WriteLine("</table>");
@@ -5923,7 +5925,7 @@ namespace IfcDoc
 																docxMain.Write("<tr><td>");
 																docxMain.Write(docConstant.Name);
 																docxMain.Write("</td><td>");
-																docxMain.Write(docConstant.DocumentationHtmlNoParagraphs());
+																docxMain.Write(docxMain.PostProcessHTML(docConstant.DocumentationHtmlNoParagraphs()));
 																docxMain.Write("</td></tr>");
 															}
 															htmDef.WriteLine("</table>");
@@ -5958,7 +5960,7 @@ namespace IfcDoc
 																		docxMain.WriteDefinition(docSelectItem.Name);
 																		//docxMain.Write(docSelectItem.Name);
 																		docxMain.Write("</td><td>");
-																		docxMain.Write(docSelectItem.DocumentationHtmlNoParagraphs());
+																		docxMain.Write(docxMain.PostProcessHTML(docSelectItem.DocumentationHtmlNoParagraphs()));
 																		docxMain.Write("</td></tr>");
 																	}
 																}
@@ -7815,7 +7817,7 @@ namespace IfcDoc
 							{
 								htmSection.WriteLine("<dt class=\"bibliographyreference\"><a id=\"" + MakeLinkName(docRef) + "\" id=\"" + MakeLinkName(docRef) + "\">" + docRef.Name + "</a>, <i>" + docRef.DocumentationHtml() + "</i></dt>");
 								htmSection.WriteLine("<dd>&nbsp;</dd>");
-								docxMain.WriteLine("<dt>" + docRef.Name + ", <i>" + docRef.DocumentationHtml() + "</i></dt>");
+								docxMain.WriteLine("<dt>" + docRef.Name + ", <i>" + docxMain.PostProcessHTML(docRef.DocumentationHtml()) + "</i></dt>");
 								docxMain.WriteLine("<dd>&nbsp;</dd>");
 							}
 						}
